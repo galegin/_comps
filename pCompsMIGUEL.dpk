@@ -1,0 +1,61 @@
+package pCompsMIGUEL;
+
+{$R *.res}
+{$R 'mAdvancedPanel.dcr'}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DESCRIPTION 'Componente MIGUEL'}
+{$IMPLICITBUILD OFF}
+
+requires
+  rtl,
+  vcl,
+  vclx,
+  vcldb,
+  dbrtl,
+  dbexpress,
+  dsnap,
+  indy,
+  vclie,
+  adortl,
+  bdertl,
+  ZComponentDesign;
+
+contains
+  mCombo in 'mCombo.pas',
+  mEdit in 'mEdit.pas',
+  mLabel in 'mLabel.pas',
+  mButton in 'mButton.pas',
+  mMemo in 'mMemo.pas',
+  mListBox in 'mListBox.pas',
+  mPanel in 'mPanel.pas',
+  mCheckBox in 'mCheckBox.pas',
+  mCheckListBox in 'mCheckListBox.pas',
+  mGrid in 'mGrid.pas',
+  mSpeedButton in 'mSpeedButton.pas',
+  mScrollBox in 'mScrollBox.pas',
+  mAdvancedPanel in 'mAdvancedPanel.pas',
+  mImage in 'mImage.pas',
+  mPanelBorder in 'mPanelBorder.pas',
+  mImageList in 'mImageList.pas';
+
+end.
