@@ -36,7 +36,7 @@ begin
   with vProperties do
     for I := 0 to Count - 1 do
       with Items[I] do
-        if IsValueDatabase then
+        if IsValueDatabase and IsValueStore then
           Result := Result + IfThen(Result <> '', ', ', '') + UpperCase(Nome);
 end;
 
@@ -52,7 +52,7 @@ begin
   with vProperties do
     for I := 0 to Count - 1 do
       with Items[I] do
-        if IsValueDatabase then
+        if IsValueDatabase and IsValueStore then
           Result := Result + IfThen(Result <> '', ', ', '') + ValueDatabase;
 end;
 
@@ -69,7 +69,7 @@ begin
   with vProperties do
     for I := 0 to Count - 1 do begin
       with Items[I] do
-        if IsValueDatabase then begin
+        if IsValueDatabase and IsValueStore then begin
           vWhere := TmPropertyValue.IndexOf(AWheres, Items[I].Nome);
           if vWhere = nil then
             Result := Result + IfThen(Result <> '', ', ', '') +

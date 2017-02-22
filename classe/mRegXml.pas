@@ -8,23 +8,36 @@ uses
 type
   TTipoRegXml = (tpvId, tpvValue);
 
-  TmRegXml = class(TStrings)
+  TmRegXml = class(TStringList)
   private
     fTagInicial : String;
     fTagFinal : String;
-    fExpression: String;
+    fExpression : String;
     procedure SetExpression(const Value: String);
     function GetMatch(Index: TTipoRegXml): String;
   public
-    function Exec(AString : String) : Boolean;
+    function Exec(AString : String) : Boolean; overload;
+    function Exec(ATipo : TTipoRegXml; AString, AExpression  : String) : String; overload;
     property Expression : String read fExpression write SetExpression;
     property Match[Index : TTipoRegXml] : String read GetMatch;
   end;
 
+  function Instance : TmRegXml;
+
 implementation
 
 uses
-  mString;
+  mString, StrUtils;
+
+var
+  _instance : TmRegXml;
+
+  function Instance : TmRegXml;
+  begin
+    if not Assigned(_instance) then
+      _instance := TmRegXml.Create;
+    Result := _instance;
+  end;
 
 { TmRegXml }
 
@@ -64,6 +77,8 @@ begin
   //-- verifica tag fin
 
   PF := Pos(fTagFinal, AString);
+  if fTagFinal = '' then
+    PF := Length(AString) + 1;
   if PF = 0 then
     Exit;
 
@@ -75,6 +90,19 @@ begin
   Add(AString);
 
   Result := True;
+end;
+
+function TmRegXml.Exec(ATipo : TTipoRegXml; AString, AExpression : String) : String;
+begin
+  Result := '';
+
+  if AString = '' then
+    Exit;
+
+  Expression := AnsiReplaceStr(AExpression, '{val}', '(.*?)');
+
+  if Exec(AString) then
+    Result := Match[ATipo];
 end;
 
 end.

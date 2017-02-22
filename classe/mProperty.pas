@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils,
-  mParametroDatabase;
+  mParametroDatabase, mString;
 
 type
   TmProperty = class;
@@ -12,6 +12,9 @@ type
 
   TmPropertyList = class;
   TmPropertyListClass = class of TmPropertyList;
+
+  TpCampo =
+    (tcCodigo, tcDescricao, tcNome, tcNumero, tcPercentual, tcTipagem, tcValor);
 
   TpProperty =
     (tppBoolean, tppDateTime, tppEnum, tppFloat, tppInteger, tppObject,
@@ -22,40 +25,61 @@ type
 
   TmProperty = class
   private
+    fNome : String;
+    fTipoBase : String;
+    fTipoCampo : TpCampo;
+
+    fTipo : TpProperty;
+    fTipoField : TpField;
+
+    fValueBoolean : Boolean;
+    fValueDateTime : TDateTime;
+    fValueEnum : Integer;
+    fValueFloat : Real;
+    fValueInteger : Integer;
+    fValueString : String;
+    fValueList : TList;
+    fValueVariant : Variant;
+    fValueObject : TObject;
+
     function GetIsValueDatabase: Boolean;
     function GetIsValueFiltro: Boolean;
     function GetIsValueList: Boolean;
     function GetIsValueObject: Boolean;
     function GetIsValueStr: Boolean;
+    function GetIsValueStore: Boolean;
     function GetIsValueVariant: Boolean;
 
     function GetValueDatabase: String;
     procedure SetValueDatabase(const Value: String);
     function GetValueIntegracao: String;
     function GetValueStr: String;
+
     function GetTipoDatabase: String;
+    procedure SetNome(const Value: String);
   public
-    Nome : String;
-    TipoBase : String;
+    property Nome : String read fNome write SetNome;
+    property TipoBase : String read fTipoBase write fTipoBase;
 
-    Tipo : TpProperty;
-    TipoField : TpField;
+    property Tipo : TpProperty read fTipo write fTipo;
+    property TipoField : TpField read fTipoField write fTipoField;
 
-    ValueBoolean : Boolean;
-    ValueDateTime : TDateTime;
-    ValueEnum : Integer;
-    ValueFloat : Real;
-    ValueInteger : Integer;
-    ValueString : String;
-    ValueList : TList;
-    ValueVariant : Variant;
-    ValueObject : TObject;
+    property ValueBoolean : Boolean read fValueBoolean write fValueBoolean;
+    property ValueDateTime : TDateTime read fValueDateTime write fValueDateTime;
+    property ValueEnum : Integer read fValueEnum write fValueEnum;
+    property ValueFloat : Real read fValueFloat write fValueFloat;
+    property ValueInteger : Integer read fValueInteger write fValueInteger;
+    property ValueString : String read fValueString write fValueString;
+    property ValueList : TList read fValueList write fValueList;
+    property ValueVariant : Variant read fValueVariant write fValueVariant;
+    property ValueObject : TObject read fValueObject write fValueObject;
 
     property IsValueDatabase : Boolean read GetIsValueDatabase;
     property IsValueFiltro : Boolean read GetIsValueFiltro;
     property IsValueList : Boolean read GetIsValueList;
     property IsValueObject : Boolean read GetIsValueObject;
     property IsValueStr : Boolean read GetIsValueStr;
+    property IsValueStore : Boolean read GetIsValueStore;
     property IsValueVariant : Boolean read GetIsValueVariant;
 
     property TipoDatabase : String read GetTipoDatabase;
@@ -81,14 +105,36 @@ type
     class function IndexOf(AProperties : TList; ANome : String) : TmProperty;
   end;
 
+  function StrToTpCampo(const s : string) : TpCampo;
+  function TpCampoToStr(const t : TpCampo) : string;
+
 implementation
+
+const
+  TpCampo_Str : Array [TpCampo] of String =
+    ('Cd_', 'Ds_', 'Nm_', 'Nr_', 'Pr_', 'Tp_', 'Vl_');
+
+  function StrToTpCampo(const s : string) : TpCampo;
+  var
+    I : Integer;
+  begin
+    Result := TpCampo(Ord(-1));
+    for I := Ord(Low(TpCampo_Str)) to Ord(High(TpCampo_Str)) do
+      if TpCampo_Str[TpCampo(I)] = s then
+        Result := TpCampo(I);
+  end;
+
+  function TpCampoToStr(const t : TpCampo) : string;
+  begin
+    Result := TpCampo_Str[t];
+  end;
 
 { TmProperty }
 
 function TmProperty.GetIsValueDatabase: Boolean;
 begin
   Result := (Tipo in [tppBoolean, tppDateTime, tppEnum, tppInteger, tppFloat,
-    tppString, tppVariant]); // and (Pos(Nome, 'IsUpdate') = 0);
+    tppString, tppVariant]);
 end;
 
 function TmProperty.GetIsValueFiltro: Boolean;
@@ -109,7 +155,7 @@ begin
     tppVariant:
       Result := ValueVariant <> varNull;
   else
-    Result := False;    
+    Result := False;
   end;
 end;
 
@@ -123,15 +169,46 @@ begin
   Result := Tipo in [tppObject];
 end;
 
+function TmProperty.GetIsValueStr: Boolean;
+begin
+  Result := GetIsValueDatabase;
+end;
+
+function TmProperty.GetIsValueStore: Boolean;
+var
+  vMinValue : Integer;
+begin
+  vMinValue := -1;
+  if (fTipoField in [tpfKey, tpfReq])
+  or (fTipoCampo in [tcPercentual, tcTipagem, tcValor]) then
+    vMinValue := 0;
+
+  case Tipo of
+    tppBoolean:
+      Result := ValueBoolean;
+    tppDateTime:
+      Result := (ValueDateTime > 0) or (ValueDateTime = vMinValue);
+    tppInteger:
+      Result := (ValueInteger > 0) or (ValueInteger = vMinValue);
+    tppEnum:
+      Result := (ValueInteger > 0) or (ValueInteger = vMinValue);
+    tppFloat:
+      Result := (ValueFloat > 0) or (ValueFloat = vMinValue);
+    tppString:
+      Result := ValueString <> '';
+    tppVariant:
+      Result := ValueVariant <> varNull;
+  else
+    Result := False;
+  end;
+end;
+
 function TmProperty.GetIsValueVariant: Boolean;
 begin
   Result := Tipo in [tppVariant];
 end;
 
-function TmProperty.GetIsValueStr: Boolean;
-begin
-  Result := GetIsValueDatabase;
-end;
+//--
 
 function TmProperty.GetTipoDatabase: String;
 begin
@@ -243,6 +320,12 @@ begin
     tppVariant:
       ValueVariant := Value;
   end;
+end;
+
+procedure TmProperty.SetNome(const Value: String);
+begin
+  fNome := Value;
+  fTipoCampo := StrToTpCampo(Copy(Value, 1, 3));
 end;
 
 { TmPropertyList }

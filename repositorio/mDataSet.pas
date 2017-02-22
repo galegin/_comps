@@ -74,7 +74,7 @@ begin
           if LowerCase(FieldName) = 'u_version' then
             Key := False;
 
-          TipoField := TpField(IfThen(Key, Ord(tpfKey), Ord(tpfNul)));
+          TipoField := TpField(IfThen(Key, Ord(tpfKey), IfThen(Required, Ord(tpfReq), Ord(tpfNul))));
 
           case DataType of
             ftBoolean : begin
