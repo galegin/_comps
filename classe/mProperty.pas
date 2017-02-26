@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils,
-  mParametroDatabase, mString;
+  mParametroDatabase, mTipoCampo, mString;
 
 type
   TmProperty = class;
@@ -12,9 +12,6 @@ type
 
   TmPropertyList = class;
   TmPropertyListClass = class of TmPropertyList;
-
-  TpCampo =
-    (tcCodigo, tcDescricao, tcNome, tcNumero, tcPercentual, tcTipagem, tcValor);
 
   TpProperty =
     (tppBoolean, tppDateTime, tppEnum, tppFloat, tppInteger, tppObject,
@@ -27,7 +24,7 @@ type
   private
     fNome : String;
     fTipoBase : String;
-    fTipoCampo : TpCampo;
+    fTipoCampo : TTipoCampo;
 
     fTipo : TpProperty;
     fTipoField : TpField;
@@ -105,29 +102,7 @@ type
     class function IndexOf(AProperties : TList; ANome : String) : TmProperty;
   end;
 
-  function StrToTpCampo(const s : string) : TpCampo;
-  function TpCampoToStr(const t : TpCampo) : string;
-
 implementation
-
-const
-  TpCampo_Str : Array [TpCampo] of String =
-    ('Cd_', 'Ds_', 'Nm_', 'Nr_', 'Pr_', 'Tp_', 'Vl_');
-
-  function StrToTpCampo(const s : string) : TpCampo;
-  var
-    I : Integer;
-  begin
-    Result := TpCampo(Ord(-1));
-    for I := Ord(Low(TpCampo_Str)) to Ord(High(TpCampo_Str)) do
-      if TpCampo_Str[TpCampo(I)] = s then
-        Result := TpCampo(I);
-  end;
-
-  function TpCampoToStr(const t : TpCampo) : string;
-  begin
-    Result := TpCampo_Str[t];
-  end;
 
 { TmProperty }
 
@@ -325,7 +300,7 @@ end;
 procedure TmProperty.SetNome(const Value: String);
 begin
   fNome := Value;
-  fTipoCampo := StrToTpCampo(Copy(Value, 1, 3));
+  fTipoCampo := StrToTipoCampo(Copy(Value, 1, 3));
 end;
 
 { TmPropertyList }
