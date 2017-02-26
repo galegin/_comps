@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, SysUtils, DB,
-  mCollectionItemIntf, mCollection, mModulo, mMensagemLog,
+  mCollectionItemIntf, mCollection, mModulo, mLogger,
   mConexao, mClasse, mSelect, mComando, mProperty, mObjeto, mDataSet, mJson;
 
 type

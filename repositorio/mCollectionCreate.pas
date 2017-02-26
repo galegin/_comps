@@ -34,7 +34,7 @@ type
 implementation
 
 uses
-  mMensagemLog;
+  mLogger;
 
 var
   _instance : TmCollectionCreate;

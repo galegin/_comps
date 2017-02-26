@@ -15,7 +15,7 @@ type
 implementation
 
 const
-  cMeses : Array [1..12] of String = (
+  c  Meses : Array [1..12] of String = (
     'Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho',
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezempbro');
 

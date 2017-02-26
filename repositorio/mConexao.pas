@@ -3,9 +3,9 @@ unit mConexao;
 interface
 
 uses
-  Classes, SysUtils, DB, // mConexao
+  Classes, SysUtils, DB,
   mDatabaseFactory, mDatabaseIntf, mDatabase, mTipoConexao,
-  mMensagemLog;
+  mException;
 
 type
   TmConexao = class;
@@ -65,12 +65,12 @@ const
   cDS_METHOD = 'TmConexao.GetConsulta()';
 begin
   Result := nil;
-  
+
   try
     Result := Database.GetConsulta(ASql, True);
   except
     on E : Exception do
-      mMensagemLog.Instance.ErroException(
+      raise TmException.Create(
         'Erro na consulta / Erro: ' + E.Message + ' / ASql : ' + ASql, cDS_METHOD);
   end;
 end;
@@ -83,7 +83,7 @@ begin
     Database.ExecComando(ACmd);
   except
     on E : Exception do
-      mMensagemLog.Instance.ErroException(
+      raise TmException.Create(
         'Erro na comando / Erro: ' + E.Message + ' / ACmd : ' + ACmd, cDS_METHOD);
   end;
 end;

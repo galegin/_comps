@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils, TypInfo, Math,
-  mMensagemLog, mProperty;
+  mLogger, mProperty;
 
 type
   TmObjeto = class(TComponent)
@@ -70,7 +70,7 @@ begin
 
       except
         on E : Exception do begin
-          mMensagemLog.Instance.Erro('Erro: ' + E.Message +
+          mLogger.Instance.Erro('Erro: ' + E.Message +
             ' / vNome: ' + vNome + ' / vTipoBase: ' + vTipoBase, cDS_METHOD);
         end;
 
