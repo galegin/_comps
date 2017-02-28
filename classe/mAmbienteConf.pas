@@ -18,7 +18,7 @@ type
     property CodigoAmbiente : String read fCodigoAmbiente;
     property CodigoEmpresa : Integer read fCodigoEmpresa;
     property CodigoTerminal : Integer read fCodigoTerminal;
-    property CodigoUsuairo : Integer read fCodigoUsuario;
+    property CodigoUsuario : Integer read fCodigoUsuario;
   end;
 
   function Instance : TmAmbienteConf;

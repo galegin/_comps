@@ -6,11 +6,13 @@ uses
   Classes, SysUtils, StrUtils;
 
 type
+  TmStringArray = Array Of String;
+
   TmString = class;
   TmStringClass = class of TmString;
 
   TmStringList = class;
-  TmStringListClass = class of TmStringList;
+  TmStringListClass = class of TmString;
 
   TmString = class
   public
@@ -24,24 +26,26 @@ type
 
     class function Replicate(AString : String; AQtde : Integer) : String;
 
-    class function Split(AString : String; ASeparador : String) : TmStringList;
+    class function Split(AString : String; ASeparador : String) : TmStringArray;
 
     class function AllTrim(AString : String; ASubString : String = ' ') : String;
 
     class function RemoveAcento(ACharacter : Char) : Char; overload;
     class function RemoveAcento(AString : String) : String; overload;
+
+    class function StringToHexa(AString : String) : String;
+    class function HexaToString(AString : String) : String;
   end;
 
   TmStringList = class
   private
-    fList : Array of String;
+    fStringArray : TmStringArray;
     function GetItem(Index: Integer): String;
     procedure SetItem(Index: Integer; const Value: String);
   public
-    constructor Create;
-    procedure Clear;
+    procedure Clear();
     procedure Add(AString : String);
-    function Count : Integer;
+    function Count: Integer;
     property Items[Index : Integer] : String read GetItem write SetItem;
   end;
 
@@ -124,17 +128,20 @@ begin
   end;
 end;
 
-class function TmString.Split(AString, ASeparador: String): TmStringList;
+class function TmString.Split(AString, ASeparador: String): TmStringArray;
 begin
-  Result := TmStringList.Create;
+  SetLength(Result, 0);
 
   while Pos(ASeparador, AString) > 0 do begin
-    Result.Add(Copy(AString, 1, Pos(ASeparador, AString) - 1));
+    SetLength(Result, Length(Result) + 1);
+    Result[High(Result)] := Copy(AString, 1, Pos(ASeparador, AString) - 1);
     Delete(AString, 1, Pos(ASeparador, AString) + Length(ASeparador) - 1);
   end;
 
-  if AString <> '' then
-    Result.Add(AString);
+  if AString <> '' then begin
+    SetLength(Result, Length(Result) + 1);
+    Result[High(Result)] := AString;
+  end;
 end;
 
 class function TmString.AllTrim(AString, ASubString: String): String;
@@ -176,37 +183,42 @@ begin
     Result := Result + RemoveAcento(AString[I]);
 end;
 
-{ TmStringList }
-
-constructor TmStringList.Create;
+class function TmString.HexaToString(AString: String): String;
 begin
-  SetLength(fList, 0);
+
 end;
+
+class function TmString.StringToHexa(AString: String): String;
+begin
+
+end;
+
+{ TmStringList }
 
 procedure TmStringList.Clear;
 begin
-  SetLength(fList, 0);
+  SetLength(fStringArray, 0);
 end;
 
 procedure TmStringList.Add(AString: String);
 begin
-  SetLength(fList, Length(fList) + 1);
-  fList[High(fList)] := AString;
+  SetLength(fStringArray, Length(fStringArray) + 1);
+  fStringArray[High(fStringArray)] := AString;
 end;
 
 function TmStringList.Count: Integer;
 begin
-  Result := Length(fList);
+  Result := Length(fStringArray);
 end;
 
 function TmStringList.GetItem(Index: Integer): String;
 begin
-  Result := fList[Index];
+  Result := fStringArray[Index];
 end;
 
 procedure TmStringList.SetItem(Index: Integer; const Value: String);
 begin
-  fList[Index] := Value;
+  fStringArray[Index] := Value;
 end;
 
 end.

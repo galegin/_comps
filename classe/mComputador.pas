@@ -13,6 +13,8 @@ type
     fNomeComputador : String;
     fNomeProcessador : String;
     fNumeroDisco : String;
+    fNumeroPlacaRede : String;
+    fNumeroProcessador : String;
     fSistemaOperacional : String;
     fUsuarioSistema : String;
   public
@@ -22,6 +24,8 @@ type
     property NomeComputador : String read fNomeComputador;
     property NomeProcessador : String read fNomeProcessador;
     property NumeroDisco : String read fNumeroDisco;
+    property NumeroPlacaRede : String read fNumeroPlacaRede;
+    property NumeroProcessador : String read fNumeroProcessador;
     property SistemaOperacional : string read fSistemaOperacional;
     property UsuarioSistema : String read fUsuarioSistema;
   end;
@@ -102,6 +106,20 @@ var
       Result := Format('%.8x', [SerNumber]);
   end;
 
+  //-- numero placa rede
+
+  function GetNumeroPlacaRede(APlaca : String = '') : String;
+  begin
+    Result := '';
+  end;
+
+  //-- numero processador
+
+  function GetNumeroProcessador() : String;
+  begin
+    Result := '';
+  end;
+
   //-- sistema operacional
 
   function GetSistemOperacional: String;
@@ -140,6 +158,8 @@ begin
   fNomeComputador := GetNomeComputador;
   fNomeProcessador := GetNomeProcessador;
   fNumeroDisco := GetNumeroDisco;
+  fNumeroPlacaRede := GetNumeroPlacaRede;
+  fNumeroProcessador := GetNumeroProcessador;
   fSistemaOperacional := GetSistemOperacional;
   fUsuarioSistema := GetUsuarioSistema;
 end;

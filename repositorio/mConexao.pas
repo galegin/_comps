@@ -64,8 +64,6 @@ function TmConexao.GetConsulta(ASql : String; AQtdeReg : Integer = -1) : TDataSe
 const
   cDS_METHOD = 'TmConexao.GetConsulta()';
 begin
-  Result := nil;
-
   try
     Result := Database.GetConsulta(ASql, True);
   except

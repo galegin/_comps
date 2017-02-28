@@ -87,8 +87,8 @@ var
   I : Integer;
 begin
   for I := 0 to Count - 1 do
-    if GetItem(I) <> nil then
-      with GetItem(I) as TmCollectionItem do
+    if Items[I] <> nil then
+      with TmCollectionItem(Items[I]) do
         Limpar();
 
   Clear();
@@ -126,8 +126,8 @@ var
   I : Integer;
 begin
   for I := 0 to Count - 1 do
-    if GetItem(I) <> nil then
-      with GetItem(I) as TmCollectionItem do
+    if Items[I] <> nil then
+      with TmCollectionItem(Items[I]) do
         Incluir();
 end;
 
@@ -136,8 +136,8 @@ var
   I : Integer;
 begin
   for I := 0 to Count - 1 do
-    if GetItem(I) <> nil then
-      with GetItem(I) as TmCollectionItem do
+    if Items[I] <> nil then
+      with TmCollectionItem(Items[I]) do
         Alterar();
 end;
 
@@ -146,8 +146,8 @@ var
   I : Integer;
 begin
   for I := 0 to Count - 1 do
-    if GetItem(I) <> nil then
-      with GetItem(I) as TmCollectionItem do
+    if Items[I] <> nil then
+      with TmCollectionItem(Items[I]) do
         Excluir();
 end;
 
@@ -231,8 +231,8 @@ var
 begin
   Result := 0;
   for I := 0 to Count - 1 do
-    if (I = 0) or (GetFloatProp(GetItem(I), ACampo) > Result) then
-      Result := GetFloatProp(GetItem(I), ACampo);
+    if (I = 0) or (GetFloatProp(Items[I], ACampo) > Result) then
+      Result := GetFloatProp(Items[I], ACampo);
 end;
 
 function TmCollection.Min(ACampo : String) : Real;
@@ -241,8 +241,8 @@ var
 begin
   Result := 0;
   for I := 0 to Count - 1 do
-    if (I = 0) or (GetFloatProp(GetItem(I), ACampo) < Result) then
-      Result := GetFloatProp(GetItem(I), ACampo);
+    if (I = 0) or (GetFloatProp(Items[I], ACampo) < Result) then
+      Result := GetFloatProp(Items[I], ACampo);
 end;
 
 function TmCollection.Sum(ACampo : String) : Real;
@@ -251,7 +251,7 @@ var
 begin
   Result := 0;
   for I := 0 to Count - 1 do
-    Result := Result + GetFloatProp(GetItem(I), ACampo);
+    Result := Result + GetFloatProp(Items[I], ACampo);
 end;
 
 //--

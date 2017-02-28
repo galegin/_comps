@@ -12,9 +12,24 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, Registry;
+  StdCtrls, ExtCtrls, Registry, StrUtils;
 
 type
+  RAppProtect = record
+    Serial : String;
+    DateStart : String;
+    DateEnd : String;
+    MaxLoad : String;
+  end;
+
+  RAppProtect_Ret = record
+    CodigoSetup : Integer;
+    CodigoLiberacao : String;
+    NumeroDisco : String;
+    NumeroPlacaRede : String;
+    NumeroProcessador : String;
+  end;
+
   TmAppProtect = class(TComponent)
   private
     FActive: Boolean;
@@ -59,7 +74,7 @@ type
     class function IsHexa(S: String): Boolean;
 
     class function GetSerNumber(pParams : String = '') : String;
-    class function GetLiberacao(pParams : String = '') : String;
+    class function GetLiberacao(AParams : RAppProtect) : RAppProtect_Ret;
 
     property DateStart: TDateTime read FDateStart;
     property DateEnd: TDateTime read FDateEnd;
@@ -77,15 +92,14 @@ type
 const
   cMIN_DATA = '01/01/1900';
   cMAX_DATA = '31/12/2100';
-  cMAX_LOAD = 65535;
+  cMAX_LOAD = '65535';
 
 procedure Register;
 
 implementation
 
 uses
-  mComputador, mAppSerial, mMensagem, mString, mDelphi,
-  mCripto, mFuncao, mItem, mXml;
+  mComputador, mAppSerial, mString, mDelphi, mCripto;
 
 { TmAppProtect }
 
@@ -177,7 +191,7 @@ resourceString
   // GetNumberHD
   function GetNumberHD() : String;
   begin
-    Result := mComputador.GetNumberHD();
+    Result := mComputador.Instance.NumeroDisco;
   end;
 
   //--
@@ -231,7 +245,7 @@ resourceString
 
     vForm := TForm.Create(Application);
     with TmAppProtect.Create(vForm) do begin
-      AppName := IfNull(pAppName, AppName);
+      AppName := IfThen(pAppName <> '', pAppName, AppName);
       Active := True;
       Result := CheckLockInfo();
       Free;
@@ -271,57 +285,51 @@ resourceString
   end;
 
   //--
-  class function TmAppProtect.GetLiberacao(pParams : String) : String;
+  class function TmAppProtect.GetLiberacao(AParams : RAppProtect) : RAppProtect_Ret;
   var
-    FNumberHD, FNumberProc, FNumberRede, S, C, Body, Key : String;
+    S, C, Body, Key : String;
   begin
-    Result := '';
-
     with TmAppProtect.Create(nil) do begin
 
       //--------------------------------------------------------------------------
       // numero de serie SETUP (4) + HD (8) = 12 + KEY(2) = 14
       // numero de serie SETUP (4) + HD (8) + CPU (8) + MAC (12) = 32 + KEY(2) = 30
-      S := item('NR_SERIAL', pParams);
-      if (Length(S) = CODSER_SIZE)
-      and IsHexa(S) then begin
+      S := AParams.Serial;
+      if (Length(S) = CODSER_SIZE) and IsHexa(S) then begin
         Body := Uncriptografe(Copy(S,1,CODSER_SIZE-2), Format('%.x', [FIdApplication]));
         Key := GetKey(Body);
         if (GetKey(Body) = Copy(S,CODSER_SIZE-1,2)) then begin
-          FSetup := StrToInt('$' + Copy(Body, 1, 4));
-          FNumberHD := Copy(Body, 5, 8);
-          FNumberProc := Copy(Body, 13, 8);
-          FNumberRede := Copy(Body, 21, 12);
+          Result.CodigoSetup := StrToInt('$' + Copy(Body, 1, 4));
+          Result.NumeroDisco := Copy(Body, 5, 8);
+          Result.NumeroProcessador := Copy(Body, 13, 8);
+          Result.NumeroPlacaRede := Copy(Body, 21, 12);
         end else begin
-          Result := 'erro digito de validacao do serial';
-          Exit;
+          raise Exception.Create('erro digito de validacao do serial');
         end;
       end else begin
-        Result := 'formato invalido de serial';
-        Exit;
+        raise Exception.Create('formato invalido de serial');
       end;
 
       //--------------------------------------------------------------------------
       // codigo de liberacao SERIAL (16) + KEY (2)
       // DT_INICIAL (4) + DT_FINAL (4) + NR_EXECUCAO (4) + SETUP (4)
-      FDateStart := StrToDate(IfNull(item('DT_INICIAL', pParams), cMIN_DATA));
-      FDateEnd := StrToDate(IfNull(item('DT_FINAL', pParams), cMAX_DATA));
-      FMaxLoad := IfNullI(item('QT_EXECUCAO', pParams), cMAX_LOAD);
+      with AParams do begin
+        FDateStart := StrToDate(IfThen(DateStart <> '', DateStart, cMIN_DATA));
+        FDateEnd := StrToDate(IfThen(DateEnd <> '', DateEnd, cMAX_DATA));
+        FMaxLoad := StrToInt(IfThen(MaxLoad <> '', MaxLoad, cMAX_LOAD));
+      end;
 
       C := Format('%.4x', [trunc(FDateStart)]) +
            Format('%.4x', [trunc(FDateEnd)]) +
            Format('%.4x', [FMaxLoad]) +
            Format('%.4x', [FSetup]);
 
-      Body := Criptografe(C, FNumberHD) + GetKey(C);
+      Body := Criptografe(C, Result.NumeroDisco) + GetKey(C);
 
       //----------------------------------------------------------------------------
       // retorna
-      putitem(Result, 'NR_SETUP', FSetup);
-      putitem(Result, 'CD_LIBERACAO', Body);
-      putitem(Result, 'NR_DISCORIGIDO', FNumberHD);
-      putitem(Result, 'NR_PROCESSADOR', FNumberProc);
-      putitem(Result, 'NR_PLACAREDE', FNumberRede);
+      Result.CodigoLiberacao := Body;
+      //--
 
       Free;
     end;
@@ -343,7 +351,7 @@ begin
   inherited Create(AOwner);
   FActive := True;
   FIdApplication := ID_APLICACAO;
-  FAppName := IfNull(Application.Name, Application.Title);
+  FAppName := IfThen(Application.Name <> '', Application.Name, Application.Title);
   FRegKey := REGKEY_PATH;
   FOwner := AOwner;
   FDialog := True;
@@ -492,8 +500,8 @@ begin
   SerNumber := GetSerNumber();
 
   // grava resultado
-  putitemX(Result, 'IN_BLOQUEIO', True);
-  putitemX(Result, 'NR_SERIAL', SerNumber);
+  //putitemX(Result, 'IN_BLOQUEIO', True);
+  //putitemX(Result, 'NR_SERIAL', SerNumber);
 
   // formulário de reset
   if (FDialog) then begin

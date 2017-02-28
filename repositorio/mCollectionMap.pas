@@ -121,7 +121,7 @@ type
   published
     property PropName : String read fName;
     property ColumnName : String read fColumnName;
-    property ForengKeys : TmStringList read fForengKeys;
+    property ForengKeys : TmStringArray read fForengKeys;
     property Length : Integer read fLength;
     property Precision : Integer read fPrecision;
     property InPrimaryKey : Boolean read GetInPrimaryKey;
@@ -253,13 +253,13 @@ end;
 
 function TmCollectionProp.HasName;
 begin
-  fName:= AName;
+  fName := AName;
   Result := Self;
 end;
 
 function TmCollectionProp.HasColumnName;
 begin
-  fColumnName:= AColumnName;
+  fColumnName := AColumnName;
   Result := Self;
 end;
 

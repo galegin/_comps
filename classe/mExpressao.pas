@@ -18,18 +18,18 @@ var
   z: Char;
 
   function StrToReal(chaine: string): Real;
-  var 
-    r: Real; 
+  var
+    r: Real;
 	Pos: Integer;
   begin
     Val(chaine, r, Pos);
-    if Pos > 0 then 
-	  Val(Copy(chaine, 1, Pos - 1), r, Pos);
+    if Pos > 0 then
+      Val(Copy(chaine, 1, Pos - 1), r, Pos);
     Result := r;
   end;
 
   function RealToStr(inreal: Extended; digits: Byte): string;
-  var 
+  var
     s : string;
   begin
     Str(inreal: 0: digits, s);
@@ -37,7 +37,7 @@ var
   end;
 
   procedure NextChar;
-  var 
+  var
     s : string;
   begin
     if ipos > Length(expressao) then begin
@@ -48,17 +48,17 @@ var
       z := s[1];
       Inc(ipos);
     end;
-    if z = ' ' then 
-	  nextchar;
+    if z = ' ' then
+      nextchar;
   end;
 
   function Expression: Real;
-  var 
+  var
     w : Real;
 
     function Factor: Real;
-    var 
-	  ws : string;
+    var
+      ws : string;
     begin
       Nextchar;
       if z in ['0'..'9'] then begin
@@ -71,32 +71,32 @@ var
       end else if z = '(' then begin
         Factor := Expression;
         nextchar
-      end else if z = '+' then 
-	    Factor := +Factor
-      else if Z = '-' then 
-	    Factor := -Factor;
+      end else if z = '+' then
+        Factor := +Factor
+      else if Z = '-' then
+        Factor := -Factor;
     end;
 
     function Term : Real;
-    var 
-	  W: Real;
+    var
+      W: Real;
     begin
       W := Factor;
       while Z in ['*', '/'] do
-        if z = '*' then 
-		  w := w * Factor
-        else 
-		  w := w / Factor;
+        if z = '*' then
+          w := w * Factor
+        else
+          w := w / Factor;
       Term := w;
     end;
 
   begin
     w := term;
     while z in ['+', '-'] do
-      if z = '+' then 
-	    w := w + term
-      else 
-	    w := w - term;
+      if z = '+' then
+        w := w + term
+      else
+        w := w - term;
     Expression := w;
   end;
 

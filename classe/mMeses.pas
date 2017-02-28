@@ -4,36 +4,30 @@ interface
 
 uses
   Classes, SysUtils, StrUtils;
-  
-type
-  TmMeses = class
-  public
-    class function Codigo(ADescricao : String) : Integer;
-    class function Descricao(ACodigo : Integer) : String;
-  end;
+
+  function MesToInt(const s : String) : Integer;
+  function IntToMes(const i : Integer) : String;
 
 implementation
 
 const
-  c  Meses : Array [1..12] of String = (
+  LMeses : Array [1..12] of String = (
     'Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezempbro');
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro');
 
-{ TmMeses }
-
-class function TmMeses.Codigo(ADescricao: String): Integer;
+function MesToInt(const s : String) : Integer;
 var
   I : Integer;
 begin
-  Result := 0;
-  for I := Low(cMeses) to High(cMeses) do
-    if LowerCase(cMeses[I]) = LowerCase(ADescricao) then
+  Result := -1;
+  for I := Low(LMeses) to High(LMeses) do
+    if LowerCase(LMeses[I]) = LowerCase(s) then
       Result := I;
 end;
 
-class function TmMeses.Descricao(ACodigo: Integer): String;
+function IntToMes(const i : Integer) : String;
 begin
-  Result := cMeses[ACodigo];
+  Result := LMeses[i];
 end;
 
 end.
