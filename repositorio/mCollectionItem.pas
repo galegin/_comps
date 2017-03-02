@@ -22,7 +22,7 @@ type
 
     function GetValuesKey(AObject : TObject) : TList;
     function GetValuesFiltro(AObject : TObject) : TList;
-    function GetValuesObjeto(AObject : TObject; AInherited : TClass) : TList; // mObjeto
+    //function GetValuesObjeto(AObject : TObject; AInherited : TClass) : TList; // mObjeto
   public
     IsUpdate : Boolean;
     IsCreate : Boolean;
@@ -158,7 +158,7 @@ begin
           Result.Add(Items[I]);
 end;
 
-function TmCollectionItem.GetValuesObjeto(AObject : TObject; AInherited : TClass) : TList;
+(* function TmCollectionItem.GetValuesObjeto(AObject : TObject; AInherited : TClass) : TList;
 var
   vValues : TmPropertyList;
   I : Integer;
@@ -179,7 +179,7 @@ begin
           if Assigned(ValueObject) then
             if ValueObject.ClassType.InheritsFrom(AInherited) then
               Result.Add(ValueObject);
-end;
+end; *)
 
 //--
 
@@ -194,13 +194,13 @@ var
   vValues : TList;
   I : Integer;
 begin
-  vValues := GetValuesObjeto(Self, TmCollectionItem);
+  vValues := TmObjeto.GetValuesObjeto(Self, TmCollectionItem);
   for I := 0 to vValues.Count - 1 do
     if vValues[I] <> nil then
       with TmCollectionItem(vValues[I]) do
         Limpar();
 
-  vValues := GetValuesObjeto(Self, TmCollection);
+  vValues := TmObjeto.GetValuesObjeto(Self, TmCollection);
   for I := 0 to vValues.Count - 1 do
     if vValues[I] <> nil then
       with TmCollection(vValues[I]) do
@@ -243,13 +243,13 @@ var
 begin
   vFiltros := GetValuesFiltro(Self);
 
-  vValues := GetValuesObjeto(Self, TmCollectionItem);
+  vValues := TmObjeto.GetValuesObjeto(Self, TmCollectionItem);
   for I := 0 to vValues.Count - 1 do
     if vValues[I] <> nil then
       with TmCollectionItem(vValues[I]) do
         Listar(vFiltros);
 
-  vValues := GetValuesObjeto(Self, TmCollection);
+  vValues := TmObjeto.GetValuesObjeto(Self, TmCollection);
   for I := 0 to vValues.Count - 1 do
     if vValues[I] <> nil then
       with TmCollection(vValues[I]) do
@@ -309,13 +309,13 @@ var
 begin
   vFiltros := GetValuesFiltro(Self);
 
-  vValues := GetValuesObjeto(Self, TmCollectionItem);
+  vValues := TmObjeto.GetValuesObjeto(Self, TmCollectionItem);
   for I := 0 to vValues.Count - 1 do
     if vValues[I] <> nil then
       with TmCollectionItem(vValues[I]) do
         Consultar(vFiltros);
 
-  vValues := GetValuesObjeto(Self, TmCollection);
+  vValues := TmObjeto.GetValuesObjeto(Self, TmCollection);
   for I := 0 to vValues.Count - 1 do
     if vValues[I] <> nil then
       with TmCollection(vValues[I]) do
@@ -338,14 +338,14 @@ var
   vValues : TList;
   I : Integer;
 begin
-  vValues := GetValuesObjeto(Self, TmCollectionItem);
+  vValues := TmObjeto.GetValuesObjeto(Self, TmCollectionItem);
   for I := 0 to vValues.Count - 1 do
     if vValues[I] <> nil then
       with TmCollectionItem(vValues[I]) do
         if IsUpdate and IsChavePreenchida then
           Incluir();
 
-  vValues := GetValuesObjeto(Self, TmCollection);
+  vValues := TmObjeto.GetValuesObjeto(Self, TmCollection);
   for I := 0 to vValues.Count - 1 do
     if vValues[I] <> nil then
       with TmCollection(vValues[I]) do
@@ -371,14 +371,14 @@ var
   vValues : TList;
   I : Integer;
 begin
-  vValues := GetValuesObjeto(Self, TmCollectionItem);
+  vValues := TmObjeto.GetValuesObjeto(Self, TmCollectionItem);
   for I := 0 to vValues.Count - 1 do
     if vValues[I] <> nil then
       with TmCollectionItem(vValues[I]) do
         if IsUpdate and IsChavePreenchida then
           Alterar();
 
-  vValues := GetValuesObjeto(Self, TmCollection);
+  vValues := TmObjeto.GetValuesObjeto(Self, TmCollection);
   for I := 0 to vValues.Count - 1 do
     if vValues[I] <> nil then
       with TmCollection(vValues[I]) do
@@ -420,14 +420,14 @@ var
   vValues : TList;
   I : Integer;
 begin
-  vValues := GetValuesObjeto(Self, TmCollectionItem);
+  vValues := TmObjeto.GetValuesObjeto(Self, TmCollectionItem);
   for I := 0 to vValues.Count - 1 do
     if vValues[I] <> nil then
       with TmCollectionItem(vValues[I]) do
         if IsUpdate and IsChavePreenchida then
           Excluir();
 
-  vValues := GetValuesObjeto(Self, TmCollection);
+  vValues := TmObjeto.GetValuesObjeto(Self, TmCollection);
   for I := 0 to vValues.Count - 1 do
     if vValues[I] <> nil then
       with TmCollection(vValues[I]) do

@@ -15,11 +15,13 @@ type
     function GetConsulta(ASql : String; AOpen : Boolean) : TDataSet;
     function GetLimits(ASql : String; AQtde : Integer) : String;
     function GetMetadata(AEntidade : String) : TList;
+    function GetConstraints(AConstraint : String) : TStringList;
     function GetTables(AFiltro : String) : TStringList;
     function GetViews(AFiltro : String) : TStringList;
 
     function GetSequence(ASequence : String) : Integer;
 
+    function ConstraintExiste(ATable : String) : Boolean;
     function TableExiste(ATable : String) : Boolean;
     function ViewExiste(AView : String) : Boolean;
 

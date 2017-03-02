@@ -13,6 +13,8 @@ type
     class function GetValues(AObject: TObject): TmPropertyList;
     class procedure SetValues(AObject: TObject; AValues: TmPropertyList);
     class procedure ToObjeto(AObjectFrom: TObject; AObjectTo: TObject);
+    class function GetValuesObjeto(AObject : TObject; AInherited : TClass) : TmPropertyList;
+    class function GetValuesObjetoName(AObject : TObject; AInherited : TClass; ANome : String) : TObject;
   end;
 
 implementation
@@ -25,7 +27,7 @@ implementation
     tkVariant, tkArray, tkRecord, tkInterface, tkInt64, tkDynArray);
 *)
 
-class procedure TmObjeto.ResetValues(AObject: TObject);
+class procedure TmObjeto.ResetValues;
 const
   cDS_METHOD = 'TmObjeto.ResetValues';
 var
@@ -84,7 +86,7 @@ end;
 
 //--
 
-class function TmObjeto.GetValues(AObject: TObject): TmPropertyList;
+class function TmObjeto.GetValues;
 var
   Count, Size, I : Integer;
   PropInfo : PPropInfo;
@@ -153,7 +155,7 @@ begin
   end;
 end;
 
-class procedure TmObjeto.SetValues(AObject: TObject; AValues : TmPropertyList);
+class procedure TmObjeto.SetValues;
 var
   PropInfo : PPropInfo;
   I : Integer;
@@ -195,9 +197,49 @@ end;
 
 //--
 
-class procedure TmObjeto.ToObjeto(AObjectFrom, AObjectTo: TObject);
+class procedure TmObjeto.ToObjeto;
 begin
   SetValues(AObjectTo, GetValues(AObjectFrom));
+end;
+
+//--
+
+class function TmObjeto.GetValuesObjeto;
+var
+  vValues : TmPropertyList;
+  I : Integer;
+begin
+  Result := TmPropertyList.Create;
+
+  if not Assigned(AObject) then
+    Exit;
+
+  vValues := TmObjeto.GetValues(AObject);
+
+  with vValues do
+    for I := 0 to Count - 1 do
+      with Items[I] do
+        if IsValueObject then
+          if Assigned(ValueObject) then
+            if ValueObject.ClassType.InheritsFrom(AInherited) then
+              Result.Add(Items[I]);
+end;
+
+class function TmObjeto.GetValuesObjetoName;
+var
+  vValues : TmPropertyList;
+  I : Integer;
+begin
+  Result := nil;
+
+  vValues := TmObjeto.GetValuesObjeto(AObject, AInherited);
+
+  with vValues do
+    for I := 0 to Count - 1 do
+      with Items[I] do
+        if Nome = ANome then
+          if ValueObject is AInherited then
+            Result := ValueObject;
 end;
 
 end.

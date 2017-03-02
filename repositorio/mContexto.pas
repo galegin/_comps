@@ -19,6 +19,10 @@ type
 
     procedure ClearEntidade();
     procedure AddEntidade(AEntidade : TmCollectionMapClass);
+    procedure AddEntidadeList(AEntidadeList : Array Of TmCollectionMapClass);
+
+    function GetEntidade(
+      ACollectionItem : TCollectionItem) : TmCollectionMap;
 
     function DbSet(
       AClasse : TCollectionItemClass) : TmCollectionSet;
@@ -45,7 +49,7 @@ type
 implementation
 
 uses
-  mCollection, mCollectionItem, mModulo;
+  mCollectionItem, mCollection, mModulo;
 
 constructor TmContexto.Create(AOwner : TComponent);
 begin
@@ -64,6 +68,31 @@ procedure TmContexto.AddEntidade;
 begin
   SetLength(fEntidades, Length(fEntidades) + 1);
   fEntidades[High(fEntidades)] := AEntidade;
+end;
+
+procedure TmContexto.AddEntidadeList;
+var
+  I : Integer;
+begin
+  for I := Low(AEntidadeList) to High(AEntidadeList) do
+    AddEntidade(AEntidadeList[I]);
+end;
+
+function TmContexto.GetEntidade;
+var
+  vCollectionMap : TmCollectionMap;
+  I : Integer;
+begin
+  Result := nil;
+  for I := Ord(Low(fEntidades)) to Ord(High(fEntidades)) do begin
+    vCollectionMap := TmCollectionMapClass(fEntidades[I]).Create(nil);
+    if ACollectionItem.ClassType = vCollectionMap.Classe then begin
+      Result := vCollectionMap;
+      Exit;
+    end;
+
+    FreeAndNil(vCollectionMap);
+  end;
 end;
 
 //--

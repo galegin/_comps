@@ -19,6 +19,7 @@ type
     Sequences : TrDatabase_Sequence;
     Tables : String;
     Views : String;
+    Constraints : String;
   end;
 
   TmDatabase = class(TComponent, IDatabaseIntf)
@@ -34,11 +35,13 @@ type
     function GetConsulta(ASql : String; AOpen : Boolean) : TDataSet; virtual; abstract;
     function GetLimits(ASql : String; AQtde : Integer) : String; virtual;
     function GetMetadata(AEntidade : String) : TList; virtual;
+    function GetConstraints(AFiltro : String) : TStringList; virtual;
     function GetTables(AFiltro : String) : TStringList; virtual;
     function GetViews(AFiltro : String) : TStringList; virtual;
 
     function GetSequence(ASequence : String) : Integer; virtual;
 
+    function ConstraintExiste(AConstraint : String) : Boolean; virtual;
     function TableExiste(ATable : String) : Boolean; virtual;
     function ViewExiste(AView : String) : Boolean; virtual;
 
@@ -63,6 +66,7 @@ implementation
         tpdDB2, tpdOracle : begin
           Limits := 'select * from ({sql}) where ROWNUM <= {qtde}';
           Metadata := 'select * from {entidade} where 1<>1';
+          Constraints := 'select CONSTRAINT_NAME from USER_CONSTRAINTS';
           Tables := 'select TABLE_NAME from USER_TABLES';
           Views := 'select VIEW_NAME from USER_VIEWS';
           with Sequences do begin
@@ -75,6 +79,7 @@ implementation
         tpdFirebird : begin
           Limits := 'select FIRST {qtde} * from ({sql})';
           Metadata := 'select * from {entidade} where 1<>1';
+          Constraints := 'select RDB$CONSTRAINT_NAME as CONSTRAINT_NAME from RDB$RELATION_CONSTRAINTS';
           Tables := 'select RDB$RELATION_NAME as TABLE_NAME from RDB$RELATIONS where RDB$SYSTEM_FLAG = 0 and RDB$VIEW_BLR is null';
           Views := 'select RDB$RELATION_NAME as VIEW_NAME from RDB$RELATIONS where RDB$SYSTEM_FLAG = 0 and RDB$VIEW_BLR is not null';
           with Sequences do begin
@@ -87,6 +92,7 @@ implementation
         tpdMySql, tpdPostgre : begin
           Limits := 'select * from ({sql}) LIMIT {qtde}';
           Metadata := 'select * from {entidade} where 1<>1';
+          Constraints := 'select CONSTRAINT_NAME from INFORMATION_SCHEMA.CONSTRAINTS where TABLE_SCHEMA = database()';
           Tables := 'select TABLE_NAME from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = database()';
           Views := 'select VIEW_NAME from INFORMATION_SCHEMA.VIEWS where TABLE_SCHEMA = database()';
         end;
@@ -152,6 +158,22 @@ begin
   Result := TmDataSet.PegarI(vDataSet, 'PROXIMO');
 end;
 
+function TmDatabase.GetConstraints(AFiltro : String) : TStringList;
+var
+  vSql : String;
+  vDataSet : TDataSet;
+begin
+  Result := TStringList.Create;
+  vSql := GetDatabase(Parametro.Tp_Database).Constraints;
+  vDataSet := GetConsulta(vSql, True);
+  with vDataSet do begin
+    while not EOF do begin
+      Result.Add(Trim(FieldByName('CONSTRAINT_NAME').AsString));
+      Next;
+    end;
+  end;
+end;
+
 function TmDatabase.GetTables(AFiltro : String) : TStringList;
 var
   vSql : String;
@@ -185,6 +207,11 @@ begin
 end;
 
 //--
+
+function TmDatabase.ConstraintExiste;
+begin
+  Result := (GetConstraints(AConstraint).IndexOf(AConstraint) > -1);
+end;
 
 function TmDatabase.TableExiste;
 begin

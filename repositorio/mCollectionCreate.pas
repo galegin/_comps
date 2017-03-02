@@ -24,6 +24,7 @@ type
 
     procedure AlterEntidade();
     procedure CreateEntidade();
+    procedure CreateForeignKey();
 
     function EntidadeExiste() : Boolean;
   published
@@ -63,6 +64,8 @@ begin
     AlterEntidade()
   else
     CreateEntidade();
+
+  CreateForeignKey();
 end;
 
 function TmCollectionCreate.EntidadeExiste;
@@ -86,6 +89,16 @@ var
 begin
   vCmd := mCreateEnt.Instance.GetCreate(fContexto, fClasse);
   fContexto.Conexao.ExecComando(vCmd);
+end;
+
+procedure TmCollectionCreate.CreateForeignKey;
+var
+  vLstForeignKey : TmStringList;
+  I : Integer;
+begin
+  vLstForeignKey := mCreateEnt.Instance.GetForeignKey(fContexto, fClasse);
+  for I := 0 to vLstForeignKey.Count - 1 do
+    fContexto.Conexao.ExecComando(vLstForeignKey.Items[I]);
 end;
 
 end.

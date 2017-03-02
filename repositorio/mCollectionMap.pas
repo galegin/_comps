@@ -22,10 +22,10 @@ unit mCollectionMap;
   //
   //  - HasRequired()
   //    .WithMany()
-  //    .HasForengKey();
+  //    .HasForeignKey();
   //  - HasOptional()
   //    .WithOptional()
-  //    .HasForengKey();
+  //    .HasForeignKey();
 
 interface
 
@@ -48,6 +48,7 @@ type
     fTable: String;
     fProperties: TmCollectionPropArray;
     function GetPrimaryKeys: TmCollectionPropArray;
+    function GetForeignKeys: TmCollectionPropArray;
     function GetRequireds: TmCollectionPropArray;
     function GetOptionais: TmCollectionPropArray;
   protected
@@ -75,11 +76,12 @@ type
     property Table : String read fTable;
     property Properties: TmCollectionPropArray read fProperties;
     property PrimaryKeys: TmCollectionPropArray read GetPrimaryKeys;
+    property ForeignKeys: TmCollectionPropArray read GetForeignKeys;
     property Requireds: TmCollectionPropArray read GetRequireds;
     property Optionais: TmCollectionPropArray read GetOptionais;
   end;
 
-  TTipoCollectionProp = (tppPrimaryKey, tppForengKey, tppRequired, tppOptional);
+  TTipoCollectionProp = (tppPrimaryKey, tppForeignKey, tppRequired, tppOptional);
   TTipoCollectionMany = (tpmRequired, tpmOptional);
 
   TmCollectionProp = class
@@ -88,13 +90,13 @@ type
     fColumnName: String;
     fType: TTipoCollectionProp;
     fMany: TTipoCollectionMany;
-    fForengKeys: TmStringList;
+    fForeignKeys: TmStringList;
     fLength: Integer;
     fPrecision: Integer;
     fInWithMany: Boolean;
     fSubType: String;
     function GetInPrimaryKey: Boolean;
-    function GetInForengKey: Boolean;
+    function GetInForeignKey: Boolean;
     function GetInRequired: Boolean;
     function GetInOptional: Boolean;
     function GetInCreate: Boolean;
@@ -103,14 +105,14 @@ type
 
     function HasName(AName: String): TmCollectionProp;
     function HasColumnName(AColumnName: String): TmCollectionProp;
-    function HasForengKey(AForengKeys: Array Of String): TmCollectionProp;
+    function HasForeignKey(AForeignKeys: Array Of String): TmCollectionProp;
     function HasPrecision(ALength, APrecision: Integer): TmCollectionProp;
     function HasRequired(): TmCollectionProp;
     function HasOptional(): TmCollectionProp;
     function HasSubType(ASubType : String): TmCollectionProp;
 
     function IsPrimaryKey(): TmCollectionProp;
-    function IsForengKey(): TmCollectionProp;
+    function IsForeignKey(): TmCollectionProp;
     function IsRequired(): TmCollectionProp;
     function IsOptional(): TmCollectionProp;
 
@@ -121,11 +123,11 @@ type
   published
     property PropName : String read fName;
     property ColumnName : String read fColumnName;
-    property ForengKeys : TmStringArray read fForengKeys;
+    property ForeignKeys : TmStringList read fForeignKeys;
     property Length : Integer read fLength;
     property Precision : Integer read fPrecision;
     property InPrimaryKey : Boolean read GetInPrimaryKey;
-    property InForengKey : Boolean read GetInForengKey;
+    property InForeignKey : Boolean read GetInForeignKey;
     property InRequired : Boolean read GetInRequired;
     property InOptional : Boolean read GetInOptional;
     property InWithMany : Boolean read fInWithMany;
@@ -195,12 +197,12 @@ end;
 
 function TmCollectionMap.HasRequired;
 begin
-  Result := Propert(APropertyName).IsForengKey();
+  Result := Propert(APropertyName).IsForeignKey();
 end;
 
 function TmCollectionMap.HasOptional;
 begin
-  Result := Propert(APropertyName).IsForengKey();
+  Result := Propert(APropertyName).IsForeignKey();
 end;
 
 //--
@@ -213,6 +215,19 @@ begin
   for I := Low(fProperties) to High(fProperties) do
     with fProperties[I] do
       if InPrimaryKey then begin
+        SetLength(Result, System.Length(Result) + 1);
+        Result[High(Result)] := fProperties[I];
+      end;
+end;
+
+function TmCollectionMap.GetForeignKeys;
+var
+  I : Integer;
+begin
+  SetLength(Result, 0);
+  for I := Low(fProperties) to High(fProperties) do
+    with fProperties[I] do
+      if InForeignKey then begin
         SetLength(Result, System.Length(Result) + 1);
         Result[High(Result)] := fProperties[I];
       end;
@@ -248,7 +263,7 @@ end;
 
 constructor TmCollectionProp.Create;
 begin
-  fForengKeys := TmStringList.Create;
+  fForeignKeys := TmStringList.Create;
 end;
 
 function TmCollectionProp.HasName;
@@ -263,13 +278,13 @@ begin
   Result := Self;
 end;
 
-function TmCollectionProp.HasForengKey;
+function TmCollectionProp.HasForeignKey;
 var
   I : Integer;
 begin
-  fForengKeys.Clear();
-  for I := Low(AForengKeys) to High(AForengKeys) do
-    fForengKeys.Add(AForengKeys[I]);
+  fForeignKeys.Clear();
+  for I := Low(AForeignKeys) to High(AForeignKeys) do
+    fForeignKeys.Add(AForeignKeys[I]);
   Result := Self;
 end;
 
@@ -286,14 +301,14 @@ end;
 
 function TmCollectionProp.HasRequired;
 begin
-  fType := tppForengKey;
+  fType := tppForeignKey;
   fMany := tpmRequired;
   Result := Self;
 end;
 
 function TmCollectionProp.HasOptional;
 begin
-  fType := tppForengKey;
+  fType := tppForeignKey;
   fMany := tpmOptional;
   Result := Self;
 end;
@@ -312,9 +327,9 @@ begin
   Result := Self;
 end;
 
-function TmCollectionProp.IsForengKey;
+function TmCollectionProp.IsForeignKey;
 begin
-  fType := tppForengKey;
+  fType := tppForeignKey;
   Result := Self;
 end;
 
@@ -370,9 +385,9 @@ begin
   Result := fType in [tppOptional];
 end;
 
-function TmCollectionProp.GetInForengKey: Boolean;
+function TmCollectionProp.GetInForeignKey: Boolean;
 begin
-  Result := fType in [tppForengKey];
+  Result := fType in [tppForeignKey];
 end;
 
 function TmCollectionProp.GetInCreate: Boolean;

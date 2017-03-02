@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils,
-  mCollectionMap, mProperty, mClasse, mContexto, mString;
+  mCollectionMap, mProperty, mContexto, mObjeto, mClasse, mString;
 
 type
   TmCreateEnt = class(TComponent)
@@ -18,9 +18,27 @@ type
     function GetEntidade() : String;
     function GetCampos() : String;
     function GetKeys() : String;
-    function GetColuna(AProperty: TmCollectionProp) : String;
-    function GetTipo(AProperty: TmCollectionProp) : String;
-    function GetRequerido(AProperty: TmCollectionProp) : String;
+
+    function GetColuna(
+      AProperty: TmCollectionProp) : String;
+    function GetTipo(
+      AProperty: TmCollectionProp) : String;
+    function GetRequerido(
+      AProperty: TmCollectionProp) : String;
+
+    function GetEntidadeForeign(
+      AProperty: TmCollectionProp) : TmCollectionMap;
+    function GetTabelaForeign(
+      AProperty: TmCollectionProp) : String;
+    function GetCamposForeign(
+      AProperty: TmCollectionProp) : String;
+
+    function GetEntidadeForeignRef(
+      AProperty: TmCollectionProp) : TmCollectionMap;
+    function GetTabelaForeignRef(
+      AProperty: TmCollectionProp) : String;
+    function GetCamposForeignRef(
+      AProperty: TmCollectionProp) : String;
   public
     constructor Create(AOwner : TComponent); override;
 
@@ -32,12 +50,19 @@ type
       AContexto : TmContexto;
       AClasse: TmCollectionMapClass) : TmStringList;
 
+    function GetForeignKey(
+      AContexto : TmContexto;
+      AClasse: TmCollectionMapClass) : TmStringList;
+
   published
   end;
 
   function Instance : TmCreateEnt;
 
 implementation
+
+uses
+  mCollectionItem, mCollection;
 
 var
   _instance : TmCreateEnt;
@@ -180,6 +205,119 @@ begin
 
           Result.Add(vComando);
         end;
+end;
+
+//--
+
+function TmCreateEnt.GetEntidadeForeign;
+begin
+  Result := fObjeto;
+end;
+
+function TmCreateEnt.GetTabelaForeign;
+var
+  vCollectionMap : TmCollectionMap;
+begin
+  vCollectionMap := GetEntidadeForeign(AProperty);
+  if Assigned(vCollectionMap) then
+    Result := vCollectionMap.Table
+  else
+    Result := '';
+end;
+
+function TmCreateEnt.GetCamposForeign;
+var
+  I : Integer;
+begin
+  Result := '';
+  with AProperty do
+    with ForeignKeys do
+      for I := 0 to Count - 1 do
+        Result := Result + IfThen(Result <> '', ', ') + Items[I];
+end;
+
+//--
+
+function TmCreateEnt.GetEntidadeForeignRef;
+var
+  vCollectionObjeto, vCollectionItem : TmCollectionItem;
+begin
+  Result := nil;
+
+  vCollectionObjeto := TmCollectionItemClass(fObjeto.Classe).Create(nil);
+
+  if Assigned(vCollectionObjeto) then begin
+    vCollectionItem := TmObjeto.GetValuesObjetoName(vCollectionObjeto,
+      TmCollectionItem, AProperty.PropName) as TmCollectionItem;
+
+    if Assigned(vCollectionItem) then
+      Result := fContexto.GetEntidade(vCollectionItem);
+  end;
+end;
+
+function TmCreateEnt.GetTabelaForeignRef;
+var
+  vCollectionMap : TmCollectionMap;
+begin
+  vCollectionMap := GetEntidadeForeignRef(AProperty);
+  if Assigned(vCollectionMap) then
+    Result := vCollectionMap.Table
+  else
+    Result := '';  
+end;
+
+function TmCreateEnt.GetCamposForeignRef;
+var
+  vCollectionMap : TmCollectionMap;
+  I : Integer;
+begin
+  Result := '';
+  vCollectionMap := GetEntidadeForeignRef(AProperty);
+  if Assigned(vCollectionMap) then
+    with vCollectionMap do
+      for I := Ord(Low(PrimaryKeys)) to Ord(High(PrimaryKeys)) do
+        with PrimaryKeys[I] do
+          Result := Result + IfThen(Result <> '', ', ') + ColumnName;
+end;
+
+//--
+
+function TmCreateEnt.GetForeignKey;
+var
+  vTabela, vCampos, vTabelaRef, vCamposRef, vComando : String;
+  I : Integer;
+begin
+  fContexto := AContexto;
+  fClasse := AClasse;
+  fObjeto := AClasse.Create(nil);
+
+  Result := TmStringList.Create;
+
+  with fObjeto do
+    for I := Low(ForeignKeys) to High(ForeignKeys) do begin
+      vTabela := GetTabelaForeign(ForeignKeys[I]);
+      vCampos := GetCamposForeign(ForeignKeys[I]);
+      vTabelaRef := GetTabelaForeignRef(ForeignKeys[I]);
+      vCamposRef := GetCamposForeignRef(ForeignKeys[I]);
+
+      if fContexto.Conexao.Database.ConstraintExiste(vTabela + '_' + vTabelaRef) then
+        Continue;
+
+      if (vTabela <> '') and (vCampos <> '')
+      and (vTabelaRef <> '') and (vCamposRef <> '') then begin
+        vComando :=
+          'alter table {tabela} ' +
+          'add constraint {tabela}_{tabela_ref} ' +
+          'foreign key ({campos}) ' +
+          'references {tabela_ref} ({campos_ref}) ';
+        vComando := AnsiReplaceStr(vComando, '{tabela}', vTabela);
+        vComando := AnsiReplaceStr(vComando, '{campos}', vCampos);
+        vComando := AnsiReplaceStr(vComando, '{tabela_ref}', vTabelaRef);
+        vComando := AnsiReplaceStr(vComando, '{campos_ref}', vCamposRef);
+
+        Result.Add(vComando);
+      end;
+    end;
 end;
 
 end.
