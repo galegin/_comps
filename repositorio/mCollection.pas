@@ -10,6 +10,7 @@ uses
 type
   TmCollection = class;
   TmCollectionClass = class of TmCollection;
+  TmCollectionArray = array of TmCollection;
 
   TmCollection = class(TCollection, ICollectionIntf)
   private

@@ -227,13 +227,20 @@ end;
 
 function TmCreateEnt.GetCamposForeign;
 var
+  vCollectionMap : TmCollectionMap;
+  vCollectionProp : TmCollectionProp;
   I : Integer;
 begin
   Result := '';
-  with AProperty do
-    with ForeignKeys do
-      for I := 0 to Count - 1 do
-        Result := Result + IfThen(Result <> '', ', ') + Items[I];
+  vCollectionMap := GetEntidadeForeign(AProperty);
+  if Assigned(vCollectionMap) then
+    with AProperty.ForeignKeys do
+      for I := 0 to Count - 1 do begin
+        vCollectionProp := vCollectionMap.Propert(Items[I]);
+        if Assigned(vCollectionProp) then
+          Result := Result + IfThen(Result <> '', ', ') +
+            vCollectionProp.ColumnName;
+      end;
 end;
 
 //--

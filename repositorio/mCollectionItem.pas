@@ -10,6 +10,7 @@ uses
 type
   TmCollectionItem = class;
   TmCollectionItemClass = class of TmCollectionItem;
+  TmCollectionItemArray = array of TmCollectionItem;
 
   TmCollectionItem = class(TCollectionItem, ICollectionItemIntf)
   private
@@ -22,7 +23,9 @@ type
 
     function GetValuesKey(AObject : TObject) : TList;
     function GetValuesFiltro(AObject : TObject) : TList;
-    //function GetValuesObjeto(AObject : TObject; AInherited : TClass) : TList; // mObjeto
+
+    function GetValuesCollection(AObject : TObject) : TmCollectionArray;
+    function GetValuesCollectionItem(AObject : TObject) : TmCollectionItemArray;
   public
     IsUpdate : Boolean;
     IsCreate : Boolean;
@@ -158,28 +161,51 @@ begin
           Result.Add(Items[I]);
 end;
 
-(* function TmCollectionItem.GetValuesObjeto(AObject : TObject; AInherited : TClass) : TList;
+//--
+
+function TmCollectionItem.GetValuesCollection;
 var
   vValues : TmPropertyList;
   I : Integer;
 begin
-  Result := TList.Create;
+  SetLength(Result, 0);
 
   if not Assigned(AObject) then
     Exit;
-  if not (AObject is TmCollectionItem) then
-    Exit;
 
-  vValues := TmObjeto.GetValues(AObject);
+  vValues := TmObjeto.GetValuesObjeto(AObject, TmCollection);
 
   with vValues do
     for I := 0 to Count - 1 do
       with Items[I] do
         if IsValueObject then
-          if Assigned(ValueObject) then
-            if ValueObject.ClassType.InheritsFrom(AInherited) then
-              Result.Add(ValueObject);
-end; *)
+          if Assigned(ValueObject) then begin
+            SetLength(Result, Length(Result) + 1);
+            Result[High(Result)] := ValueObject as TmCollection;
+          end;
+end;
+
+function TmCollectionItem.GetValuesCollectionItem;
+var
+  vValues : TmPropertyList;
+  I : Integer;
+begin
+  SetLength(Result, 0);
+
+  if not Assigned(AObject) then
+    Exit;
+
+  vValues := TmObjeto.GetValuesObjeto(AObject, TmCollectionItem);
+
+  with vValues do
+    for I := 0 to Count - 1 do
+      with Items[I] do
+        if IsValueObject then
+          if Assigned(ValueObject) then begin
+            SetLength(Result, Length(Result) + 1);
+            Result[High(Result)] := ValueObject as TmCollectionItem;
+          end;
+end;
 
 //--
 
@@ -191,20 +217,17 @@ end;
 
 procedure TmCollectionItem.LimparDep();
 var
-  vValues : TList;
+  vCollectionItemArray : TmCollectionItemArray;
+  vCollectionArray : TmCollectionArray;
   I : Integer;
 begin
-  vValues := TmObjeto.GetValuesObjeto(Self, TmCollectionItem);
-  for I := 0 to vValues.Count - 1 do
-    if vValues[I] <> nil then
-      with TmCollectionItem(vValues[I]) do
-        Limpar();
+  vCollectionItemArray := GetValuesCollectionItem(Self);
+  for I := Low(vCollectionItemArray) to High(vCollectionItemArray) do
+    vCollectionItemArray[I].Limpar();
 
-  vValues := TmObjeto.GetValuesObjeto(Self, TmCollection);
-  for I := 0 to vValues.Count - 1 do
-    if vValues[I] <> nil then
-      with TmCollection(vValues[I]) do
-        Limpar();
+  vCollectionArray := GetValuesCollection(Self);
+  for I := Low(vCollectionArray) to High(vCollectionArray) do
+    vCollectionArray[I].Limpar();
 end;
 
 //--
@@ -237,23 +260,20 @@ end;
 
 procedure TmCollectionItem.ListarDep();
 var
+  vCollectionItemArray : TmCollectionItemArray;
+  vCollectionArray : TmCollectionArray;
   vFiltros : TList;
-  vValues : TList;
   I : Integer;
 begin
   vFiltros := GetValuesFiltro(Self);
 
-  vValues := TmObjeto.GetValuesObjeto(Self, TmCollectionItem);
-  for I := 0 to vValues.Count - 1 do
-    if vValues[I] <> nil then
-      with TmCollectionItem(vValues[I]) do
-        Listar(vFiltros);
+  vCollectionItemArray := GetValuesCollectionItem(Self);
+  for I := Low(vCollectionItemArray) to High(vCollectionItemArray) do
+    vCollectionItemArray[I].Listar(vFiltros);
 
-  vValues := TmObjeto.GetValuesObjeto(Self, TmCollection);
-  for I := 0 to vValues.Count - 1 do
-    if vValues[I] <> nil then
-      with TmCollection(vValues[I]) do
-        Listar(vFiltros);
+  vCollectionArray := GetValuesCollection(Self);
+  for I := Low(vCollectionArray) to High(vCollectionArray) do
+    vCollectionArray[I].Listar(vFiltros);
 end;
 
 //--
@@ -303,23 +323,20 @@ end;
 
 procedure TmCollectionItem.ConsultarDep();
 var
+  vCollectionItemArray : TmCollectionItemArray;
+  vCollectionArray : TmCollectionArray;
   vFiltros : TList;
-  vValues : TList;
   I : Integer;
 begin
   vFiltros := GetValuesFiltro(Self);
 
-  vValues := TmObjeto.GetValuesObjeto(Self, TmCollectionItem);
-  for I := 0 to vValues.Count - 1 do
-    if vValues[I] <> nil then
-      with TmCollectionItem(vValues[I]) do
-        Consultar(vFiltros);
+  vCollectionItemArray := GetValuesCollectionItem(Self);
+  for I := Low(vCollectionItemArray) to High(vCollectionItemArray) do
+    vCollectionItemArray[I].Consultar(vFiltros);
 
-  vValues := TmObjeto.GetValuesObjeto(Self, TmCollection);
-  for I := 0 to vValues.Count - 1 do
-    if vValues[I] <> nil then
-      with TmCollection(vValues[I]) do
-        Consultar(vFiltros);
+  vCollectionArray := GetValuesCollection(Self);
+  for I := Low(vCollectionArray) to High(vCollectionArray) do
+    vCollectionArray[I].Consultar(vFiltros);
 end;
 
 //--
@@ -335,22 +352,21 @@ end;
 
 procedure TmCollectionItem.IncluirDep;
 var
-  vValues : TList;
+  vCollectionItemArray : TmCollectionItemArray;
+  vCollectionArray : TmCollectionArray;
   I : Integer;
 begin
-  vValues := TmObjeto.GetValuesObjeto(Self, TmCollectionItem);
-  for I := 0 to vValues.Count - 1 do
-    if vValues[I] <> nil then
-      with TmCollectionItem(vValues[I]) do
-        if IsUpdate and IsChavePreenchida then
-          Incluir();
+  vCollectionItemArray := GetValuesCollectionItem(Self);
+  for I := Low(vCollectionItemArray) to High(vCollectionItemArray) do
+    with vCollectionItemArray[I] do
+      if IsUpdate and IsChavePreenchida then
+        Incluir();
 
-  vValues := TmObjeto.GetValuesObjeto(Self, TmCollection);
-  for I := 0 to vValues.Count - 1 do
-    if vValues[I] <> nil then
-      with TmCollection(vValues[I]) do
-        if IsUpdate then
-          Incluir();
+  vCollectionArray := GetValuesCollection(Self);
+  for I := Low(vCollectionArray) to High(vCollectionArray) do
+    with vCollectionArray[I] do
+      if IsUpdate then
+        Incluir();
 end;
 
 //--
@@ -368,22 +384,21 @@ end;
 
 procedure TmCollectionItem.AlterarDep;
 var
-  vValues : TList;
+  vCollectionItemArray : TmCollectionItemArray;
+  vCollectionArray : TmCollectionArray;
   I : Integer;
 begin
-  vValues := TmObjeto.GetValuesObjeto(Self, TmCollectionItem);
-  for I := 0 to vValues.Count - 1 do
-    if vValues[I] <> nil then
-      with TmCollectionItem(vValues[I]) do
-        if IsUpdate and IsChavePreenchida then
-          Alterar();
+  vCollectionItemArray := GetValuesCollectionItem(Self);
+  for I := Low(vCollectionItemArray) to High(vCollectionItemArray) do
+    with vCollectionItemArray[I] do
+      if IsUpdate and IsChavePreenchida then
+        Alterar();
 
-  vValues := TmObjeto.GetValuesObjeto(Self, TmCollection);
-  for I := 0 to vValues.Count - 1 do
-    if vValues[I] <> nil then
-      with TmCollection(vValues[I]) do
-        if IsUpdate then
-          Alterar();
+  vCollectionArray := GetValuesCollection(Self);
+  for I := Low(vCollectionArray) to High(vCollectionArray) do
+    with vCollectionArray[I] do
+      if IsUpdate then
+        Alterar();
 end;
 
 //--
@@ -417,22 +432,21 @@ end;
 
 procedure TmCollectionItem.ExcluirDep;
 var
-  vValues : TList;
+  vCollectionItemArray : TmCollectionItemArray;
+  vCollectionArray : TmCollectionArray;
   I : Integer;
 begin
-  vValues := TmObjeto.GetValuesObjeto(Self, TmCollectionItem);
-  for I := 0 to vValues.Count - 1 do
-    if vValues[I] <> nil then
-      with TmCollectionItem(vValues[I]) do
-        if IsUpdate and IsChavePreenchida then
-          Excluir();
+  vCollectionItemArray := GetValuesCollectionItem(Self);
+  for I := Low(vCollectionItemArray) to High(vCollectionItemArray) do
+    with vCollectionItemArray[I] do
+      if IsUpdate and IsChavePreenchida then
+        Excluir();
 
-  vValues := TmObjeto.GetValuesObjeto(Self, TmCollection);
-  for I := 0 to vValues.Count - 1 do
-    if vValues[I] <> nil then
-      with TmCollection(vValues[I]) do
-        if IsUpdate then
-          Excluir();
+  vCollectionArray := GetValuesCollection(Self);
+  for I := Low(vCollectionArray) to High(vCollectionArray) do
+    with vCollectionArray[I] do
+      if IsUpdate then
+        Excluir();
 end;
 
 //--
