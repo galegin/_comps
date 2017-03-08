@@ -3,7 +3,7 @@ unit mTipoCampo;
 interface
 
 uses
-  SysUtils, StrUtils; // mProperty
+  SysUtils, StrUtils;
 
 type
   TTipoCampo = (
