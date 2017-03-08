@@ -19,7 +19,7 @@ type
     Mil : Integer;
   end;
 
-  TmTempoString = class(TComponent)
+  TmTempoString = class
   private
     fTipo: TTipoTempo;
 
