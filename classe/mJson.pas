@@ -17,7 +17,7 @@ type
 implementation
 
 uses
-  mString, mClasse, mProperty, mObjeto, mMethod;
+  mString, mClasse, mProperty, mObjeto;
 
 { TmJson }
 
