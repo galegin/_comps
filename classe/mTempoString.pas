@@ -21,8 +21,9 @@ type
 
   TmTempoString = class(TComponent)
   private
-    fTempoR: RTempoString;
     fTipo: TTipoTempo;
+
+    fTempoR: RTempoString;
 
     function GetTempoS: String;
     procedure SetTempoS(const Value: String);
@@ -34,7 +35,15 @@ type
     function GetMin: Integer;
     function GetSeg: Integer;
     function GetMil: Integer;
-  public
+  public  
+    constructor Create(ATipo : TTipoTempo; ATempo : String);
+    
+    function Contar(ATempo : String) : String;
+    function Somar(ATempo : String) : String;
+    function Media(ATempo : String) : String;
+    function Maior(ATempo : String) : String;
+    function Menor(ATempo : String) : String;
+  published
     property Tipo : TTipoTempo read fTipo write fTipo;
 
     property TempoR : RTempoString read fTempoR write fTempoR;
@@ -47,12 +56,6 @@ type
     property Min : Integer read GetMin;
     property Seg : Integer read GetSeg;
     property Mil : Integer read GetMil;
-
-    function Contar(ATempo : String) : String;
-    function Somar(ATempo : String) : String;
-    function Media(ATempo : String) : String;
-    function Maior(ATempo : String) : String;
-    function Menor(ATempo : String) : String;
   end;
 
   function StrToTempoString(const ATipo : TTipoTempo; const ATempo : string) : RTempoString;
@@ -121,22 +124,22 @@ implementation
   begin
     case ATipo of
       ttAno : begin
-        Result := Format('%d:%d', [ATempo.Ano, ATempo.Mes]);
+        Result := Format('%d:%2d', [ATempo.Ano, ATempo.Mes]);
       end;
       ttMes : begin
-        Result := Format('%d:%d', [ATempo.Mes, ATempo.Dia]);
+        Result := Format('%d:%2d', [ATempo.Mes, ATempo.Dia]);
       end;
       ttDia : begin
-        Result := Format('%d:%d', [ATempo.Dia, ATempo.Hor]);
+        Result := Format('%d:%2d', [ATempo.Dia, ATempo.Hor]);
       end;
       ttHor : begin
-        Result := Format('%d:%d', [ATempo.Hor, ATempo.Min]);
+        Result := Format('%d:%2d', [ATempo.Hor, ATempo.Min]);
       end;
       ttMin : begin
-        Result := Format('%d:%d', [ATempo.Min, ATempo.Seg]);
+        Result := Format('%d:%2d', [ATempo.Min, ATempo.Seg]);
       end;
       ttSeg : begin
-        Result := Format('%d:%d', [ATempo.Seg, ATempo.Mil]);
+        Result := Format('%d:%3d', [ATempo.Seg, ATempo.Mil]);
       end;
     end;
   end;
@@ -243,7 +246,7 @@ implementation
         ATempo.Hor := ATempo.Hor + ATempoSoma.Hor;
         if ATempo.Hor > 23 then begin
           ATempo.Dia := ATempo.Dia + 1;
-          ATempo.Hor := ATempo.Hor - 23;
+          ATempo.Hor := ATempo.Hor - 24;
         end;
       end;
       ttHor : begin
@@ -251,7 +254,7 @@ implementation
         ATempo.Min := ATempo.Min + ATempoSoma.Min;
         if ATempo.Min > 59 then begin
           ATempo.Hor := ATempo.Hor + 1;
-          ATempo.Min := ATempo.Min - 59;
+          ATempo.Min := ATempo.Min - 60;
         end;
       end;
       ttMin : begin
@@ -259,13 +262,13 @@ implementation
         ATempo.Seg := ATempo.Seg + ATempoSoma.Seg;
         if ATempo.Seg > 59 then begin
           ATempo.Min := ATempo.Min + 1;
-          ATempo.Seg := ATempo.Seg - 59;
+          ATempo.Seg := ATempo.Seg - 60;
         end;
       end;
       ttSeg : begin
         ATempo.Seg := ATempo.Seg + ATempoSoma.Seg;
         ATempo.Mil := ATempo.Mil + ATempoSoma.Mil;
-        if ATempo.Mil > 1000 then begin
+        if ATempo.Mil > 999 then begin
           ATempo.Seg := ATempo.Seg + 1;
           ATempo.Mil := ATempo.Mil - 1000;
         end;
@@ -321,6 +324,14 @@ implementation
   begin
     fTempoR := StrToTempoString(Tipo, Value);
   end;
+
+{ TmTempoString }
+
+constructor TmTempoString.Create(ATipo : TTipoTempo; ATempo : String);
+begin
+  fTipo := ATipo;
+  SetTempoS(ATempo);
+end;  
 
 //--
 
