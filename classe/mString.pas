@@ -35,6 +35,9 @@ type
 
     class function StringToHexa(AString : String) : String;
     class function HexaToString(AString : String) : String;
+    
+    class function StringInSet(AString : String; AList : Array of String) : Integer;
+    class function StringNotInSet(AString : String; AList : Array of String) : Integer;
   end;
 
   TmStringList = class
@@ -191,6 +194,26 @@ end;
 class function TmString.StringToHexa(AString: String): String;
 begin
 
+end;
+
+//--
+
+class function TmString.StringInSet(AString : String; AList : Array of String) : Integer;
+var
+  I : Integer;
+begin
+  Result := -1;
+  for I := Low(AList) to High(AList) do begin
+    if AList[I] = AString then begin
+      Result := I;
+      Exit;
+    end;
+  end;
+end;
+
+class function TmString.StringNotInSet(AString : String; AList : Array of String) : Integer;
+begin
+  Result := not StringInSet(AString, AList);
 end;
 
 { TmStringList }
