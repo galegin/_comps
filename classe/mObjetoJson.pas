@@ -24,7 +24,7 @@ end;
 //--
 
   procedure AnalisaJson(pObjeto : TObject; var pJson : String;
-    const pNivel : Integer);
+    const pNivel : Integer; const pAtributo : String);
   var
     vTipoJsonIni, vTipoJsonPrx, vTipoJsonFin : TrTipoJson;
     vAtributo, vConteudo : String;
@@ -45,14 +45,12 @@ end;
 
         // [lista]
         tjLista : begin
-          AnalisaJson(vLista, pJson, pNivel + 1);
-          vValues.AdicionarLista('', vLista);
+          AnalisaJson(vLista, pJson, pNivel + 1, pAtributo);
         end;
 
         // {objeto}
         tjObjeto : begin
-          AnalisaJson(vObjeto, pJson, pNivel + 1);
-          vValues.AdicionarObjeto('', vObjeto);
+          AnalisaJson(vObjeto, pJson, pNivel + 1, pAtributo);
         end;
 
         // "Atributo":"Conteudo"
@@ -66,25 +64,18 @@ end;
           RemoveStrTipoJson(vTipoJsonPrx, pJson);
           case vTipoJsonPrx.Tipo of
 
-            // [lista]
-            tjLista : begin
-              AnalisaJson(vLista, pJson, pNivel + 1);
-              vValues.AdicionarLista(vAtributo, vLista);
-            end;
-
-            // {objeto}
-            tjObjeto : begin
-              AnalisaJson(vObjeto, pJson, pNivel + 1);
-              vValues.AdicionarObjeto(vAtributo, vObjeto);
-            end;
-
             // :"Conteudo"
             tjConteudo : begin
               vTipoJsonFin := GetTipoJsonFin(pJson);
               vConteudo := GetValueTipoJson(vTipoJsonFin, pJson);
               RemoveStrTipoJson(vTipoJsonFin, pJson);
+              
               vValues.AdicionarAtributo(vAtributo, vConteudo);
             end;
+            
+          // [lista] / {objeto}
+          else  
+            AnalisaJson(pObjeto, pJson, pNivel + 1, vAtributo);
 
           end;
         end;
@@ -99,7 +90,7 @@ end;
 class function TmObjetoJson.JsonToObjeto(AClasse : TClass; AJson : String) : TObject;
 begin
   Result := AClasse.NewInstance;
-  AnalisaJson(Result, AJson, 0);
+  AnalisaJson(Result, AJson, 0, '');
 end;
 
 //--
