@@ -23,19 +23,11 @@ end;
 
 //--
 
-  procedure AnalisaJson(pObjeto : TObject; var pJson : String;
-    const pNivel : Integer; const pAtributo : String);
+  procedure AnalisaJson(pTipoJson : TrTipoJson; var pJson : String; const pNivel : Integer);
   var
     vTipoJsonIni, vTipoJsonPrx, vTipoJsonFin : TrTipoJson;
     vAtributo, vConteudo : String;
-    vValues : TmPropertyList;
-    vObjeto : TObject;
-    vLista : TList;
   begin
-    vValues := TmPropertyList.Create;
-    vObjeto := TObject.Create;
-    vLista := TList.Create;
-
     while (pJson <> '') do begin
 
       // inicio
@@ -45,12 +37,14 @@ end;
 
         // [lista]
         tjLista : begin
-          AnalisaJson(vLista, pJson, pNivel + 1, pAtributo);
+          pTipoJson.Lista := TList.Create;
+          AnalisaJson(pTipoJson, pJson, pNivel + 1);
         end;
 
         // {objeto}
         tjObjeto : begin
-          AnalisaJson(vObjeto, pJson, pNivel + 1, pAtributo);
+          pTipoJson.Objeto := TObject.Create;
+          AnalisaJson(pTipoJson, pJson, pNivel + 1);
         end;
 
         // "Atributo":"Conteudo"
@@ -70,27 +64,38 @@ end;
               vConteudo := GetValueTipoJson(vTipoJsonFin, pJson);
               RemoveStrTipoJson(vTipoJsonFin, pJson);
               
-              vValues.AdicionarAtributo(vAtributo, vConteudo);
+              TmObjeto.SetValue(pTipoJson.Objeto, vAtributo, vConteudo);
             end;
             
           // [lista] / {objeto}
           else  
-            AnalisaJson(pObjeto, pJson, pNivel + 1, vAtributo);
+            AnalisaJson(pTipoJson, pJson, pNivel + 1);
 
           end;
         end;
       end;
+      
+      // finaliza
+      vTipoJsonFin := GetTipoJsonFin(pJson);
+      RemoveStrTipoJson(vTipoJsonFin, pJson);
+      case vTipoJsonIni.Tipo of      
+        tjLista, tjObjeto : begin
+          Exit;
+        end;
+      end;
 
-      TmObjeto.SetValues(pObjeto, vValues);
     end;
   end;
 
 //--
 
 class function TmObjetoJson.JsonToObjeto(AClasse : TClass; AJson : String) : TObject;
+var
+  vTipoJson : TrTipoJson;
 begin
-  Result := AClasse.NewInstance;
-  AnalisaJson(Result, AJson, 0, '');
+  vTipoJson.Objeto := AClasse.NewInstance;
+  AnalisaJson(vTipoJson, AJson, 0);
+  Result := vTipoJson.Objeto;
 end;
 
 //--
