@@ -78,7 +78,7 @@ end;
       // finaliza
       vTipoJsonFin := GetTipoJsonFin(pJson);
       RemoveStrTipoJson(vTipoJsonFin, pJson);
-      case vTipoJsonIni.Tipo of      
+      case vTipoJsonFin.Tipo of      
         tjLista, tjObjeto : begin
           Exit;
         end;
