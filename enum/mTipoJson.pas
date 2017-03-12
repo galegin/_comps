@@ -44,9 +44,12 @@ uses
     Result.Tipo := TpTipoJson(Ord(-1));
     Result.Posicao := -1;
     Result.Codigo := '';
+    
+    vTot := Length(pStr);
+    if vTot = 0 then
+      Exit;
 
     vPos := 1;
-    vTot := Length(pStr);
     vInd := TmString.StringInSet(pStr[vPos], pLstStr);
     while (vInd = -1) and (vPos <= vTot) do begin
       Inc(vPos);
