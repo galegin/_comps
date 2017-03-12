@@ -127,10 +127,10 @@ type
   TRetorno = class
   private
     fMensagem: String;
-    fConteudo: String;
+    fConteudo: TObject;
   published
     property Mensagem : String read fMensagem write fMensagem;
-    property Conteudo : String read fConteudo write fConteudo;
+    property Conteudo : TObject read fConteudo write fConteudo;
   end;
 
   TLogradouro = class
