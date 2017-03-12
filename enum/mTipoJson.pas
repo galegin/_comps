@@ -70,8 +70,8 @@ end;
 
 function GetTipoJsonFin(const s : string) : TrTipoJson;
 begin
-  Result := BuscarTipoJson(s, [']', '}', ':', ' ', ','],
-    [tjLista, tjObjeto, tjAtributo, tjConteudo, tjSeparador]);
+  Result := BuscarTipoJson(s, [']', '}', ':', ','],
+    [tjLista, tjObjeto, tjAtributo, tjSeparador]);
 end;
 
 //--
