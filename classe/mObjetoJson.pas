@@ -3,8 +3,9 @@ unit mObjetoJson;
 interface
 
 uses
-  Classes, SysUtils, StrUtils, Math,
-  mTipoJson, mProperty, mString, mObjeto;
+  Classes, SysUtils,
+  mProperty, mObjeto,
+  ulkJSON;
 
 type
   TmObjetoJson = class
@@ -15,181 +16,133 @@ type
 
 implementation
 
-//--
+{ TmObjetoJson }
 
 class function TmObjetoJson.ObjetoToJson(AObjeto : TObject) : String;
+var
+  vJSONobject : TlkJSONobject;
+  vValues : TmPropertyList;
+  vValue : TmProperty;
+  I : Integer;
 begin
-end;
+  vValues := TmObjeto.GetValues(AObjeto);
 
-//--
+  vJSONobject := TlkJSONobject.Create();
 
-  procedure AnalisaJson(pTipoJson : TrTipoJson; var pJson : String; const pNivel : Integer);
-  var
-    vTipoJsonIni, vTipoJsonPrx, vTipoJsonFin : TrTipoJson;
-    vAtributo, vConteudo : String;
-  begin
-    while (pJson <> '') do begin
+  for I := 0 to vValues.Count - 1 do begin
+    vValue := TmProperty(vValues[I]);
 
-      // inicio
-      vTipoJsonIni := GetTipoJsonIni(pJson);
-      RemoveStrTipoJson(vTipoJsonIni, pJson);
-      case vTipoJsonIni.Tipo of
-
-        // [lista]
-        tjLista : begin
-          pTipoJson.Lista := TList.Create;
-          AnalisaJson(pTipoJson, pJson, pNivel + 1);
+    with vValue do begin
+      case Tipo of
+        tppBoolean: begin
+          vJSONobject.Add(Nome, TlkJSONboolean.Generate(ValueBoolean));
         end;
-
-        // {objeto}
-        tjObjeto : begin
-          pTipoJson.Objeto := TObject.Create;
-          AnalisaJson(pTipoJson, pJson, pNivel + 1);
+        tppDateTime: begin
+          vJSONobject.Add(Nome, TlkJSONstring.Generate(ValueStr));
         end;
-
-        // "Atributo":"Conteudo"
-        tjAtributo : begin
-          vTipoJsonIni := GetTipoJsonIni(pJson);
-          vAtributo := GetValueTipoJson(vTipoJsonIni, pJson);
-          RemoveStrTipoJson(vTipoJsonIni, pJson);
-
-          // proximo
-          vTipoJsonPrx := GetTipoJsonIni(pJson);
-          RemoveStrTipoJson(vTipoJsonPrx, pJson);
-          case vTipoJsonPrx.Tipo of
-
-            // :"Conteudo"
-            tjConteudo : begin
-              vTipoJsonFin := GetTipoJsonFin(pJson);
-              vConteudo := GetValueTipoJson(vTipoJsonFin, pJson);
-              RemoveStrTipoJson(vTipoJsonFin, pJson);
-              
-              TmObjeto.SetValue(pTipoJson.Objeto, vAtributo, vConteudo);
-            end;
-            
-          // [lista] / {objeto}
-          else  
-            AnalisaJson(pTipoJson, pJson, pNivel + 1);
-
-          end;
+        tppFloat: begin
+          vJSONobject.Add(Nome, TlkJSONnumber.Generate(ValueFloat));
+        end;
+        tppInteger: begin
+          vJSONobject.Add(Nome, TlkJSONnumber.Generate(ValueInteger));
+        end;
+        tppObject: begin
+          //vJSONobject.Add(Nome, ValueToJson(ValueObject));
+        end;
+        tppList: begin
+          //vJSONobject.Add(Nome, TlkJSONlist.Generate(ValueList));
+        end;
+        tppString: begin
+          vJSONobject.Add(Nome, TlkJSONstring.Generate(ValueString));
+        end;
+        tppVariant: begin
+          vJSONobject.Add(Nome, TlkJSONstring.Generate(ValueStr));
         end;
       end;
-      
-      // finaliza
-      vTipoJsonFin := GetTipoJsonFin(pJson);
-      RemoveStrTipoJson(vTipoJsonFin, pJson);
-      case vTipoJsonFin.Tipo of      
-        tjLista, tjObjeto : begin
-          Exit;
-        end;
-      end;
-
     end;
+
   end;
+
+  Result := TlkJSON.GenerateText(vJSONobject);
+end;
 
 //--
 
 class function TmObjetoJson.JsonToObjeto(AClasse : TClass; AJson : String) : TObject;
 var
-  vTipoJson : TrTipoJson;
+  vJSONobject : TlkJSONobject;
+  vValues : TmPropertyList;
+  vValue : TmProperty;
+  I : Integer;
 begin
-  vTipoJson.Objeto := AClasse.NewInstance;
-  AnalisaJson(vTipoJson, AJson, 0);
-  Result := vTipoJson.Objeto;
+  Result := AClasse.NewInstance;
+
+  vValues := TmObjeto.GetValues(Result);
+
+  vJSONobject := TlkJSON.ParseText(AJson) as TlkJSONobject;
+
+  for I := 0 to vValues.Count - 1 do begin
+    vValue := TmProperty(vValues[I]);
+
+    with vValue do begin
+      case Tipo of
+        tppBoolean: begin
+          if not (vJSONobject.Field[Nome] is TlkJSONnull) then
+            ValueBoolean := vJSONobject.getBoolean(Nome)
+          else
+            ValueBoolean := False;
+        end;
+        tppDateTime: begin
+          if not (vJSONobject.Field[Nome] is TlkJSONnull) then
+            ValueDatabase := vJSONobject.getString(Nome)
+          else
+            ValueDateTime := 0;
+        end;
+        tppFloat: begin
+          if not (vJSONobject.Field[Nome] is TlkJSONnull) then
+            ValueFloat := vJSONobject.getDouble(Nome)
+          else
+            ValueFloat := 0;
+        end;
+        tppInteger: begin
+          if not (vJSONobject.Field[Nome] is TlkJSONnull) then
+            ValueInteger := vJSONobject.getInt(Nome)
+          else
+            ValueInteger := 0;
+        end;
+        tppObject: begin
+          (* if not (vJSONobject.Field[Nome] is TlkJSONnull) then
+            ValueObject := vJSONobject.getObject(Nome)
+          else
+            ValueObject := nil; *)
+        end;
+        tppList: begin
+          (* if not (vJSONobject.Field[Nome] is TlkJSONnull) then
+            ValueList := vJSONobject.getList(Nome);
+          else
+            ValueList := nil; *)
+        end;
+        tppString: begin
+          if not (vJSONobject.Field[Nome] is TlkJSONnull) then
+            ValueString := vJSONobject.getString(Nome)
+          else
+            ValueString := '';
+        end;
+        tppVariant: begin
+          if not (vJSONobject.Field[Nome] is TlkJSONnull) then
+            ValueVariant := vJSONobject.getString(Nome)
+          else
+            ValueVariant := '';
+        end;
+
+      end;
+    end;
+
+  end;
+
+  TmObjeto.SetValues(Result, vValues);
 end;
 
 //--
-
-(*
-url:
-  http://192.168.190.102/api/cep/87205104
-retorno:
-  {
-    "Mensagem":"",
-    "Conteudo":
-    {
-      "Logradouro":"RUA JOSE RODRIGUES BRIZNES",
-      "Cep":"87205104",
-      "Municipio":"CIANORTE",
-      "CodigoMunicipio":4105508,
-      "Bairro":"CONJUNTO PORTAL DAS AMERICAS",
-      "Complemento":"- ATE 149/150",
-      "CodigoEstado":41,
-      "Estado":"PARANA",
-      "Uf":"PR ",
-      "CodigoPais":1058,
-      "Pais":"BRASIL"
-    }
-  }
-*)
-
-type
-  TRetorno = class
-  private
-    fMensagem: String;
-    fConteudo: TObject;
-  published
-    property Mensagem : String read fMensagem write fMensagem;
-    property Conteudo : TObject read fConteudo write fConteudo;
-  end;
-
-  TLogradouro = class
-  private
-    fCep : String;
-    fLogradouro : String;
-    fBairro : String;
-    fComplemento : String;
-    fCodigoMunicipio : String;
-    fMunicipio : String;
-    fCodigoEstado : String;
-    fEstado : String;
-    fUf : String;
-    fCodigoPais : String;
-    fPais : String;
-  published
-    property Cep : String read fCep write fCep;
-    property Logradouro : String read fLogradouro write fLogradouro;
-    property Bairro : String read fBairro write fBairro;
-    property Complemento : String read fComplemento write fComplemento;
-    property CodigoMunicipio : String read fCodigoMunicipio write fCodigoMunicipio;
-    property Municipio : String read fMunicipio write fMunicipio;
-    property CodigoEstado : String read fCodigoEstado write fCodigoEstado;
-    property Estado : String read fEstado write fEstado;
-    property Uf : String read fUf write fUf;
-    property CodigoPais : String read fCodigoPais write fCodigoPais;
-    property Pais : String read fPais write fPais;
-  end;
-
-procedure TestarJson();
-var
-  vJson : String;
-  vObjeto : TObject;
-begin
-  vJson :=
-    '{' +
-      '"Mensagem":"",' +
-      '"Conteudo":' +
-      '{' +
-        '"Logradouro":"RUA JOSE RODRIGUES BRIZNES",' +
-        '"Cep":"87205104",' +
-        '"Municipio":"CIANORTE",' +
-        '"CodigoMunicipio":4105508,' +
-        '"Bairro":"CONJUNTO PORTAL DAS AMERICAS",' +
-        '"Complemento":"- ATE 149/150",' +
-        '"CodigoEstado":41,' +
-        '"Estado":"PARANA",' +
-        '"Uf":"PR ",' +
-        '"CodigoPais":1058,' +
-        '"Pais":"BRASIL"' +
-      '}' +
-    '}';
-
-  vObjeto := TmObjetoJson.JsonToObjeto(TRetorno, vJson);
-end;
-
-//--
-
-initialization
-  TestarJson();
 
 end.
