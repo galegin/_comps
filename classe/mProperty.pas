@@ -92,10 +92,7 @@ type
     procedure SetItem(Index: Integer; const Value: TmProperty);
   public
     function Adicionar : TmProperty; overload;
-    procedure Adicionar(item : TmProperty); overload;
-    procedure AdicionarAtributo(ANome : String; AConteudo : String);
-    procedure AdicionarLista(ANome : String; ALista : TList);
-    procedure AdicionarObjeto(ANome : String; AObjeto : TObject);
+    procedure Adicionar(AProperty : TmProperty); overload;
     function IndexOf(ANome : String) : TmProperty;
     property Items[Index: Integer] : TmProperty read GetItem write SetItem;
   end;
@@ -324,36 +321,9 @@ begin
   Self.Add(Result);
 end;
 
-procedure TmPropertyList.Adicionar(item : TmProperty);
+procedure TmPropertyList.Adicionar(AProperty : TmProperty);
 begin
-  Self.Add(item);
-end;
-
-procedure TmPropertyList.AdicionarAtributo(ANome, AConteudo: String);
-begin
-  with Adicionar do begin
-    Nome := ANome;
-    Tipo := tppString;
-    ValueString := AConteudo;
-  end;
-end;
-
-procedure TmPropertyList.AdicionarLista(ANome: String; ALista: TList);
-begin
-  with Adicionar do begin
-    Nome := ANome;
-    Tipo := tppList;
-    ValueList := ALista;
-  end;
-end;
-
-procedure TmPropertyList.AdicionarObjeto(ANome: String; AObjeto: TObject);
-begin
-  with Adicionar do begin
-    Nome := ANome;
-    Tipo := tppObject;
-    ValueObject := AObjeto;
-  end;
+  Self.Add(AProperty);
 end;
 
 function TmPropertyList.IndexOf(ANome: String): TmProperty;
