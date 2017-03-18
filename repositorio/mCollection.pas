@@ -35,7 +35,7 @@ type
 
     procedure Excluir();
 
-    function ListaOrdenada(ACampos : String) : TStringList;
+    function ListaOrdenada(ACampos : Array Of String) : TStringList;
 
     function GetJson() : String;
     procedure SetJson(json : String);
@@ -103,8 +103,9 @@ var
 begin
   Result := nil;
   vCollectionItem := TmClasse.CreateObjeto(ItemClass, nil) as TmCollectionItem;
-  AFiltros := vCollectionItem.ValidateKey(AFiltros);
-  vSql := TmSelect.getSelect(vCollectionItem, AFiltros);
+  if (AFiltros is TmPropertyList) then
+    AFiltros := vCollectionItem.ValidateKey(AFiltros as TmPropertyList);
+  vSql := TmSelect.GetSelect(vCollectionItem, AFiltros);
   vDataSet := vCollectionItem.Conexao.GetConsulta(vSql);
   with vDataSet do begin
     while not EOF do begin
@@ -154,9 +155,8 @@ end;
 
 //--
 
-function TmCollection.ListaOrdenada(ACampos: String): TStringList;
+function TmCollection.ListaOrdenada(ACampos: Array Of String): TStringList;
 var
-  vCampos : TStringList;
   vDsChave : String;
   I : Integer;
 
@@ -170,8 +170,8 @@ var
 
     vValues := TmObjeto.GetValues(AObjeto);
 
-    for J := 0 to vCampos.Count - 1 do begin
-      vProperty := vValues.IndexOf(vCampos[J]);
+    for J := Low(ACampos) to High(ACampos) do begin
+      vProperty := vValues.IndexOf(ACampos[J]);
       if vProperty <> nil then
         Result := Result + IfThen(Result <> '', '#', '') +
           vProperty.ValueIntegracao;
@@ -181,16 +181,9 @@ var
 begin
   Result := TStringList.Create;
 
-  ACampos := AnsiReplaceStr(ACampos, ';', sLineBreak);
-  ACampos := AnsiReplaceStr(ACampos, '|', sLineBreak);
-  ACampos := AnsiReplaceStr(ACampos, ',', sLineBreak);
-
-  vCampos := TStringList.Create;
-  vCampos.Text := ACampos;
-
   for I := 0 to Count - 1 do begin
-    vDsChave := GetDsChave(GetItem(I));
-    Result.AddObject(vDsChave, GetItem(I));
+    vDsChave := GetDsChave(Items[I]);
+    Result.AddObject(vDsChave, Items[I]);
   end;
 
   Result.Sort;

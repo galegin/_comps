@@ -21,8 +21,8 @@ type
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;
 
-    function GetValuesKey(AObject : TObject) : TList;
-    function GetValuesFiltro(AObject : TObject) : TList;
+    function GetValuesKey(AObject : TObject) : TmPropertyList;
+    function GetValuesFiltro(AObject : TObject) : TmPropertyList;
 
     function GetValuesCollection(AObject : TObject) : TmCollectionArray;
     function GetValuesCollectionItem(AObject : TObject) : TmCollectionItemArray;
@@ -32,8 +32,8 @@ type
 
     constructor Create(Collection: TCollection); override;
 
-    function ValidateKey(AObject : TObject; AFiltros : TList) : TList; overload;
-    function ValidateKey(AFiltros : TList) : TList; overload;
+    function ValidateKey(AObject : TObject; AFiltros : TmPropertyList) : TmPropertyList; overload;
+    function ValidateKey(AFiltros : TmPropertyList) : TmPropertyList; overload;
 
     procedure Limpar();
     procedure LimparDep();
@@ -103,38 +103,38 @@ end;
 
 //--
 
-function TmCollectionItem.ValidateKey(AObject : TObject; AFiltros : TList) : TList;
+function TmCollectionItem.ValidateKey(AObject : TObject; AFiltros : TmPropertyList) : TmPropertyList;
 var
-  vKeys : TList;
+  vKeys : TmPropertyList;
   vKey : TmProperty;
   vFiltro : TmProperty;
   I : Integer;
 begin
-  Result := TList.Create;
+  Result := TmPropertyList.Create;
 
   vKeys := GetValuesKey(AObject);
 
   for I := 0 to AFiltros.Count - 1 do begin
     vFiltro := TmProperty(AFiltros[I]);
-    vKey := TmPropertyValue.IndexOf(vKeys, vFiltro.Nome);
+    vKey := vKeys.IndexOf(vFiltro.Nome);
     if Assigned(vKey) and vFiltro.IsValueDatabase then
       Result.Add(vFiltro);
   end;
 end;
 
-function TmCollectionItem.ValidateKey(AFiltros : TList) : TList;
+function TmCollectionItem.ValidateKey(AFiltros : TmPropertyList) : TmPropertyList;
 begin
   Result := ValidateKey(Self, AFiltros);
 end;
 
 //--
 
-function TmCollectionItem.GetValuesKey(AObject : TObject) : TList;
+function TmCollectionItem.GetValuesKey(AObject : TObject) : TmPropertyList;
 var
   vValues : TmPropertyList;
   I : Integer;
 begin
-  Result := TList.Create;
+  Result := TmPropertyList.Create;
 
   vValues := TmObjeto.GetValues(AObject);
 
@@ -145,12 +145,12 @@ begin
           Result.Add(Items[I]);
 end;
 
-function TmCollectionItem.GetValuesFiltro(AObject : TObject) : TList;
+function TmCollectionItem.GetValuesFiltro(AObject : TObject) : TmPropertyList;
 var
   vValues : TmPropertyList;
   I : Integer;
 begin
-  Result := TList.Create;
+  Result := TmPropertyList.Create;
 
   vValues := TmObjeto.GetValues(AObject);
 
@@ -302,7 +302,8 @@ begin
   if not Assigned(AFiltros) then
     AFiltros := GetValuesKey(Self);
 
-  AFiltros := ValidateKey(Self, AFiltros);
+  if (AFiltros is TmPropertyList) then
+    AFiltros := ValidateKey(Self, AFiltros as TmPropertyList);
 
   vSql := TmSelect.GetSelect(Self, AFiltros);
   vDataSet := Conexao.GetConsulta(vSql, 1);
@@ -374,7 +375,7 @@ end;
 procedure TmCollectionItem.Alterar;
 var
   vCmd : String;
-  vKeys : TList;
+  vKeys : TmPropertyList;
 begin
   vKeys := GetValuesKey(Self);
   vCmd := TmComando.GetUpdate(Self, vKeys);
@@ -422,7 +423,7 @@ end;
 procedure TmCollectionItem.Excluir;
 var
   vCmd : String;
-  vKeys : TList;
+  vKeys : TmPropertyList;
 begin
   vKeys := GetValuesKey(Self);
   vCmd := TmComando.GetDelete(Self, vKeys);

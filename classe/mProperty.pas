@@ -11,7 +11,6 @@ type
   TmPropertyClass = class of TmProperty;
 
   TmPropertyList = class;
-  TmPropertyListClass = class of TmPropertyList;
 
   TpProperty =
     (tppBoolean, tppDateTime, tppEnum, tppFloat, tppInteger, tppObject,
@@ -94,11 +93,6 @@ type
     function Add : TmProperty; overload;
     function IndexOf(ANome : String) : TmProperty;
     property Items[Index: Integer] : TmProperty read GetItem write SetItem;
-  end;
-
-  TmPropertyValue = class
-  public
-    class function IndexOf(AProperties : TList; ANome : String) : TmProperty;
   end;
 
 implementation
@@ -321,25 +315,16 @@ begin
 end;
 
 function TmPropertyList.IndexOf(ANome: String): TmProperty;
-begin
-  Result := TmPropertyValue.IndexOf(Self, ANome);
-end;
-
-{ TmPropertyValue }
-
-class function TmPropertyValue.IndexOf(AProperties : TList; ANome : String) : TmProperty;
 var
   I : Integer;
 begin
   Result := nil;
-  for I := 0 to AProperties.Count - 1 do begin
-    with TmProperty(AProperties[I]) do begin
+  for I := 0 to Count - 1 do
+    with TmProperty(Self[I]) do
       if LowerCase(Nome) = LowerCase(ANome) then begin
-        Result := TmProperty(AProperties[I]);
+        Result := TmProperty(Self[I]);
         Exit;
       end;
-    end;
-  end;
 end;
 
 end.

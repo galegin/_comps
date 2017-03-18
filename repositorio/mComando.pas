@@ -11,11 +11,11 @@ type
   protected
     class function GetCampos(AObject : TObject) : String;
     class function GetValues(AObject : TObject) : String;
-    class function GetSets(AObject : TObject; AWheres : TList) : String;
+    class function GetSets(AObject : TObject; AWheres : TmPropertyList) : String;
   public
     class function GetInsert(AObject : TObject) : String;
-    class function GetUpdate(AObject : TObject; AWheres : TList) : String;
-    class function GetDelete(AObject : TObject; AWheres : TList) : String;
+    class function GetUpdate(AObject : TObject; AWheres : TmPropertyList) : String;
+    class function GetDelete(AObject : TObject; AWheres : TmPropertyList) : String;
   end;
 
 implementation
@@ -56,7 +56,7 @@ begin
           Result := Result + IfThen(Result <> '', ', ', '') + ValueDatabase;
 end;
 
-class function TmComando.GetSets(AObject : TObject; AWheres : TList) : String;
+class function TmComando.GetSets(AObject : TObject; AWheres : TmPropertyList) : String;
 var
   vProperties : TmPropertyList;
   vWhere : TmProperty;
@@ -70,7 +70,7 @@ begin
     for I := 0 to Count - 1 do begin
       with Items[I] do
         if IsValueDatabase and IsValueStore then begin
-          vWhere := TmPropertyValue.IndexOf(AWheres, Items[I].Nome);
+          vWhere := AWheres.IndexOf(Items[I].Nome);
           if vWhere = nil then
             Result := Result + IfThen(Result <> '', ', ', '') +
               UpperCase(Nome) + ' = ' + ValueDatabase;
@@ -88,7 +88,7 @@ begin
   Result := AnsiReplaceStr(Result, '{values}', GetValues(AObject));
 end;
 
-class function TmComando.GetUpdate(AObject: TObject; AWheres: TList): String;
+class function TmComando.GetUpdate(AObject: TObject; AWheres: TmPropertyList): String;
 begin
   Result := 'update {entidade} set {sets} /*WHERE*/';
   Result := AnsiReplaceStr(Result, '{entidade}', GetEntidade(AObject));
@@ -96,7 +96,7 @@ begin
   Result := AnsiReplaceStr(Result, '/*WHERE*/', GetWheres(AObject, AWheres));
 end;
 
-class function TmComando.GetDelete(AObject: TObject; AWheres: TList): String;
+class function TmComando.GetDelete(AObject: TObject; AWheres: TmPropertyList): String;
 begin
   Result := 'delete from {entidade} /*WHERE*/';
   Result := AnsiReplaceStr(Result, '{entidade}', GetEntidade(AObject));
