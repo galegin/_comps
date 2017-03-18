@@ -169,7 +169,7 @@ begin
     with AFields[I] do begin
 
       if Assigned(Binding.Entidade) then begin
-        with Result.Adicionar do begin
+        with Result.Add do begin
 
           Nome := Binding.Campo;
 

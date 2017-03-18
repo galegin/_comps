@@ -34,8 +34,7 @@ type
     function GetItem(Index: Integer): TmConexao;
     procedure SetItem(Index: Integer; const Value: TmConexao);
   public
-    function Adicionar : TmConexao; overload;
-    procedure Adicionar(item : TmConexao); overload;
+    function Add : TmConexao; overload;
     property Items[Index: Integer] : TmConexao read GetItem write SetItem;
   end;
 
@@ -98,15 +97,10 @@ begin
   Self[Index] := Value;
 end;
 
-function TmConexaoList.Adicionar: TmConexao;
+function TmConexaoList.Add: TmConexao;
 begin
   Result := TmConexao.Create(nil);
   Self.Add(Result);
-end;
-
-procedure TmConexaoList.Adicionar(item : TmConexao);
-begin
-  Self.Add(item);
 end;
 
 end.

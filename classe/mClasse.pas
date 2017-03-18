@@ -58,7 +58,7 @@ begin
     for I:=0 to Count-1 do begin
       PropInfo := List^[I];
       if (PropInfo^.PropType^.Kind in tkProperties) then begin
-        with Result.Adicionar do begin
+        with Result.Add do begin
           Nome := PropInfo^.Name;
           TipoBase := PropInfo^.PropType^.Name;
 

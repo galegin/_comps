@@ -91,8 +91,7 @@ type
     function GetItem(Index: Integer): TmProperty;
     procedure SetItem(Index: Integer; const Value: TmProperty);
   public
-    function Adicionar : TmProperty; overload;
-    procedure Adicionar(AProperty : TmProperty); overload;
+    function Add : TmProperty; overload;
     function IndexOf(ANome : String) : TmProperty;
     property Items[Index: Integer] : TmProperty read GetItem write SetItem;
   end;
@@ -315,15 +314,10 @@ begin
   Self[Index] := Value;
 end;
 
-function TmPropertyList.Adicionar: TmProperty;
+function TmPropertyList.Add: TmProperty;
 begin
   Result := TmProperty.Create;
   Self.Add(Result);
-end;
-
-procedure TmPropertyList.Adicionar(AProperty : TmProperty);
-begin
-  Self.Add(AProperty);
 end;
 
 function TmPropertyList.IndexOf(ANome: String): TmProperty;

@@ -68,8 +68,7 @@ type
     function GetItem(Index: Integer): TmFilter;
     procedure SetItem(Index: Integer; const Value: TmFilter);
   public
-    function Adicionar : TmFilter; overload;
-    procedure Adicionar(item : TmFilter); overload;
+    function Add : TmFilter; overload;
     property Items[Index: Integer] : TmFilter read GetItem write SetItem;
   end;
 
@@ -231,15 +230,10 @@ begin
   Self[Index] := Value;
 end;
 
-function TmFilterList.Adicionar: TmFilter;
+function TmFilterList.Add: TmFilter;
 begin
   Result := TmFilter.Create;
   Self.Add(Result);
-end;
-
-procedure TmFilterList.Adicionar(item : TmFilter);
-begin
-  Self.Add(item);
 end;
 
 end.

@@ -68,7 +68,7 @@ begin
   with ADataSet do begin
     for I := 0 to FieldCount - 1 do begin
       with Fields[I] do begin
-        with Result.Adicionar do begin
+        with Result.Add do begin
           Nome := FieldName;
 
           if LowerCase(FieldName) = 'u_version' then

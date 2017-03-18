@@ -110,7 +110,7 @@ begin
         Continue;
 
       if (PropInfo^.PropType^.Kind in tkProperties) then begin
-        with Result.Adicionar do begin
+        with Result.Add do begin
           Nome := PropInfo^.Name;
           TipoBase := PropInfo^.PropType^.Name;
 
