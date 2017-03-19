@@ -24,24 +24,23 @@ type
     fValor : TmProperty;
     function GetField: String;
   public
-    constructor Create(ACampo : String; ATipo : TTipoCollectionCmd);
+    constructor Create; overload;
+    constructor Create(ACampo : String; ATipo : TTipoCollectionCmd); overload;
+    constructor Create(ACampo : String; ATipo : TTipoCollectionCmd; AValor : TmProperty); overload;
     function GetComandoSelect() : String;
   published
     property Campo : String read fCampo write fCampo;
-    property Field : String read GetField;
     property Tipo : TTipoCollectionCmd read fTipo write fTipo;
     property Valor : TmProperty read fValor write fValor;
+    property Field : String read GetField;
   end;
 
-  TmCollectionCmdList = class
+  TmCollectionCmdList = class(TList)
   private
-    fList : Array of TmCollectionCmd;
     function GetItem(Index: Integer): TmCollectionCmd;
     procedure SetItem(Index: Integer; const Value: TmCollectionCmd);
   public
-    constructor Create;
-    procedure Add(ACollectionCmd : TmCollectionCmd);
-    function Count : Integer;
+    function Add : TmCollectionCmd; overload;
     property Items[Index : Integer] : TmCollectionCmd read GetItem write SetItem;
   end;
 
@@ -66,9 +65,22 @@ const
 
 constructor TmCollectionCmd.Create;
 begin
-  fValor := TmProperty.Create;
+
+end;
+
+constructor TmCollectionCmd.Create(ACampo: String;
+  ATipo: TTipoCollectionCmd);
+begin
   fCampo := ACampo;
   fTipo := ATipo;
+end;
+
+constructor TmCollectionCmd.Create(ACampo: String;
+  ATipo: TTipoCollectionCmd; AValor: TmProperty);
+begin
+  fCampo := ACampo;
+  fTipo := ATipo;
+  fValor := AValor;
 end;
 
 function TmCollectionCmd.GetField: String;
@@ -85,30 +97,20 @@ end;
 
 { TmCollectionCmdList }
 
-constructor TmCollectionCmdList.Create;
+function TmCollectionCmdList.Add : TmCollectionCmd;
 begin
-  SetLength(fList, 0);
-end;
-
-procedure TmCollectionCmdList.Add;
-begin
-  SetLength(fList, Length(fList) + 1);
-  fList[High(fList)] := ACollectionCmd;
-end;
-
-function TmCollectionCmdList.Count: Integer;
-begin
-  Result := Length(fList) - 1;
+  Result := TmCollectionCmd.Create;
+  Self.Add(Result);
 end;
 
 function TmCollectionCmdList.GetItem;
 begin
-  Result := fList[Index];
+  Result := TmCollectionCmd(Self[Index]);
 end;
 
 procedure TmCollectionCmdList.SetItem;
 begin
-  fList[Index] := Value;
+  Self[Index] := Value;
 end;
 
 end.

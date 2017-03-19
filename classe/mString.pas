@@ -35,9 +35,14 @@ type
 
     class function StringToHexa(AString : String) : String;
     class function HexaToString(AString : String) : String;
-    
+
     class function StringInSet(AString : String; AList : Array of String) : Integer;
     class function StringNotInSet(AString : String; AList : Array of String) : Integer;
+
+    class function SoAlfa(AString : String) : String;
+    class function SoAlfaNumerico(AString : String) : String;
+    class function SoDigitos(AString : String) : String;
+    class function SoDigitosFloat(AString : String) : String;
   end;
 
   TmStringList = class
@@ -214,6 +219,48 @@ end;
 class function TmString.StringNotInSet(AString : String; AList : Array of String) : Integer;
 begin
   Result := not StringInSet(AString, AList);
+end;
+
+//--
+
+class function TmString.SoAlfa(AString: String): String;
+var
+  I : Integer;
+begin
+  Result := '';
+  for I := 1 to Length(AString) do
+   if AString[I] in ['a'..'z', 'A'..'Z'] then
+     Result := Result + AString[I];
+end;
+
+class function TmString.SoAlfaNumerico(AString: String): String;
+var
+  I : Integer;
+begin
+  Result := '';
+  for I := 1 to Length(AString) do
+   if AString[I] in ['a'..'z', 'A'..'Z', '0'..'9'] then
+     Result := Result + AString[I];
+end;
+
+class function TmString.SoDigitos(AString: String): String;
+var
+  I : Integer;
+begin
+  Result := '';
+  for I := 1 to Length(AString) do
+   if AString[I] in ['0'..'9'] then
+     Result := Result + AString[I];
+end;
+
+class function TmString.SoDigitosFloat(AString: String): String;
+var
+  I : Integer;
+begin
+  Result := '';
+  for I := 1 to Length(AString) do
+   if AString[I] in ['0'..'9', ','] then
+     Result := Result + AString[I];
 end;
 
 { TmStringList }

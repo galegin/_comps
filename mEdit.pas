@@ -4,107 +4,51 @@ interface
 
 uses
   SysUtils, Classes, Controls, StdCtrls, DB, Graphics, TypInfo, Messages, Forms,
-  Windows, StrUtils, mTipoFormatar, mFormatar, mTipoDado, mTipoEdit;
+  Windows, StrUtils, mTipoFormatar, mFormatar, mTipoCampo, mProperty;
 
 type
   TmEdit = class(TEdit)
   private
     FAlignment : TAlignment;
     FLabel : TObject;
-    FDescr : TObject;
-    FTipoDado : TTipoDado;
     FColorEnter : TColor;
     FColorExit : TColor;
-    FCampo : String;
-    FTam : Integer;
-    FDec : Integer;
+    FCampo : TmProperty;
     FMover : Boolean;
-    FFormat : String;
-    FLstTeclas : String;
-    FTipoEdit : TTipoEdit;
-    FClasse : String;
     FTipoFormatar : TTipoFormatar;
 
-    FNumSeq : String;
-
-    FDefault : String;
-
-    FonExit : TNotifyEvent;
-
-    function desformatar(pText : String) : String;
-    function formatar(pText : String) : String;
-    function validar(pText : String) : Boolean;
+    function DesFormatar(pText : String) : String;
+    function Formatar(pText : String) : String;
+    function Validar(pText : String) : Boolean;
 
     procedure CMChanged(var Message: TMessage); message CM_CHANGED;
     procedure CMEnter(var Message: TCMEnter); message CM_ENTER;
     procedure CMExit(var Message: TCMExit); message CM_EXIT;
+
     procedure SetAlignment(const Value: TAlignment);
-    procedure SetTipoDado(const Value: TTipoDado);
+    procedure SetCampo(const Value: TmProperty);
+
     procedure PosicaoLabel();
-    procedure SetTipoEdit(const Value: TTipoEdit);
-    function GetValue: String;
-    procedure SetValue(const Value: String);
-    function GetData: TDateTime;
-    procedure SetData(const Value: TDateTime);
-    function GetInteiro: Integer;
-    procedure SetInteiro(const Value: Integer);
-    function GetNumero: Real;
-    procedure SetNumero(const Value: Real);
-    function GetTrim: String;
-    procedure SetCampo(const Value: String);
   protected
     procedure CreateParams(var Params: TCreateParams); override;
     procedure KeyPress(var Key: Char); override;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
   public
     constructor create(AOwner : TComponent); overload; override;
-    constructor create(AOwner : TComponent; AParent : TWinControl; pParams : String); overload;
-    procedure SetarEditEnt();
-    function getDia() : Real;
-    function getMes() : Real;
-    function getAno() : Real;
-    function getFmt(pFmt : String) : String;
-    function getNumber() : Real;
-    function getDate() : TDateTime;
-    function getExpr() : String;
+    constructor create(AOwner : TComponent; AParent : TWinControl); overload;
   published
     property _Alignment : TAlignment Read FAlignment Write SetAlignment Default taLeftJustify;
     property _Label : TObject read FLabel write FLabel;
-    property _Descr : TObject read FDescr write FDescr;
-    property _TipoDado : TTipoDado read FTipoDado write SetTipoDado;
     property _ColorEnter : TColor read FColorEnter write FColorEnter;
     property _ColorExit : TColor read FColorExit write FColorExit;
-    property _Tam : Integer read FTam write FTam;
-    property _Dec : Integer read FDec write FDec;
-    property _Campo : String read FCampo write SetCampo;
-    property _Value : String read GetValue write SetValue;
+    property _Campo : TmProperty read FCampo write SetCampo;
     property _Mover : Boolean read FMover write FMover;
-    property _Format : String read FFormat write FFormat;
-    property _LstTeclas : String read FLstTeclas write FLstTeclas;
-    property _TipoEdit : TTipoEdit read FTipoEdit write SetTipoEdit;
-    property _Classe : String read FClasse write FClasse;
     property _TipoFormatar : TTipoFormatar read FTipoFormatar write FTipoFormatar;
-
-    property _Data : TDateTime read GetData write SetData;
-    property _Inteiro : Integer read GetInteiro write SetInteiro;
-    property _Numero : Real read GetNumero write SetNumero;
-
-    property _NumSeq : String read FNumSeq write FNumSeq;
-
-    property _Default : String read FDefault write FDefault;
-
-    property _Trim : String read GetTrim;
-
-    property _onExit : TNotifyEvent read FonExit write FonExit;
   end;
 
 procedure Register;
 
 implementation
-
-uses
-  mMetadata, mMensagem, mValidar, mFuncao, //mCampo,
-  mTipoMsg, mEstilo, mFont, mItem, mXml;
 
 procedure Register;
 begin
@@ -116,11 +60,11 @@ end;
 constructor TmEdit.create(AOwner: TComponent);
 begin
   inherited create(AOwner);
-  FTipoDado := mTipoDado.ALFA;
+
   FColorEnter := clYellow;
   FColorExit := clWhite;
-  FTipoEdit := mTipoEdit.EDICAO;
-  FTipoFormatar := mTipoFormatar.NULO;
+
+  FTipoFormatar := TTipoFormatar(Ord(-1));
 
   AutoSize := False;
   Width := 129;
@@ -129,30 +73,13 @@ begin
   Font.Size := 16;
 end;
 
-constructor TmEdit.create(AOwner: TComponent; AParent : TWinControl; pParams: String);
+constructor TmEdit.create(AOwner: TComponent; AParent : TWinControl);
 begin
   create(AOwner);
   Parent := AParent;
-  Name := 'Edit' + itemA('cod', pParams);
-  Text := '';
-  CharCase := ecUpperCase;
-  BorderStyle := bsNone;
-  //Font.Size := cTAM_FNT;
-  _Campo := itemA('cod', pParams);
-  _TipoDado := mTipoDado.tip(itemA('tpd', pParams));
-  _Tam := itemAI('tam', pParams);
-  _Dec := itemAI('dec', pParams);
-  _LstTeclas := itemA('lst_tecla', pParams);
-
-  if (itemA('pwd', pParams) <> '') then
-    PasswordChar := '*';
-
-  if (itemA('fmt', pParams) <> '') then
-    _TipoFormatar := mTipoFormatar.tip(itemA('fmt', pParams));
-
-  if (itemA('chr', pParams) <> '') then
-    //CharCase := GetTpCharCase(itemA('chr', pParams));
 end;
+
+//--
 
 procedure TmEdit.CMChanged(var Message: TMessage);
 begin
@@ -182,7 +109,7 @@ procedure TmEdit.CMExit(var Message: TCMExit);
 var
   vTexto, vErro : String;
 
-  procedure getValueData();
+  (* procedure getValueData();
   var
     vText : String;
   begin
@@ -196,12 +123,11 @@ var
       vTexto := Copy(vText,1,2) + '/' + Copy(vText,3,2) + '/' + Copy(vText,5,2);
       vTexto := FormatDateTime('dd/mm/yyyy', StrToDate(vTexto));
     end;
-  end;
+  end; *)
 
 begin
-  if TabStop and not ReadOnly then begin
+  (* if TabStop and not ReadOnly then
     Color := FColorExit;
-  end;
 
   vTexto := GetValue();
 
@@ -209,13 +135,13 @@ begin
     vErro := '';
 
     if (FTipoFormatar = mTipoFormatar.NULO) then begin
-      if (FTipoDado in [mTipoDado.DATAHORA]) then begin
+      if (FTipoCampo in [mTipoCampo.DATAHORA]) then begin
         getValueData();
 
         if (StrToDateTimeDef(vTexto, -1) = -1) then
           vErro := mTipoMsg.str(mTipoMsg.DATE_INVALID);
 
-      end else if (FTipoDado in [mTipoDado.NUMERO]) then begin
+      end else if (FTipoCampo in [mTipoCampo.NUMERO]) then begin
         if (StrToFloatDef(vTexto, -1) = -1) then
           vErro := mTipoMsg.str(mTipoMsg.NUMBER_INVALID);
 
@@ -237,7 +163,7 @@ begin
   //SetFiltro();
 
   if Assigned(FonExit) then
-    FonExit(Self);
+    FonExit(Self); *)
 
   DoExit;
 end;
@@ -248,11 +174,11 @@ var
   vKey : Boolean;
 begin
 
-  if (FTipoDado in [mTipoDado.DATAHORA]) then begin
+  (* if (FTipoCampo in [mTipoCampo.DATAHORA]) then begin
     if not (Key in  ['0'..'9', '/', ':', Chr(8)]) then Key := #0;
-  end else if (FTipoDado in [mTipoDado.NUMERO]) then begin
+  end else if (FTipoCampo in [mTipoCampo.NUMERO]) then begin
     if not (Key in  ['0'..'9', ',', Chr(8)]) then Key := #0;
-  end else if (FTipoDado in [mTipoDado.INTEIRO]) then begin
+  end else if (FTipoCampo in [mTipoCampo.INTEIRO]) then begin
     if not (Key in  ['0'..'9', Chr(8)]) then Key := #0;
   end else begin
     //vLstTecla := IfNull(FLstTeclas, '0..9|A..Z|a..z|,|(|)|[|]|{|}|_|chr(32)|') + 'chr(8)|';
@@ -293,28 +219,12 @@ begin
     if not vKey then begin
       Key := #0;
     end;
-  end;
+  end; *)
 
   inherited; //
 end;
 
-procedure TmEdit.SetarEditEnt();
-//var
-//  vWidth : Integer;
-begin
-  //vWidth := TWinControl(Owner).Width;
-
-  with TWinControl(_Descr) do begin
-    Top := Self.Top;
-    Left := Self.Left + Self.Width + 4;
-    Height := Self.Height;
-
-    //if ((Left + Width) > vWidth) then
-	  //  Width := vWidth - Left - cREC_COL;
-  end;
-end;
-
-procedure TmEdit.SetValue(const Value: String);
+(* procedure TmEdit.SetValue(const Value: String);
 var
   vFormat : String;
 begin
@@ -324,11 +234,11 @@ begin
     Exit;
 
   if (FTipoFormatar = mTipoFormatar.NULO) then begin
-    vFormat := IfNull(FFormat, FormatoCampo(FTipoDado, FTam, FDec));
+    vFormat := IfNull(FFormat, FormatoCampo(FTipoCampo, FTam, FDec));
 
-    if (FTipoDado in [mTipoDado.DATAHORA]) and (FFormat <> '') then begin
+    if (FTipoCampo in [mTipoCampo.DATAHORA]) and (FFormat <> '') then begin
       Text := FormatDateTime(vFormat, StrToDateTime(Text));
-    end else if (FTipoDado in [mTipoDado.NUMERO]) then begin
+    end else if (FTipoCampo in [mTipoCampo.NUMERO]) then begin
       Text := FormatFloat(vFormat, StrToFloat(Text));
     end;
   end;
@@ -346,18 +256,18 @@ begin
   if (Result = '') then Exit;
 
   if (FTipoFormatar = mTipoFormatar.NULO) then begin
-    if (FTipoDado in [mTipoDado.DATAHORA]) then begin
+    if (FTipoCampo in [mTipoCampo.DATAHORA]) then begin
       if (FFormat = 'mm/yyyy') then begin
         Result := '01/' + Result;
       end else if (FFormat = 'yyyy') then begin
         Result := '01/01/' + Result;
       end;
 
-    end else if (FTipoDado in [mTipoDado.NUMERO]) then begin
+    end else if (FTipoCampo in [mTipoCampo.NUMERO]) then begin
       Result := AnsiReplaceStr(Result, '.', '');
       Result := FloatToStr(StrToFloatDef(Result,0));
 
-    end else if (FTipoDado in [mTipoDado.ALFA]) then begin
+    end else if (FTipoCampo in [mTipoCampo.ALFA]) then begin
       Result := AllTrim(Result);
 
     end;
@@ -367,7 +277,7 @@ begin
   //  Text := TmCripto.encrypt(Text, cCHAVE);
 
   Result := desformatar(Result);
-end;
+end; *)
 
 procedure TmEdit.SetAlignment(const Value: TAlignment);
 begin
@@ -386,16 +296,16 @@ begin
   Params.Style := Params.Style and (not 0) or (Alignments[FAlignment]);
 end;
 
-procedure TmEdit.SetTipoDado(const Value: TTipoDado);
+(* procedure TmEdit.SetTipoCampo(const Value: TTipoCampo);
 begin
-  FTipoDado := Value;
+  FTipoCampo := Value;
 
-  if (FTipoDado in [mTipoDado.NUMERO]) then begin
+  if (FTipoCampo in [mTipoCampo.NUMERO]) then begin
     _Alignment := taRightJustify;
-  end else if (FTipoDado in [mTipoDado.DATAHORA]) then begin
+  end else if (FTipoCampo in [mTipoCampo.DATAHORA]) then begin
     _Alignment := taCenter;
   end;
-end;
+end; *)
 
 procedure TmEdit.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 const
@@ -413,7 +323,7 @@ end;
 
 procedure TmEdit.PosicaoLabel();
 begin
-  Top := (Top div 4) * 4;
+  (* Top := (Top div 4) * 4;
   Left := (Left div 4) * 4;
   if FLabel <> nil then
     with TWinControl(FLabel) do begin
@@ -424,89 +334,34 @@ begin
     with TWinControl(FDescr) do begin
       Top := Self.Top;
       Left := Self.Left + Self.Width + 4;
-    end;
+    end; *)
 end;
 
-function TmEdit.getDia() : Real;
-begin
-  Result := StrToFloatDef(FormatDateTime('dd', StrToDateTimeDef(_Value, 0)), 0);
-end;
-
-function TmEdit.getMes() : Real;
-begin
-  Result := StrToFloatDef(FormatDateTime('mm', StrToDateTimeDef(_Value, 0)), 0);
-end;
-
-function TmEdit.getAno() : Real;
-begin
-  Result := StrToFloatDef(FormatDateTime('yyyy', StrToDateTimeDef(_Value, 0)), 0);
-end;
-
-function TmEdit.getFmt(pFmt : String) : String;
-begin
-  Result := FormatDateTime(pFmt, StrToDateDef(_Value, Date));
-end;
-
-function TmEdit.getNumber() : Real;
-begin
-  Result := StrToFloatDef(_Value, 0);
-end;
-
-function TmEdit.getDate() : TDateTime;
-begin
-  Result := StrToDateTimeDef(_Value, 0);
-end;
-
-function TmEdit.getExpr() : String;
-begin
-  Result := AllTrim(Text);
-  if (Result = '') then
-    Exit;
-
-  Result := '%' + AnsiReplaceStr(Result, ' ', '%') + '%';
-end;
-
-procedure TmEdit.SetTipoEdit(const Value: TTipoEdit);
-var
-  vFont : TmFont;
-begin
-  FTipoEdit := Value;
-
-  if (csDesigning in ComponentState) then
-    Exit;
-
-  vFont := mTipoEdit.fnt(FTipoEdit);
-  if vFont <> nil then begin
-    Color := vFont._Cor;
-    Font.Color := vFont._CorFnt;
-  end;
-end;
-
-function TmEdit.desformatar(pText : String) : String;
+function TmEdit.DesFormatar(pText : String) : String;
 begin
   Result := pText;
-  if not (FTipoFormatar in [mTipoFormatar.NULO]) then
-    Result := mFormatar.reti(FTipoFormatar, pText);
+  (* if not (FTipoFormatar in [mTipoFormatar.NULO]) then
+    Result := mFormatar.reti(FTipoFormatar, pText); *)
 end;
 
-function TmEdit.formatar(pText : String) : String;
+function TmEdit.Formatar(pText : String) : String;
 begin
   Result := pText;
-  if not (FTipoFormatar in [mTipoFormatar.NULO]) then
-    Result := mFormatar.cont(FTipoFormatar, pText);
+  (* if not (FTipoFormatar in [mTipoFormatar.NULO]) then
+    Result := mFormatar.cont(FTipoFormatar, pText); *)
 end;
 
-function TmEdit.validar(pText : String) : Boolean;
+function TmEdit.Validar(pText : String) : Boolean;
 begin
   Result := True;
 
   if (pText = '') then
     Exit;
 
-  if (FTipoFormatar in [mTipoFormatar.CNPJ, mTipoFormatar.CPF]) then
+  (* if (FTipoFormatar in [mTipoFormatar.CNPJ, mTipoFormatar.CPF]) then
     Result := mValidar.cnpjcpf(pText)
   else if (FTipoFormatar in [mTipoFormatar.INSC]) then
-    Result := mValidar.inscricao(pText);
+    Result := mValidar.inscricao(pText); *)
 
   if not Result then begin
     SetFocus;
@@ -514,76 +369,9 @@ begin
   end;
 end;
 
-function TmEdit.GetData: TDateTime;
-begin
-  Result := StrToDateTimeDef(Text, 0);
-end;
-
-function TmEdit.GetInteiro: Integer;
-var
-  vText : String;
-begin
-  vText := AnsiReplaceStr(Text, '.', '');
-  Result := StrToIntDef(vText, 0);
-end;
-
-function TmEdit.GetNumero: Real;
-var
-  vText : String;
-begin
-  vText := AnsiReplaceStr(Text, '.', '');
-  Result := StrToFloatDef(vText, 0);
-end;
-
-procedure TmEdit.SetData(const Value: TDateTime);
-begin
-  if not (FTipoDado in [mTipoDado.DATAHORA]) then
-    Exit;
-  _Value := DateTimeToStr(Value);
-end;
-
-procedure TmEdit.SetInteiro(const Value: Integer);
-begin
-  if not (FTipoDado in [mTipoDado.INTEIRO]) then
-    Exit;
-  _Value := IntToStr(Value);
-end;
-
-procedure TmEdit.SetNumero(const Value: Real);
-begin
-  if not (FTipoDado in [mTipoDado.NUMERO]) then
-    Exit;
-  _Value := FloatToStr(Value);
-end;
-
-function TmEdit.GetTrim: String;
-begin
-  Result := AllTrim(Text);
-end;
-
-procedure TmEdit.SetCampo(const Value: String);
-var
-  vName : String;
+procedure TmEdit.SetCampo(const Value: TmProperty);
 begin
   FCampo := Value;
-
-  if not (csDesigning in ComponentState) then
-    Exit;
-
-  if Pos('mEdit', Name) = 0 then
-    Exit;
-
-  if Pos('_', Value) = 0 then
-    Exit;
-
-  //vName := AtributoCampo(Value);
-  if vName = '' then
-    Exit;
-
-  if (LowerCase(vName) <> LowerCase(Name)) then begin
-    Name := vName;
-    Text := '';
-  end;
 end;
 
 end.

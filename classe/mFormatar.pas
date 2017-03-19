@@ -6,43 +6,47 @@ uses
   Classes, SysUtils, StrUtils, TypInfo,
   mTipoFormatar;
 
-  function cont(pTip: TTipoFormatar; pCnt : String; pDec : Integer = 0) : String;
-  function reti(pTip: TTipoFormatar; pCnt : String) : String;
-  function cnpj(pNum : String) : String;
-  function data(pDat, pFmt : String; pInv : Boolean = False) : String;
-  function insc(pIns, pEst : String) : String;
+type
+  TmFormatar = class
+  public
+    class function conteudo(pTip: TTipoFormatar; pCnt : String; pDec : Integer = 0) : String;
+    class function retirar(pTip: TTipoFormatar; pCnt : String) : String;
+    class function cnpj(pNum : String) : String;
+    class function data(pDat, pFmt : String; pInv : Boolean = False) : String;
+    class function inscricao(pIns, pEst : String) : String;
+  end;
 
 implementation
 
 { TmFormatar }
 
 uses
-  mFuncao, mXml;
+  mString, mXml;
 
-function cont(pTip: TTipoFormatar; pCnt: String; pDec: Integer): String;
+class function TmFormatar.conteudo(pTip: TTipoFormatar; pCnt: String; pDec: Integer): String;
 var
   vFmtNun, vFmt : String;
   I, C, F : Integer;
 begin
   Result := '';
 
-  vFmt := mTipoFormatar.fmt(pTip);
+  vFmt := TipoFormatarToStr(pTip);
 
   if vFmt = '' then begin
     Result := pCnt;
     Exit;
   end;
 
-  if (pTip in [NUMERO]) then begin
-    pCnt := AnsiReplaceStr(SoDigitosFloat(pCnt), '.', ',');
-    vFmtNun := '0' + IfThen(pDec>0,'.') + ReplicateStr('0',pDec);
+  if (pTip in [tfNumero]) then begin
+    pCnt := AnsiReplaceStr(TmString.SoDigitosFloat(pCnt), '.', ',');
+    vFmtNun := '0' + IfThen(pDec > 0, '.') + TmString.Replicate('0', pDec);
     pCnt := FormatFloat(vFmtNun, StrToFloatDef(pCnt,0));
   end;
 
-  if pTip in [mTipoFormatar.PLACA] then
-    pCnt := AllTrim(pCnt)
+  if pTip in [tfPlaca] then
+    pCnt := TmString.AllTrim(pCnt)
   else
-    pCnt := SoDigitos(pCnt);
+    pCnt := TmString.SoDigitos(pCnt);
 
   C := Length(pCnt);
   F := Length(vFmt);
@@ -58,14 +62,14 @@ begin
   Result := AnsiReplaceStr(Result, '#', '');
 end;
 
-function reti(pTip: TTipoFormatar; pCnt : String) : String;
+class function TmFormatar.retirar(pTip: TTipoFormatar; pCnt : String) : String;
 var
   vFmt : String;
   I : Integer;
 begin
   Result := '';
 
-  vFmt := mTipoFormatar.fmt(pTip);
+  vFmt := TipoFormatarToStr(pTip);
 
   if vFmt = '' then begin
     Result := pCnt;
@@ -77,17 +81,17 @@ begin
       Result := Result + pCnt[I];
 end;
 
-function cnpj(pNum: String): String;
+class function TmFormatar.cnpj(pNum: String): String;
 begin
   if Length(pNum) = 11 then
-    Result := mFormatar.cont(mTipoFormatar.CPF, pNum)
+    Result := TmFormatar.conteudo(tfCPF, pNum)
   else
-    Result := mFormatar.cont(mTipoFormatar.CNPJ, pNum);
+    Result := TmFormatar.conteudo(tfCNPJ, pNum);
 end;
 
-function data(pDat, pFmt: String; pInv: Boolean): String;
+class function TmFormatar.data(pDat, pFmt: String; pInv: Boolean): String;
 begin
-  pDat := SoDigitos(pDat);
+  pDat := TmString.SoDigitos(pDat);
 
   // YYYY/MM/DD
   if (pInv) then begin
@@ -95,7 +99,7 @@ begin
       pDat := pDat + '01'
     else if Length(pDat) = 4 then
       pDat := pDat + '0101';
-    pDat := mFormatar.cont(mTipoFormatar.DATA, pDat);
+    pDat := TmFormatar.conteudo(tfDATA, pDat);
 
   // DD/MM/YYYY
   end else begin
@@ -103,7 +107,7 @@ begin
       pDat := '01' + pDat
     else if Length(pDat) = 4 then
       pDat := '0101' + pDat;
-    pDat := mFormatar.cont(mTipoFormatar.DATA, pDat);
+    pDat := TmFormatar.conteudo(tfDATA, pDat);
 
   end;
 
@@ -113,7 +117,7 @@ begin
   Result := pDat;
 end;
 
-function insc(pIns, pEst : String) : String;
+class function TmFormatar.inscricao(pIns, pEst : String) : String;
 var
   M, I : Integer;
   vMas : String;

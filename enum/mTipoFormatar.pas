@@ -8,13 +8,13 @@ uses
 type
   TTipoFormatar = (
     tfCep, 
-	tfCnpj, 
-	tfCpf, 
-	tfData, 
-	tfInscricao, 
-	tfNumero, 
-	tfPlaca, 
-	tfTelefone);
+    tfCnpj,
+    tfCpf,
+    tfData,
+    tfInscricao,
+    tfNumero,
+    tfPlaca,
+    tfTelefone);
 
   function StrToTipoFormatar(const s : string) : TTipoFormatar;
   function TipoFormatarToStr(const t : TTipoFormatar) : string;
@@ -39,8 +39,8 @@ var
   I : Integer;
 begin
   Result := TTipoFormatar(Ord(-1));
-  for I := Low(TTipoFormatar)) to High(TTipoFormatar) do begin
-     if LTipoFormatar[TTipoFormatar(I)] = s then
+  for I := Ord(Low(TTipoFormatar)) to Ord(High(TTipoFormatar)) do
+   if LTipoFormatar[TTipoFormatar(I)] = s then
 	   Result := TTipoFormatar(I);
 end;
 

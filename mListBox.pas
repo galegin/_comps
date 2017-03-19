@@ -5,47 +5,28 @@ interface
 uses
   SysUtils, Classes, Controls, StdCtrls,
   Variants, StrUtils,
-  mStringList;
+  mKeyValue;
 
 type
   TmListBox = class(TListBox)
   private
     FCampo: String;
-    function GetValue: String;
-    procedure SetValue(const Value: String);
-    function GetValueDs: String;
-    function GetLista: String;
-    procedure SetLista(const Value: String);
+    FLista : TmKeyValueList;
+    procedure SetLista(const Value: TmKeyValueList);
+    function GetValue: TmKeyValue;
+    procedure SetValue(const Value: TmKeyValue);
   protected
   public
     constructor create(Aowner : TComponent); override;
-
-    procedure Limpar;
-    procedure Adicionar(pCod : String); overload;
-    procedure Adicionar(pCod, pDes : String); overload;
-    procedure AdicionarLst(pLst : String; pPad : String = '');
-    procedure Retirar(pCod : String);
-
-    procedure AdicionarVr(pCod : String; pVar : Variant);
-    function PegarCd(pInd : Integer = -2) : String; overload;
-    function PegarCd(pCod : String) : String; overload;
-    function PegarVr(pInd : Integer = -2) : Variant; overload;
-    function PegarVr(pCod : String) : Variant; overload;
-    procedure RetirarVr(pCod : String);
   published
     property _Campo : String read FCampo write FCampo;
-    property _Value : String read GetValue write SetValue;
-    property _Lista : String read GetLista write SetLista;
-    property _ValueDs : String read GetValueDs; // write SetValueDs;
-    //property _Values : TmVariant	
+    property _Lista : TmKeyValueList read FLista write SetLista;
+    property _Value : TmKeyValue read GetValue write SetValue;
   end;
 
 procedure Register;
 
 implementation
-
-uses
-  mFuncao, mItem;
 
 procedure Register;
 begin
@@ -57,100 +38,34 @@ end;
 constructor TmListBox.create(Aowner: TComponent);
 begin
   inherited create(Aowner);
+  FLista := TmKeyValueList.Create;
 end;
 
 //--
 
-function TmListBox.GetValue: String;
+procedure TmListBox.SetLista(const Value: TmKeyValueList);
+var
+  I : Integer;
 begin
-  Result := TmStringList(Items).getValueOf(ItemIndex);
-end;
+  FLista := Value;
 
-procedure TmListBox.SetValue(const Value: String);
-begin
-  ItemIndex := TmStringList(Items).prcIndexOf(Value);
-end;
+  Items.Clear;
 
-//--
-
-function TmListBox.GetValueDs: String;
-begin
-  Result := TmStringList(Items).GetValueDs(ItemIndex);
+  for I := 0 to FLista.Count - 1 do
+    with FLista.Items[I] do
+      Items.AddObject(FLista.Items[I].Display, FLista.Items[I]);
 end;
 
 //--
 
-function TmListBox.GetLista: String;
+function TmListBox.GetValue: TmKeyValue;
 begin
-  Result := TmStringList(Items).GetLista();
+  Result := FLista.Items[ItemIndex];
 end;
 
-procedure TmListBox.SetLista(const Value: String);
+procedure TmListBox.SetValue(const Value: TmKeyValue);
 begin
-  AdicionarLst(Value);
+  ItemIndex := FLista.IndexOf(Value);
 end;
-
-//--
-
-procedure TmListBox.Limpar;
-begin
-  TmStringList(Items).Limpar();
-end;
-
-procedure TmListBox.Adicionar(pCod, pDes: String);
-begin
-  TmStringList(Items).Adicionar(pCod, pDes);
-end;
-
-procedure TmListBox.Adicionar(pCod: String);
-begin
-  TmStringList(Items).Adicionar(pCod);
-end;
-
-procedure TmListBox.AdicionarLst(pLst, pPad: String);
-begin
-  TmStringList(Items).AdicionarLst(pLst, pPad);
-end;
-
-procedure TmListBox.Retirar(pCod: String);
-begin
-  TmStringList(Items).Retirar(pCod);
-end;
-
-//--
-
-procedure TmListBox.AdicionarVr(pCod: String; pVar: Variant);
-begin
-  TmStringList(Items).AdicionarVr(pCod, pVar);
-end;
-
-function TmListBox.PegarCd(pInd: Integer): String;
-begin
-  if (pInd = -2) then pInd := ItemIndex;
-  TmStringList(Items).PegarCd(pInd);
-end;
-
-function TmListBox.PegarCd(pCod: String): String;
-begin
-  TmStringList(Items).PegarCd(pCod);
-end;
-
-function TmListBox.PegarVr(pInd: Integer): Variant;
-begin
-  if (pInd = -2) then pInd := ItemIndex;
-  TmStringList(Items).PegarVr(pInd);
-end;
-
-function TmListBox.PegarVr(pCod: String): Variant;
-begin
-  TmStringList(Items).PegarVr(pCod);
-end;
-
-procedure TmListBox.RetirarVr(pCod: String);
-begin
-  TmStringList(Items).RetirarVr(pCod);
-end;
-
-//--
 
 end.

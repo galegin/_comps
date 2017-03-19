@@ -13,7 +13,7 @@ type
     procedure SetValue(const Value: String);
   public
     constructor create(AOwner: TComponent); overload; override;
-    constructor create(AOwner : TComponent; AParent : TWinControl; pParams : String); overload;
+    constructor create(AOwner : TComponent; AParent : TWinControl); overload;
   published
     property _Campo : String read FCampo write FCampo;
     property _Value : String read GetValue write SetValue;
@@ -23,9 +23,6 @@ procedure Register;
 
 implementation
 
-uses
-  mFuncao, mConst, mItem, mXml, mVar;
-
 procedure Register;
 begin
   RegisterComponents('Comps MIGUEL', [TmCheckBox]);
@@ -33,12 +30,12 @@ end;
 
   function TmCheckBox.GetValue: String;
   begin
-    Result := BoolToStr(Checked, True);
+    Result := IfThen(Checked, 'T', 'F');
   end;
 
   procedure TmCheckBox.SetValue(const Value: String);
   begin
-    Checked := IsStringTrue(Value);
+    Checked := (Value = 'T');
   end;
 
 { TmCheckBox }
@@ -48,17 +45,10 @@ begin
   inherited create(AOwner);
 end;
 
-constructor TmCheckBox.create(AOwner: TComponent; AParent: TWinControl; pParams: String);
+constructor TmCheckBox.create(AOwner: TComponent; AParent: TWinControl);
 begin
   create(AOwner);
   Parent := AParent;
-  Name := 'CheckBox' + itemA('cod', pParams);
-  Caption := '';
-  AutoSize := False;
-  Height := cALT_EDT;
-  Width := cALT_EDT;
-  Font.Size := 16;
-  _Campo := itemA('cod', pParams);
 end;
 
 end.
