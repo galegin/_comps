@@ -3,21 +3,23 @@ unit mListView;
 interface
 
 uses
-  Classes, SysUtils, ComCtrls,
-  mCollection, mCollectionItem, mProperty, mClasse, mObjeto;
+  Classes, SysUtils, ComCtrls, DB,
+  mCollection, mCollectionItem, mProperty, mClasse, mObjeto, mField;
 
 type
   TmListView = class(TListView)
   public
     class procedure SetColumns(AListView : TListView;
-      ACollectionItemClass : TCollectionItemClass);
+      AFields : TmFieldList);
 
     class procedure ClrItems(AListView : TListView);
 
     class procedure AddItems(AListView : TListView;
+      AFields : TmFieldList;
       ACollectionItem : TCollectionItem);
 
     class procedure SetItems(AListView : TListView;
+      AFields : TmFieldList;
       ACollection : TCollection);
   end;
 
@@ -30,36 +32,25 @@ begin
   RegisterComponents('Comps MIGUEL', [TmListView]);
 end;
 
-  function GetValuesDat(AValues : TmPropertyList) : TmPropertyList;
-  var
-    I : Integer;
-  begin
-    Result := TmPropertyList.Create;
-    for I := 1 to AValues.Count - 1 do
-      if AValues.Items[I].IsValueDatabase then
-        Result.Add(AValues.Items[I]);
-   end;
-
 { TmListView }
 
 class procedure TmListView.SetColumns(AListView: TListView;
-  ACollectionItemClass : TCollectionItemClass);
+  AFields : TmFieldList);
 var
-  vValues : TmPropertyList;
   I : Integer;
 begin
-  vValues := TmClasse.GetProperties(ACollectionItemClass);
-  vValues := GetValuesDat(vValues);
-
   with AListView do begin
     SortType := stText;
     ViewStyle := vsReport;
 
     Columns.Clear;
 
-    for I := 0 to vValues.Count - 1 do
-      with Columns.Add do
-        Caption := vValues.Items[I].Nome;
+    for I := 0 to AFields.Count - 1 do
+      with Columns.Add do begin
+        Caption := AFields.Items[I].Descricao;
+        Width := AFields.Items[I].Tamanho * 8;
+        Tag := I;
+      end;
   end;
 end;
 
@@ -71,27 +62,34 @@ begin
 end;
 
 class procedure TmListView.AddItems(AListView : TListView;
+  AFields : TmFieldList;
   ACollectionItem : TCollectionItem);
 var
   vValues : TmPropertyList;
+  vValue : TmProperty;
   I : Integer;
 begin
   with AListView do begin
 
     vValues := TmObjeto.GetValues(ACollectionItem);
-    vValues := GetValuesDat(vValues);
 
     with Items.Add do
-      for I := 0 to vValues.Count - 1 do
+      for I := 0 to AFields.Count - 1 do begin
+        vValue := vValues.IndexOf(AFields.Items[I].Nome);
+        if not Assigned(vValue) then
+          Continue;
+
         if I = 0 then
-          Caption := vValues.Items[I].ValueStr
+          Caption := vValue.ValueStr
         else
-          SubItems.Add(vValues.Items[I].ValueStr);
+          SubItems.Add(vValue.ValueStr);
+      end;
 
   end;
 end;
 
 class procedure TmListView.SetItems(AListView: TListView;
+  AFields : TmFieldList;
   ACollection : TCollection);
 var
   I : Integer;
@@ -100,7 +98,7 @@ begin
 
   with ACollection do
     for I := 0 to Count - 1 do
-      AddItems(AListView, Items[I]);
+      AddItems(AListView, AFields, Items[I]);
 end;
 
 end.

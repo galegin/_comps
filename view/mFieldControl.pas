@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, Controls, StdCtrls,
-  mField, mProperty, mTipoPosition, mTipoMarging;
+  mFieldCtrl, mProperty, mTipoPosition, mTipoMarging;
 
 type
   RTipoFieldArray = Array Of RTipoField;
@@ -174,15 +174,15 @@ begin
           Nome := Binding.Campo;
 
           case AFields[I].Tipo of
-            mField.tfCheckBox : begin
+            mFieldCtrl.tfCheckBox : begin
               Tipo := tppBoolean;
               ValueBoolean := (Control as TCheckBox).Checked;
             end;
-            mField.tfComboBox : begin
+            mFieldCtrl.tfComboBox : begin
               Tipo := tppInteger;
               ValueInteger := (Control as TComboBox).ItemIndex;
             end;
-            mField.tfEdit : begin
+            mFieldCtrl.tfEdit : begin
               Tipo := tppBoolean;
               ValueString := (Control as TEdit).Text;
             end;
@@ -209,11 +209,11 @@ begin
         vValue := AValues.IndexOf(Binding.Campo);
 
         case AFields[I].Tipo of
-          mField.tfCheckBox :
+          mFieldCtrl.tfCheckBox :
             (Control as TCheckBox).Checked := vValue.ValueBoolean;
-          mField.tfComboBox :
+          mFieldCtrl.tfComboBox :
             (Control as TComboBox).ItemIndex := vValue.ValueInteger;
-          mField.tfEdit :
+          mFieldCtrl.tfEdit :
             (Control as TEdit).Text := vValue.ValueString;
         end;
 
