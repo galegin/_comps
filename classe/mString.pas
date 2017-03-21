@@ -84,6 +84,8 @@ begin
       Result[I] := LwCase(Result[I]);
 end;
 
+//--
+
 class function TmString.LeftStr(AString, ASubString : String) : String;
 var
   P : Integer;
@@ -106,6 +108,8 @@ begin
     Result := '';
 end;
 
+//--
+
 //startsWiths('miguel franco galego', 'miguel');
 //startsWiths('miguel franco galego', 'jose');
 class function TmString.StartsWiths(AString, ASubString : String) : Boolean;
@@ -127,6 +131,8 @@ begin
   Result := (Copy(AString, Length(AString) - vTam + 1, vTam) = ASubString);
 end;
 
+//--
+
 class function TmString.Replicate(AString: String; AQtde: Integer): String;
 begin
   Result := '';
@@ -135,6 +141,8 @@ begin
     Dec(AQtde);
   end;
 end;
+
+//--
 
 class function TmString.Split(AString, ASeparador: String): TmStringArray;
 begin
@@ -151,6 +159,8 @@ begin
     Result[High(Result)] := AString;
   end;
 end;
+
+//--
 
 class function TmString.AllTrim(AString, ASubString: String): String;
 var
@@ -172,6 +182,8 @@ begin
     Delete(Result, Pos(ASubString, Result), vTam);
 end;
 
+//--
+
 class function TmString.RemoveAcento(ACharacter: Char): Char;
 const
   ComAcento = '‡‚ÍÙ˚„ı·ÈÌÛ˙Á¸¿¬ ‘€√’¡…Õ”⁄«‹';
@@ -190,6 +202,8 @@ begin
   for I := 1 to Length(AString) do
     Result := Result + RemoveAcento(AString[I]);
 end;
+
+//--
 
 class function TmString.HexaToString(AString: String): String;
 begin
