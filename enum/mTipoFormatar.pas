@@ -14,7 +14,10 @@ type
     tfInscricao,
     tfNumero,
     tfPlaca,
-    tfTelefone);
+    tfTelefone,
+    tfEmail,
+    tfSite,
+    tfSenha);
 
   function StrToTipoFormatar(const s : string) : TTipoFormatar;
   function TipoFormatarToStr(const t : TTipoFormatar) : string;
@@ -32,8 +35,11 @@ const
     '999.999.999.999'    ,
     '#,###,###,##0'      ,
     'ZZZ-9999'           ,
-    '(###)##999-9999'    );
-	
+    '(##)#-9999-9999'    ,
+    'x@x.x'              ,
+    'x.x'                ,
+    'x'                  );
+
 function StrToTipoFormatar(const s : string) : TTipoFormatar;
 var
   I : Integer;

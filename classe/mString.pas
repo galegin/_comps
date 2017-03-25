@@ -36,8 +36,8 @@ type
     class function StringToHexa(AString : String) : String;
     class function HexaToString(AString : String) : String;
 
-    class function StringInSet(AString : String; AList : Array of String) : Integer;
-    class function StringNotInSet(AString : String; AList : Array of String) : Integer;
+    class function Contains(AString : String; AList : Array of String) : Integer;
+    class function NotContains(AString : String; AList : Array of String) : Integer;
 
     class function SoAlfa(AString : String) : String;
     class function SoAlfaNumerico(AString : String) : String;
@@ -217,7 +217,7 @@ end;
 
 //--
 
-class function TmString.StringInSet(AString : String; AList : Array of String) : Integer;
+class function TmString.Contains(AString : String; AList : Array of String) : Integer;
 var
   I : Integer;
 begin
@@ -230,9 +230,9 @@ begin
   end;
 end;
 
-class function TmString.StringNotInSet(AString : String; AList : Array of String) : Integer;
+class function TmString.NotContains(AString : String; AList : Array of String) : Integer;
 begin
-  Result := not StringInSet(AString, AList);
+  Result := not Contains(AString, AList);
 end;
 
 //--

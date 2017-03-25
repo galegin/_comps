@@ -3,18 +3,19 @@ unit mFieldCtrl;
 interface
 
 uses
-  Classes, Controls, StdCtrls, Grids,
+  Classes, Controls, StdCtrls, ExtCtrls, ComCtrls, Forms,
   mTipoBinding, mTipoEstilo, mTipoMarging, mTipoPosition;
 
 type
   TTipoField = (
+    tfPanel,
+    tfFrame,
+    tfGrade,
+    tfLabel,
     tfButton,
     tfCheckBox,
     tfComboBox,
-    tfEdit,
-    //tfGrid,
-    tfLabel,
-    tfMemo);
+    tfTextBox);
 
   RTipoField = record
     Tipo : TTipoField;
@@ -45,13 +46,14 @@ implementation
 function GetClasseTipoField;
 begin
   case t of
+    tfPanel : Result := TPanel;
+    tfFrame : Result := TFrame;
+    tfGrade : Result := TListView;
+    tfLabel : Result := TLabel;
     tfButton : Result := TButton;
     tfCheckBox : Result := TCheckBox;
     tfComboBox : Result := TComboBox;
-    tfEdit : Result := TEdit;
-    //tfGrid : Result := TGrid;
-    tfLabel : Result := TLabel;
-    tfMemo : Result := TMemo;
+    tfTextBox : Result := TEdit;
   else
     Result := TEdit;
   end;

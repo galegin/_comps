@@ -45,7 +45,8 @@ var
 begin
   inherited;
 
-  if (FTpFundo = tpfNenhum) then Exit;
+  if (FTpFundo = tpfNenhum) then
+    Exit;
 
   // Do not remove this comment to keep transparancy
 
@@ -53,7 +54,8 @@ begin
 
   Canvas.Handle := DC;
   Canvas.Brush.Color := clWhite;
-  if (vBitmap <> nil) then Canvas.Brush.Bitmap := vBitmap;
+  if (vBitmap <> nil) then
+    Canvas.Brush.Bitmap := vBitmap;
   Canvas.FillRect(GetClientRect);
   Canvas.Handle := 0;
 end;

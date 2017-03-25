@@ -12,7 +12,7 @@ type
   protected
   public
     constructor create(AOwner : TComponent); overload; override; 
-    constructor create(AOwner : TComponent; AParent : TWinControl; pParams : String); overload;
+    constructor create(AOwner : TComponent; AParent : TWinControl); overload;
   published
     property _Params : String read FParams write FParams;
   end;
@@ -20,9 +20,6 @@ type
 procedure Register;
 
 implementation
-
-uses
-  mItem, mXml;
 
 procedure Register;
 begin
@@ -36,22 +33,10 @@ begin
   inherited; //
 end;
 
-constructor TmButton.create(AOwner: TComponent; AParent: TWinControl; pParams: String);
+constructor TmButton.create(AOwner: TComponent; AParent: TWinControl);
 begin
   inherited create(AOwner);
   Parent := AParent;
-  Name := 'Button' + itemA('cod', pParams);
-  Caption := itemA('des', pParams);
-  TabStop := False;
-  if (itemA('tpf', pParams) = 'key') then begin
-    Font.Style := Font.Style + [fsBold];
-  end;
-  if Pos(itemA('tpf', pParams), 'key|req') > 0 then begin
-    Caption := Caption + ' (*)';
-  end;
-  //if (itemA('ent', pParams) <> '') then begin
-  //  Caption := Caption + ' [...]';
-  //end;
 end;
 
 end.

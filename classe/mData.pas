@@ -10,23 +10,25 @@ type
   public
     class procedure IncData(var pData : TDateTime; pTipo : String; pQtde : Integer = 1);
 
-    class function data(pData : TDateTime; pTipo : String) : Real; overload;
-    class function data(pDia, pMes, pAno : Real) : TDateTime; overload;
-    class function data(pDia, pMes, pAno, pHor, pMin, pSeg : Real) : TDateTime; overload;
-    class function data(pData : TDateTime; pHor, pMin, pSeg : Real) : TDateTime; overload;
+    class function Data(pData : TDateTime; pTipo : String) : Real; overload;
+    class function Data(pDia, pMes, pAno : Real) : TDateTime; overload;
+    class function Data(pDia, pMes, pAno, pHor, pMin, pSeg : Real) : TDateTime; overload;
+    class function Data(pData : TDateTime; pHor, pMin, pSeg : Real) : TDateTime; overload;
 
-    class function qtdDia(pData : TDateTime) : Real;
+    class function QtdeDia(pData : TDateTime) : Real;
 
-    class function priMes(pData : TDateTime) : TDateTime;
-    class function ultMes(pData : TDateTime) : TDateTime;
-    class function priAno(pData : TDateTime) : TDateTime;
-    class function ultAno(pData : TDateTime) : TDateTime;
+    class function PrimeiroMes(pData : TDateTime) : TDateTime;
+    class function UltimoMes(pData : TDateTime) : TDateTime;
+    class function PrimeiroAno(pData : TDateTime) : TDateTime;
+    class function UltimoAno(pData : TDateTime) : TDateTime;
 
     class function IsValidDate(const S: string): boolean;
     class function IsValidDateStr(const S: string): boolean;
     class function IsValidDateDem(const S: string): boolean;
 
-    class function formata(const S, F: string): string;
+    class function Formata(const S, F: string): string;
+
+    class function GetDataHora(const AString : String) : TDateTime;
   end;
 
   (*
@@ -119,7 +121,7 @@ begin
   end;
 end;
 
-class function TmData.data(pData : TDateTime; pTipo : String) : Real;
+class function TmData.Data(pData : TDateTime; pTipo : String) : Real;
 var
   vAno, vMes, vDia, vHor, vMin, vSeg, vMil : Word;
 begin
@@ -146,7 +148,7 @@ begin
   end;
 end;
 
-class function TmData.data(pDia, pMes, pAno : Real) : TDateTime;
+class function TmData.Data(pDia, pMes, pAno : Real) : TDateTime;
 var
   vAno, vMes, vDia : Word;
 begin
@@ -157,7 +159,7 @@ begin
   Result := EncodeDate(vAno, vMes, vDia);
 end;
 
-class function TmData.data(pDia, pMes, pAno, pHor, pMin, pSeg : Real) : TDateTime;
+class function TmData.Data(pDia, pMes, pAno, pHor, pMin, pSeg : Real) : TDateTime;
 var
   vAno, vMes, vDia, vHor, vMin, vSeg, vMil : Word;
 begin
@@ -172,7 +174,7 @@ begin
   Result := EncodeDateTime(vAno, vMes, vDia, vHor, vMin, vSeg, vMil);
 end;
 
-class function TmData.data(pData : TDateTime; pHor, pMin, pSeg : Real) : TDateTime;
+class function TmData.Data(pData : TDateTime; pHor, pMin, pSeg : Real) : TDateTime;
 var
   vAno, vMes, vDia, vHor, vMin, vSeg, vMil : Word;
 begin
@@ -185,34 +187,34 @@ begin
   Result := EncodeDateTime(vAno, vMes, vDia, vHor, vMin, vSeg, vMil);
 end;
 
-class function TmData.qtdDia(pData : TDateTime) : Real;
+class function TmData.QtdeDia(pData : TDateTime) : Real;
 var
   vData : TDateTime;
 begin
-  pData := priMes(pData);
+  pData := PrimeiroMes(pData);
   vData := pData;
   IncData(vData, 'M');
   Result := vData - trunc(pData);
 end;
 
-class function TmData.priMes(pData : TDateTime) : TDateTime;
+class function TmData.PrimeiroMes(pData : TDateTime) : TDateTime;
 begin
-  Result := data(1, data(pData, 'M'), data(pData, 'Y'));
+  Result := Data(1, data(pData, 'M'), data(pData, 'Y'));
 end;
 
-class function TmData.ultMes(pData : TDateTime) : TDateTime;
+class function TmData.UltimoMes(pData : TDateTime) : TDateTime;
 begin
-  Result := data(qtdDia(pData), data(pData, 'M'), data(pData, 'Y'));
+  Result := Data(QtdeDia(pData), data(pData, 'M'), data(pData, 'Y'));
 end;
 
-class function TmData.priAno(pData : TDateTime) : TDateTime;
+class function TmData.PrimeiroAno(pData : TDateTime) : TDateTime;
 begin
-  Result := data(1, 1, data(pData, 'Y'));
+  Result := Data(1, 1, data(pData, 'Y'));
 end;
 
-class function TmData.ultAno(pData : TDateTime) : TDateTime;
+class function TmData.UltimoAno(pData : TDateTime) : TDateTime;
 begin
-  Result := data(1, 12, data(pData, 'Y'));
+  Result := Data(1, 12, data(pData, 'Y'));
 end;
 
 class function TmData.IsValidDate(const S: string): boolean;
@@ -255,7 +257,7 @@ begin
     Result := TryStrToDate(S, TestDate);
 end;
 
-class function TmData.formata(const S, F: string): string;
+class function TmData.Formata(const S, F: string): string;
 var
    I : Integer;
 begin
@@ -267,6 +269,30 @@ begin
     end else begin
       Result := Result + S[I];
     end;
+  end;
+end;
+
+class function TmData.GetDataHora(const AString: String): TDateTime;
+const
+  LDataFormat : Array [0..6] of String = (
+    'dd', 'ddmm', 'ddmmyy', 'ddmmyyyy', 'dd/mm', 'dd/mm/yy', 'dd/mm/yyyy');
+var
+  I : Integer;
+  vData : TDateTime;
+  vFormat : TFormatSettings;
+begin
+  Result := 0;
+
+  vFormat.DateSeparator := '/';
+  vFormat.TimeSeparator := ':';
+  vFormat.ShortDateFormat := 'dd/mm/yyyy';
+  vFormat.ShortTimeFormat := 'hh:nn:ss';
+
+  for I := 0 to High(LDataFormat) do begin
+    vFormat.ShortDateFormat := LDataFormat[I];
+    Result := StrToDateTimeDef(AString, 0, vFormat);
+    if Result <> 0 then
+      Exit;
   end;
 end;
 

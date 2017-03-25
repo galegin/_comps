@@ -83,7 +83,8 @@ procedure TmComboBox.KeyDown(var Key: Word; Shift: TShiftState);
 begin
   //Por motivo de a tecla F4 é padrão para consulta
   //Nesse caso não abrir o DROPDWON
-  if (Key = VK_F4) then Key := 0;
+  if (Key = VK_F4) then
+    Key := 0;
   //
 end;
 

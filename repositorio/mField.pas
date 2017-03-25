@@ -43,8 +43,6 @@ type
 
 implementation
 
-uses mListView;
-
 { TmField }
 
 constructor TmField.Create;

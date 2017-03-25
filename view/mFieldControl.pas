@@ -16,12 +16,14 @@ type
     class procedure SetPosition(AControl : TControl; APosition : RTipoPosition);
     class procedure SetMarging(AControl : TControl; AMarging : RTipoMarging);
 
+    class procedure SetFrame(AField : RTipoField);
+    class procedure SetPanel(AField : RTipoField);
+    class procedure SetGrade(AField : RTipoField);
+    class procedure SetLabel(AField : RTipoField);
     class procedure SetButton(AField : RTipoField);
-    class procedure SetEdit(AField : RTipoField);
     class procedure SetCheckBox(AField : RTipoField);
     class procedure SetComboBox(AField : RTipoField);
-    class procedure SetLabel(AField : RTipoField);
-    class procedure SetMemo(AField : RTipoField);
+    class procedure SetTextBox(AField : RTipoField);
 
     class function GetValues(AControl : TControl; AFields : RTipoFieldArray) : TmPropertyList;
     class procedure SetValues(AControl : TControl; AFields : RTipoFieldArray; AValues : TmPropertyList);
@@ -29,7 +31,10 @@ type
 
 implementation
 
-uses mTipoBinding;
+uses
+  mTipoBinding,
+  mFrame, mPanel, mGrade,
+  mLabel, mButton, mCheckBox, mComboBox, mTextBox;
 
 { TmFieldControl }
 
@@ -43,12 +48,14 @@ begin
       Control := TControlClass(ControlClasse).Create(AControl);
 
       case Tipo of
+        tfFrame : SetFrame(AFields[I]);
+        tfPanel : SetPanel(AFields[I]);
+        tfGrade : SetGrade(AFields[I]);
+        tfLabel : SetLabel(AFields[I]);
         tfButton : SetButton(AFields[I]);
         tfCheckBox : SetCheckBox(AFields[I]);
         tfComboBox : SetComboBox(AFields[I]);
-        tfEdit : SetEdit(AFields[I]);
-        tfLabel : SetLabel(AFields[I]);
-        tfMemo : SetMemo(AFields[I]);
+        tfTextBox : SetTextBox(AFields[I]);
       end;
     end;
   end;
@@ -78,10 +85,60 @@ end;
 
 //--
 
+class procedure TmFieldControl.SetFrame;
+begin
+  if (AField.Control is TmFrame) then
+    with (AField.Control as TmFrame) do begin
+      Name := AField.Nome;
+      //Caption := AField.Content;
+      //OnClick := AField.Click;
+      SetPosition(AField.Control, AField.Position);
+      SetMarging(AField.Control, AField.Marging);
+    end;
+end;
+
+class procedure TmFieldControl.SetPanel;
+begin
+  if (AField.Control is TmPanel) then
+    with (AField.Control as TmPanel) do begin
+      Name := AField.Nome;
+      //Caption := AField.Content;
+      //OnClick := AField.Click;
+      SetPosition(AField.Control, AField.Position);
+      SetMarging(AField.Control, AField.Marging);
+    end;
+end;
+
+class procedure TmFieldControl.SetGrade;
+begin
+  if (AField.Control is TmGrade) then
+    with (AField.Control as TmGrade) do begin
+      Name := AField.Nome;
+      //Caption := AField.Content;
+      //OnClick := AField.Click;
+      SetPosition(AField.Control, AField.Position);
+      SetMarging(AField.Control, AField.Marging);
+    end;
+end;
+
+//--
+
+class procedure TmFieldControl.SetLabel;
+begin
+  if (AField.Control is TmLabel) then
+    with (AField.Control as TmLabel) do begin
+      Name := AField.Nome;
+      Caption := AField.Content;
+      OnClick := AField.Click;
+      SetPosition(AField.Control, AField.Position);
+      SetMarging(AField.Control, AField.Marging);
+    end;
+end;
+
 class procedure TmFieldControl.SetButton;
 begin
-  if (AField.Control is TButton) then
-    with (AField.Control as TButton) do begin
+  if (AField.Control is TmButton) then
+    with (AField.Control as TmButton) do begin
       Name := AField.Nome;
       Caption := AField.Content;
       OnClick := AField.Click;
@@ -92,8 +149,8 @@ end;
 
 class procedure TmFieldControl.SetCheckBox;
 begin
-  if (AField.Control is TCheckBox) then
-    with (AField.Control as TCheckBox) do begin
+  if (AField.Control is TmCheckBox) then
+    with (AField.Control as TmCheckBox) do begin
       Name := AField.Nome;
       Caption := AField.Content;
       OnClick := AField.Click;
@@ -104,8 +161,8 @@ end;
 
 class procedure TmFieldControl.SetComboBox;
 begin
-  if (AField.Control is TComboBox) then
-    with (AField.Control as TComboBox) do begin
+  if (AField.Control is TmComboBox) then
+    with (AField.Control as TmComboBox) do begin
       Name := AField.Nome;
       OnClick := AField.Click;
       SetPosition(AField.Control, AField.Position);
@@ -113,38 +170,10 @@ begin
     end;
 end;
 
-class procedure TmFieldControl.SetEdit;
+class procedure TmFieldControl.SetTextBox;
 begin
-  if (AField.Control is TEdit) then
-    with (AField.Control as TEdit) do begin
-      Name := AField.Nome;
-      OnClick := AField.Click;
-      OnDblClick := AField.DblClick;
-      OnEnter := AField.Enter;
-      OnExit := AField.Exit;
-      OnKeyDown := AField.KeyDown;
-      OnKeyPress := AField.KeyPress;
-      SetPosition(AField.Control, AField.Position);
-      SetMarging(AField.Control, AField.Marging);
-    end;
-end;
-
-class procedure TmFieldControl.SetLabel;
-begin
-  if (AField.Control is TLabel) then
-    with (AField.Control as TLabel) do begin
-      Name := AField.Nome;
-      Caption := AField.Content;
-      OnClick := AField.Click;
-      SetPosition(AField.Control, AField.Position);
-      SetMarging(AField.Control, AField.Marging);
-    end;
-end;
-
-class procedure TmFieldControl.SetMemo;
-begin
-  if (AField.Control is TMemo) then
-    with (AField.Control as TMemo) do begin
+  if (AField.Control is TmTextBox) then
+    with (AField.Control as TmTextBox) do begin
       Name := AField.Nome;
       OnClick := AField.Click;
       OnDblClick := AField.DblClick;
@@ -176,15 +205,15 @@ begin
           case AFields[I].Tipo of
             mFieldCtrl.tfCheckBox : begin
               Tipo := tppBoolean;
-              ValueBoolean := (Control as TCheckBox).Checked;
+              ValueBoolean := (Control as TmCheckBox).Checked;
             end;
             mFieldCtrl.tfComboBox : begin
               Tipo := tppInteger;
-              ValueInteger := (Control as TComboBox).ItemIndex;
+              ValueInteger := (Control as TmComboBox).ItemIndex;
             end;
-            mFieldCtrl.tfEdit : begin
+            mFieldCtrl.tfTextBox : begin
               Tipo := tppBoolean;
-              ValueString := (Control as TEdit).Text;
+              ValueString := (Control as TmTextBox)._Value;
             end;
           end;
           
@@ -210,11 +239,11 @@ begin
 
         case AFields[I].Tipo of
           mFieldCtrl.tfCheckBox :
-            (Control as TCheckBox).Checked := vValue.ValueBoolean;
+            (Control as TmCheckBox).Checked := vValue.ValueBoolean;
           mFieldCtrl.tfComboBox :
-            (Control as TComboBox).ItemIndex := vValue.ValueInteger;
-          mFieldCtrl.tfEdit :
-            (Control as TEdit).Text := vValue.ValueString;
+            (Control as TmComboBox).ItemIndex := vValue.ValueInteger;
+          mFieldCtrl.tfTextBox :
+            (Control as TmTextBox)._Value := vValue.ValueString;
         end;
 
       end;

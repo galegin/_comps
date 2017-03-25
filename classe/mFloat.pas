@@ -13,6 +13,8 @@ type
     class function Power(Value, Potencia: Real): Real;
     class function Resto(Value, Divisor: Real; Casas: Integer = 0): Real;
     class function Fraction(Value: Real): Real;
+    class function GetNumero(Value: String): Real;
+    class function GetValor(Value: String): Real;
   end;
 
 implementation
@@ -59,6 +61,26 @@ end;
 class function TmFloat.Fraction(Value: Real): Real;
 begin
   Result := Frac(Value);
+end;
+
+class function TmFloat.GetNumero(Value: String): Real;
+var
+  vFormat : TFormatSettings;
+begin
+  vFormat.DecimalSeparator := '.';
+  vFormat.ThousandSeparator := ',';
+
+  Result := Trunc(StrToFloatDef(Value, 0, vFormat));
+end;
+
+class function TmFloat.GetValor(Value: String): Real;
+var
+  vFormat : TFormatSettings;
+begin
+  vFormat.DecimalSeparator := '.';
+  vFormat.ThousandSeparator := ',';
+
+  Result := StrToFloatDef(Value, 0, vFormat);
 end;
 
 end.

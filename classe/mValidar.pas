@@ -5,62 +5,38 @@ interface
 uses
   Classes, SysUtils, StrUtils, Math;
 
-  function cnpjcpf(pNum : String) : Boolean;
-  function inscricao(pInscricao : String; pTipo : String = '') : Boolean;
+type
+  TmValidar = class
+  public
+    class function Cnpj(pDocumento : String) : Boolean;
+    class function Cpf(pDocumento : String) : Boolean;
+    class function Documento(pDocumento : String) : Boolean;
+    class function Inscricao(pInscricao : String; pTipo : String = '') : Boolean;
+  end;
 
 implementation
 
 { TmValidar }
 
-uses
-  mFuncao;
-
-function cnpjcpf(pNum : String) : Boolean;
-type
-  TpDocto = (tpCNPJ, tpCPF);
-var
-  I, D, K, Soma, vDigito : Integer;
-  vDigiCalc, vDigiDoct : String;
-  vTpDocto : TpDocto;
+class function TmValidar.Cnpj(pDocumento : String) : Boolean;
 begin
-  Result := False;
-
-  //mantem apenas os digitos do documento, retirando a mascara
-  pNum := SoDigitos(pNum);
-
-  //Verifica se CPF ou CNPJ
-  if (Length(pNum) = 11) then begin
-    vTpDocto := tpCPF;
-  end else if (Length(pNum) = 14) then begin
-    vTpDocto := tpCNPJ;
-  end else begin
-    Exit;
-  end;
-
-  //Retira digito verificado do documento
-  vDigiDoct := Copy(pNum, Length(pNum) - 1, 2);
-  Delete(pNum, Length(pNum) - 1, 2);
-  vDigiCalc := '';
-
-  //Calcula digito verificar
-  for D:=1 to 2 do begin
-    K := Ifthen(D=1,2,3);
-    Soma := Ifthen(D=1,0,StrToIntDef(vDigiCalc,0)*2);
-    for I:=Length(pNum) downto 1 do begin
-      Soma := Soma + (Ord(pNum[I]) - Ord('0')) * K;
-      Inc(K);
-      if (K > 9) and (vTpDocto = tpCNPJ) then K := 2;
-    end;
-    vDigito := 11 - Soma mod 11;
-    if (vDigito >= 10) then vDigito := 0;
-    vDigiCalc := vDigiCalc + Chr(vDigito + Ord('0'));
-  end;
-
-  //Compara se o digito calculado é igual ao digito do documento
-  Result := (vDigiDoct = vDigiCalc);
+  Result := TmValidar.Inscricao(pDocumento, 'CNPJ');
 end;
 
-function inscricao(pInscricao, pTipo : String) : Boolean;
+class function TmValidar.Cpf(pDocumento : String) : Boolean;
+begin
+  Result := TmValidar.Inscricao(pDocumento, 'CPF');
+end;
+
+class function TmValidar.Documento(pDocumento : String) : Boolean;
+begin
+  case Length(pDocumento) of
+    11 : Result := TmValidar.Inscricao(pDocumento, 'CPF');
+    14 : Result := TmValidar.Inscricao(pDocumento, 'CNPJ');
+  end;
+end;
+
+class function TmValidar.Inscricao(pInscricao, pTipo : String) : Boolean;
 var
   Contador  : ShortInt;
   Casos     : ShortInt;
@@ -83,7 +59,7 @@ var
   Erro_2    : ShortInt;
   Erro_3    : ShortInt;
 
-  Posicao_1 : string;
+  Posicao_1 : String;
   Posicao_2 : String;
 
   Tabela    : String;
@@ -103,7 +79,8 @@ begin
     Tabela_2 := ' ';
     Tabela_3 := ' ';
 
-    {                                                                               }                                                                                                                 {                                                                                                }
+    {                                                                               }
+    {                                                                               }
     {         Valores possiveis para os digitos (j)                                 }
     {                                                                               }
     { 0 a 9 = Somente o digito indicado.                                            }
@@ -193,7 +170,7 @@ begin
     Erro_2 := 0;
     Erro_3 := 0;
 
-    while Casos < 3 Do Begin
+    while Casos < 3 do begin
 
       Casos := Casos + 1;
 
@@ -205,13 +182,13 @@ begin
 
       Erro_3 := 0 ;
 
-      if Copy( Tabela, 1, 1 ) <> ' ' then Begin
+      if Copy( Tabela, 1, 1 ) <> ' ' then begin
 
         { Verifica o Tamanho }
 
         if Length( Trim( Base_1 ) ) <> ( StrToInt( Copy( Tabela,  3,  2 ) ) ) then Erro_3 := 1;
 
-        if Erro_3 = 0 then Begin
+        if Erro_3 = 0 then begin
 
           { Ajusta o Tamanho }
 
@@ -221,7 +198,7 @@ begin
 
           Contador := 0 ;
 
-          while ( Contador < 14 ) and ( Erro_3 = 0 ) Do Begin
+          while ( Contador < 14 ) and ( Erro_3 = 0 ) do begin
 
             Contador := Contador + 1;
 
@@ -251,7 +228,7 @@ begin
           Digitos := 000;
           Digito  := 000;
 
-          while ( Digitos < 2 ) and ( Erro_3 = 0 ) Do Begin
+          while ( Digitos < 2 ) and ( Erro_3 = 0 ) do begin
 
             Digitos := Digitos + 1;
 
@@ -259,7 +236,7 @@ begin
 
             Peso := Copy( Tabela, 5 + ( Digitos * 8 ), 2 );
 
-            if Peso <> '  ' then Begin
+            if Peso <> '  ' then begin
               Rotina :=           Copy( Tabela, 0 + ( Digitos * 8 ), 1 )  ;
               Modulo := StrToInt( Copy( Tabela, 2 + ( Digitos * 8 ), 2 ) );
 
@@ -288,7 +265,7 @@ begin
               Soma_1 := 0;
               Soma_2 := 0;
 
-              For Contador := 1 To 14 Do Begin
+              for Contador := 1 to 14 do begin
                 Valor_1 := ( StrToInt( Copy( Base_3, Contador, 01 ) ) * StrToInt( Copy( Peso, Contador * 3 - 2, 2 ) ) );
                 Soma_1  := Soma_1 + Valor_1;
                 if Valor_1 > 9 then Valor_1 := Valor_1 - 9;
@@ -303,8 +280,8 @@ begin
 
               { Calcula o Digito }
 
-              if Pos( Rotina, 'D0'  ) > 0 then Digito := Soma_1 Mod Modulo;
-              if Pos( Rotina, 'E12' ) > 0 then Digito := Modulo - ( Soma_1 Mod Modulo);
+              if Pos( Rotina, 'D0'  ) > 0 then Digito := Soma_1 mod Modulo;
+              if Pos( Rotina, 'E12' ) > 0 then Digito := Modulo - ( Soma_1 mod Modulo);
 
               if Digito < 10 then Resultado := IntToStr( Digito );
               if Digito = 10 then Resultado := '0';
