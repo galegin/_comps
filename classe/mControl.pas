@@ -11,6 +11,10 @@ type
   public
     class function GetValues(AControl : TControl) : TmPropertyList;
     class procedure SetValues(AControl : TControl; AValues : TmPropertyList);
+    class function NewControlName(AControl: TWinControl; AName: String): String;
+    class function ControlNameExists(AControl: TWinControl; AName: String): Boolean;
+    class function NewComponentName(AComponent: TComponent; AName: String): String;
+    class function ComponentNameExists(AComponent: TComponent; AName: String): Boolean;
   end;
 
 implementation
@@ -27,21 +31,21 @@ begin
     for I := 0 to ComponentCount - 1 do begin
 
       if Components[I] is TCheckBox then begin
-        with Result.Adicionar, (Components[I] as TCheckBox) do begin
+        with Result.Add, (Components[I] as TCheckBox) do begin
           Nome := Name;
           Tipo := tppBoolean;
           ValueBoolean := Checked;
         end;
 
       end else if Components[I] is TComboBox then begin
-        with Result.Adicionar, (Components[I] as TComboBox) do begin
+        with Result.Add, (Components[I] as TComboBox) do begin
           Nome := Name;
           Tipo := tppInteger;
           ValueInteger := ItemIndex;
         end;
 
       end else if Components[I] is TEdit then begin
-        with Result.Adicionar, (Components[I] as TEdit) do begin
+        with Result.Add, (Components[I] as TEdit) do begin
           Nome := Name;
           case TpProperty(Tag) of
             tppDateTime : begin
@@ -63,21 +67,21 @@ begin
         end;
 
       end else if Components[I] is TListBox then begin
-        with Result.Adicionar, (Components[I] as TListBox) do begin
+        with Result.Add, (Components[I] as TListBox) do begin
           Nome := Name;
           Tipo := tppInteger;
           ValueInteger := ItemIndex;
         end;
 
       end else if Components[I] is TMemo then begin
-        with Result.Adicionar, (Components[I] as TMemo) do begin
+        with Result.Add, (Components[I] as TMemo) do begin
           Nome := Name;
           Tipo := tppString;
           ValueString := Text;
         end;
 
       end else if Components[I] is TRadioButton then begin
-        with Result.Adicionar, (Components[I] as TRadioButton) do begin
+        with Result.Add, (Components[I] as TRadioButton) do begin
           Nome := Name;
           Tipo := tppBoolean;
           ValueBoolean := Checked;
@@ -145,6 +149,58 @@ begin
             Checked := vValue.ValueBoolean;
         end;
 
+      end;
+    end;
+  end;
+end;
+
+//--
+
+class function TmControl.NewControlName(AControl: TWinControl; AName: String): String;
+var X : Integer;
+begin
+  X := 0;
+  repeat
+    Inc(X);
+    Result := AName + IntToStr(X);
+  until not ControlNameExists(AControl, Result);
+end;
+
+class function TmControl.ControlNameExists(AControl: TWinControl; AName: String): Boolean;
+var X : Integer;
+begin
+  Result := False;
+  with AControl do begin
+    for X := 0 to ControlCount-1 do begin
+      if UpperCase(Controls[X].Name) = UpperCase(AName) then begin
+        Result := True;
+        Break;
+      end;
+    end;
+  end;
+end;
+
+//--
+
+class function TmControl.NewComponentName(AComponent: TComponent; AName: String): String;
+var X : Integer;
+begin
+  X := 0;
+  repeat
+    Inc(X);
+    Result := AName + IntToStr(X);
+  until not ComponentNameExists(AComponent, Result);
+end;
+
+class function TmControl.ComponentNameExists(AComponent: TComponent; AName: String): Boolean;
+var X : Integer;
+begin
+  Result := False;
+  with AComponent do begin
+    for X := 0 to ComponentCount-1 do begin
+      if UpperCase(Components[X].Name) = UpperCase(AName) then begin
+        Result := True;
+        Break;
       end;
     end;
   end;

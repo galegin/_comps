@@ -8,7 +8,10 @@ uses
 type
   TmGrade = class(TListView)
   private
+    fCollection : TCollection;
   public
+  published
+    property Collection : TCollection read fCollection write fCollection;
   end;
 
 implementation

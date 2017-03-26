@@ -7,26 +7,24 @@ uses
   mFieldCtrl, mProperty, mTipoPosition, mTipoMarging;
 
 type
-  RTipoFieldArray = Array Of RTipoField;
-
   TmFieldControl = class
   public
-    class procedure SetControls(AControl : TControl; AFields : RTipoFieldArray);
+    class procedure SetControls(AControl : TControl; AFields : TmFieldCtrlList);
 
     class procedure SetPosition(AControl : TControl; APosition : RTipoPosition);
     class procedure SetMarging(AControl : TControl; AMarging : RTipoMarging);
 
-    class procedure SetFrame(AField : RTipoField);
-    class procedure SetPanel(AField : RTipoField);
-    class procedure SetGrade(AField : RTipoField);
-    class procedure SetLabel(AField : RTipoField);
-    class procedure SetButton(AField : RTipoField);
-    class procedure SetCheckBox(AField : RTipoField);
-    class procedure SetComboBox(AField : RTipoField);
-    class procedure SetTextBox(AField : RTipoField);
+    class procedure SetFrame(AField : TmFieldCtrl);
+    class procedure SetPanel(AField : TmFieldCtrl);
+    class procedure SetGrade(AField : TmFieldCtrl);
+    class procedure SetLabel(AField : TmFieldCtrl);
+    class procedure SetButton(AField : TmFieldCtrl);
+    class procedure SetCheckBox(AField : TmFieldCtrl);
+    class procedure SetComboBox(AField : TmFieldCtrl);
+    class procedure SetTextBox(AField : TmFieldCtrl);
 
-    class function GetValues(AControl : TControl; AFields : RTipoFieldArray) : TmPropertyList;
-    class procedure SetValues(AControl : TControl; AFields : RTipoFieldArray; AValues : TmPropertyList);
+    class function GetValues(AControl : TControl; AFields : TmFieldCtrlList) : TmPropertyList;
+    class procedure SetValues(AControl : TControl; AFields : TmFieldCtrlList; AValues : TmPropertyList);
   end;
 
 implementation
@@ -42,23 +40,18 @@ class procedure TmFieldControl.SetControls;
 var
   I : Integer;
 begin
-  for I := Ord(Low(AFields)) to Ord(High(AFields)) do begin
-    with AFields[I] do begin
-      ControlClasse := GetClasseTipoField(Tipo);
-      Control := TControlClass(ControlClasse).Create(AControl);
-
-      case Tipo of
-        tfFrame : SetFrame(AFields[I]);
-        tfPanel : SetPanel(AFields[I]);
-        tfGrade : SetGrade(AFields[I]);
-        tfLabel : SetLabel(AFields[I]);
-        tfButton : SetButton(AFields[I]);
-        tfCheckBox : SetCheckBox(AFields[I]);
-        tfComboBox : SetComboBox(AFields[I]);
-        tfTextBox : SetTextBox(AFields[I]);
+  with AFields do
+    for I := 0 to Count - 1 do
+      case Items[I].Tipo of
+        tfFrame : SetFrame(Items[I]);
+        tfPanel : SetPanel(Items[I]);
+        tfGrade : SetGrade(Items[I]);
+        tfLabel : SetLabel(Items[I]);
+        tfButton : SetButton(Items[I]);
+        tfCheckBox : SetCheckBox(Items[I]);
+        tfComboBox : SetComboBox(Items[I]);
+        tfTextBox : SetTextBox(Items[I]);
       end;
-    end;
-  end;
 end;
 
 //--
@@ -128,7 +121,7 @@ begin
   if (AField.Control is TmLabel) then
     with (AField.Control as TmLabel) do begin
       Name := AField.Nome;
-      Caption := AField.Content;
+      Caption := AField.Descricao;
       OnClick := AField.Click;
       SetPosition(AField.Control, AField.Position);
       SetMarging(AField.Control, AField.Marging);
@@ -140,7 +133,7 @@ begin
   if (AField.Control is TmButton) then
     with (AField.Control as TmButton) do begin
       Name := AField.Nome;
-      Caption := AField.Content;
+      Caption := AField.Descricao;
       OnClick := AField.Click;
       SetPosition(AField.Control, AField.Position);
       SetMarging(AField.Control, AField.Marging);
@@ -152,7 +145,7 @@ begin
   if (AField.Control is TmCheckBox) then
     with (AField.Control as TmCheckBox) do begin
       Name := AField.Nome;
-      Caption := AField.Content;
+      Caption := AField.Descricao;
       OnClick := AField.Click;
       SetPosition(AField.Control, AField.Position);
       SetMarging(AField.Control, AField.Marging);
@@ -194,15 +187,15 @@ var
 begin
   Result := TmPropertyList.Create;
 
-  for I := Ord(Low(AFields)) to Ord(High(AFields)) do begin
-    with AFields[I] do begin
+  for I := 0 to AFields.Count - 1 do begin
+    with AFields.Items[I] do begin
 
       if Assigned(Binding.Entidade) then begin
         with Result.Add do begin
 
           Nome := Binding.Campo;
 
-          case AFields[I].Tipo of
+          case AFields.Items[I].Tipo of
             mFieldCtrl.tfCheckBox : begin
               Tipo := tppBoolean;
               ValueBoolean := (Control as TmCheckBox).Checked;
@@ -230,14 +223,14 @@ var
   vValue : TmProperty;
   I : Integer;
 begin
-  for I := Ord(Low(AFields)) to Ord(High(AFields)) do begin
-    with AFields[I] do begin
+  for I := 0 to AFields.Count - 1 do begin
+    with AFields.Items[I] do begin
 
       if Assigned(Binding.Entidade) then begin
 
         vValue := AValues.IndexOf(Binding.Campo);
 
-        case AFields[I].Tipo of
+        case AFields.Items[I].Tipo of
           mFieldCtrl.tfCheckBox :
             (Control as TmCheckBox).Checked := vValue.ValueBoolean;
           mFieldCtrl.tfComboBox :

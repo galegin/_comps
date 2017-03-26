@@ -3,90 +3,169 @@ unit mFormControl;
 interface
 
 uses
-  Classes, SysUtils, Forms,
-  mFrame, mPanel, mGrade,
-  mLabel, mButton, mComboBox, mCheckBox, mTextBox,
-  mCollectionItem, mTipoCampo, mFieldControl;
+  Classes, SysUtils, Forms, Controls, StdCtrls,
+  mOrientacaoFrame, mFrame, mPanel, mGrade,
+  mLabel, mButton, mComboBox, mCheckBox, mTextBox, mTipoCampo, mKeyValue;
 
 type
-  TTipoOrientacao = (toHorizontal, toVertical);
-
-  RComboBox = record
-    Value : String;
-    Display : String;
-  end;
-
-  TmFormControl = class(TForm)
+  TmFormControl = class
   private
   protected
   public
-    function AddFrame(AOrientacao : TTipoOrientacao) : TmFrame;
+    class function AddFrame(
+      AOwner : TComponent;
+      AParent : TWinControl;
+      AOrientacao : TOrientacaoFrame) : TmFrame;
 
-    function AddPanel(AOrientacao : TTipoOrientacao) : TmPanel;
+    class function AddPanel(
+      AOwner : TComponent;
+      AParent : TWinControl;
+      AOrientacao : TOrientacaoFrame) : TmPanel;
 
-    function AddGrade(AOrientacao : TTipoOrientacao) : TmGrade;
+    class function AddGrade(
+      AOwner : TComponent;
+      AParent : TWinControl;
+      ACollection : TCollection) : TmGrade;
 
-    function AddLabel(ALargura : Integer; ADescricao : String) : TmLabel;
+    class function AddLabel(
+      AOwner : TComponent;
+      AParent : TWinControl;
+      ALargura : Integer;
+      ADescricao : String) : TmLabel;
 
-    function AddButton(ALargura : Integer; ADescricao : String) : TmButton;
+    class function AddButton(
+      AOwner : TComponent;
+      AParent : TWinControl;
+      ALargura : Integer;
+      ADescricao : String) : TmButton;
 
-    function AddCheckBox(ALargura : Integer; AEntidade : TmCollectionItem;
-      AAtributo : String) : TmCheckBox;
-    function AddComboBox(ALargura : Integer; AEntidade : TmCollectionItem;
-      AAtributo : String; ALista : Array Of RComboBox) : TmComboBox;
-    function AddTextBox(ALargura : Integer; AEntidade : TmCollectionItem;
-      AAtributo : String; ATipoCampo : TTipoCampo) : TmTextBox;
+    class function AddCheckBox(
+      AOwner : TComponent;
+      AParent : TWinControl;
+      ALargura : Integer;
+      AEntidade : TCollectionItem;
+      ACampo : String) : TmCheckBox;
+
+    class function AddComboBox(
+      AOwner : TComponent;
+      AParent : TWinControl;
+      ALargura : Integer;
+      AEntidade : TCollectionItem;
+      ACampo : String;
+      ALista : Array Of TmKeyValue) : TmComboBox;
+
+    class function AddTextBox(
+      AOwner : TComponent;
+      AParent : TWinControl;
+      ALargura : Integer;
+      AEntidade : TCollectionItem;
+      ACampo : String;
+      ATipo : TTipoCampo) : TmTextBox;
+
   published
   end;
 
 implementation
 
+uses
+  mControl;
+
 { TmFormControl }
 
-function TmFormControl.AddFrame;
+class function TmFormControl.AddFrame;
 begin
-  Result := TmFrame.create(Owner);
+  Result := TmFrame.Create(AOwner);
+  with Result do begin
+    Name := TmControl.NewComponentName(AOwner, '_Frame');
+    Parent := AParent;
+    Orientacao := AOrientacao;
+  end;
 end;
 
-function TmFormControl.AddPanel;
+class function TmFormControl.AddPanel;
 begin
-  Result := TmPanel.create(Owner);
-end;
-
-//--
-
-function TmFormControl.AddGrade;
-begin
-  Result := TmGrade.create(Owner);
-end;
-
-//--
-
-function TmFormControl.AddLabel;
-begin
-  Result := TmLabel.create(Owner);
-end;
-
-function TmFormControl.AddButton;
-begin
-  Result := TmButton.create(Owner);
+  Result := TmPanel.Create(AOwner);
+  with Result do begin
+    Name := TmControl.NewComponentName(AOwner, '_Panel');
+    Parent := AParent;
+    Orientacao := AOrientacao;
+  end;
 end;
 
 //--
 
-function TmFormControl.AddCheckBox;
+class function TmFormControl.AddGrade;
 begin
-  Result := TmCheckBox.create(Owner);
+  Result := TmGrade.Create(AOwner);
+  with Result do begin
+    Name := TmControl.NewComponentName(AOwner, '_Grade');
+    Parent := AParent;
+    Collection := ACollection;
+  end;
 end;
 
-function TmFormControl.AddComboBox;
+//--
+
+class function TmFormControl.AddLabel;
 begin
-  Result := TmComboBox.create(Owner);
+  Result := TmLabel.Create(AOwner);
+  with Result do begin
+    Name := TmControl.NewComponentName(AOwner, '_Label');
+    Parent := AParent;
+    Width := ALargura;
+    Caption := ADescricao;
+  end;
 end;
 
-function TmFormControl.AddTextBox;
+class function TmFormControl.AddButton;
 begin
-  Result := TmTextBox.create(Owner);
+  Result := TmButton.Create(AOwner);
+  with Result do begin
+    Name := TmControl.NewComponentName(AOwner, '_Button');
+    Parent := AParent;
+    Width := ALargura;
+    Caption := ADescricao;
+  end;
+end;
+
+//--
+
+class function TmFormControl.AddCheckBox;
+begin
+  Result := TmCheckBox.Create(AOwner);
+  with Result do begin
+    Name := TmControl.NewComponentName(AOwner, '_CheckBox');
+    Parent := AParent;
+    Width := ALargura;
+    _Entidade := AEntidade;
+    _Campo := ACampo;
+  end;
+end;
+
+class function TmFormControl.AddComboBox;
+begin
+  Result := TmComboBox.Create(AOwner);
+  with Result do begin
+    Name := TmControl.NewComponentName(AOwner, '_ComboBox');
+    Parent := AParent;
+    Width := ALargura;
+    _Entidade := AEntidade;
+    _Campo := ACampo;
+    SetListaArray(ALista);
+  end;
+end;
+
+class function TmFormControl.AddTextBox;
+begin
+  Result := TmTextBox.Create(AOwner);
+  with Result do begin
+    Name := TmControl.NewComponentName(AOwner, '_TextBox');
+    Parent := AParent;
+    Width := ALargura;
+    _Entidade := AEntidade;
+    _Campo := ACampo;
+    _Tipo := ATipo;
+  end;
 end;
 
 end.

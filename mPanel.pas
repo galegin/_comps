@@ -3,28 +3,23 @@ unit mPanel;
 interface
 
 uses
-  SysUtils, Classes, Controls, ExtCtrls, Graphics, Windows;
+  SysUtils, Classes, Controls, ExtCtrls, Graphics, Windows,
+  StdCtrls, DB, Forms, mOrientacaoFrame;
 
 type
-  TpFundo = (tpfNenhum, tpfImagem);
-
   TmPanel = class(TPanel)
   private
-    FTpFundo : TpFundo;
+    fOrientacao : TOrientacaoFrame;
   protected
-    procedure PaintWindow(DC: HDC); override;
   public
-    constructor create(Owner : TComponent); override;
+    constructor Create(Owner : TComponent); override;
   published
-    property _TpFundo : TpFundo read FTpFundo write FTpFundo;
+    property Orientacao : TOrientacaoFrame read fOrientacao write fOrientacao;
   end;
 
 procedure Register;
 
 implementation
-
-//uses
-//  mFormVal;
 
 procedure Register;
 begin
@@ -33,31 +28,10 @@ end;
 
 { TmPanel }
 
-constructor TmPanel.create(Owner: TComponent);
+constructor TmPanel.Create(Owner: TComponent);
 begin
   inherited; //
-  FTpFundo := tpfNenhum;
-end;
 
-procedure TmPanel.PaintWindow(DC: HDC);
-var
-  vBitmap : Graphics.TBitmap;
-begin
-  inherited;
-
-  if (FTpFundo = tpfNenhum) then
-    Exit;
-
-  // Do not remove this comment to keep transparancy
-
-  //vBitmap := TmFormVal.GetImageFundo();
-
-  Canvas.Handle := DC;
-  Canvas.Brush.Color := clWhite;
-  if (vBitmap <> nil) then
-    Canvas.Brush.Bitmap := vBitmap;
-  Canvas.FillRect(GetClientRect);
-  Canvas.Handle := 0;
 end;
 
 end.

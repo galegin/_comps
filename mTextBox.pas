@@ -4,8 +4,7 @@ interface
 
 uses
   SysUtils, Classes, Controls, StdCtrls, DB, Graphics, TypInfo, Messages, Forms,
-  Windows, StrUtils, mTipoCampo, mProperty,
-  mTipoFormatar, mFormatar, mValidar;
+  Windows, StrUtils, mTipoCampo, mTipoFormatar, mFormatar, mValidar;
 
 type
   TmTextBox = class(TEdit)
@@ -14,10 +13,11 @@ type
     FLabel : TObject;
     FColorEnter : TColor;
     FColorExit : TColor;
-    FCampo : TmProperty;
+    FEntidade : TCollectionItem;
+    FCampo : String;
     FMover : Boolean;
-    FTipoCampo : TTipoCampo;
-    FTipoFormatar : TTipoFormatar;
+    FTipo : TTipoCampo;
+    FFormato : TTipoFormatar;
 
     procedure Validar();
 
@@ -26,8 +26,7 @@ type
     procedure CMExit(var Message: TCMExit); message CM_EXIT;
 
     procedure SetAlignment(const Value: TAlignment);
-    procedure SetCampo(const Value: TmProperty);
-    procedure SetTipoCampo(const Value: TTipoCampo);
+    procedure SetTipo(const Value: TTipoCampo);
 
     procedure PosicaoLabel();
     function GetValue: String;
@@ -38,17 +37,18 @@ type
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
   public
     constructor create(AOwner : TComponent); overload; override;
-    constructor create(AOwner : TComponent; AParent : TWinControl); overload;
+    constructor create(AOwner : TComponent; AParent : TWinControl); reintroduce; overload;
   published
     property _Alignment : TAlignment Read FAlignment Write SetAlignment Default taLeftJustify;
     property _Label : TObject read FLabel write FLabel;
     property _ColorEnter : TColor read FColorEnter write FColorEnter;
     property _ColorExit : TColor read FColorExit write FColorExit;
-    property _Campo : TmProperty read FCampo write SetCampo;
+    property _Entidade : TCollectionItem read FEntidade write FEntidade;
+    property _Campo : String read FCampo write FCampo;
     property _Value : String read GetValue write SetValue;
     property _Mover : Boolean read FMover write FMover;
-    property _TipoCampo : TTipoCampo read FTipoCampo write SetTipoCampo;
-    property _TipoFormatar : TTipoFormatar read FTipoFormatar write FTipoFormatar;
+    property _Tipo : TTipoCampo read FTipo write SetTipo;
+    property _Formato : TTipoFormatar read FFormato write FFormato;
   end;
 
 procedure Register;
@@ -72,7 +72,7 @@ begin
   FColorEnter := clYellow;
   FColorExit := clWhite;
 
-  FTipoFormatar := TTipoFormatar(Ord(-1));
+  FFormato := TTipoFormatar(Ord(-1));
 
   AutoSize := False;
   Width := 129;
@@ -94,28 +94,28 @@ begin
   if (Text = '') then
     Exit;
 
-  case FTipoFormatar of
+  case FFormato of
     tfCnpj:
       if not TmValidar.Cnpj(Text) then
-        raise Exception.Create('CNPJ invalida');
+        raise Exception.Create('CNPJ invalido');
     tfCpf:
       if not TmValidar.Cpf(Text) then
-        raise Exception.Create('CPF invalida');
+        raise Exception.Create('CPF invalido');
     tfInscricao:
       if not TmValidar.Inscricao(Text) then
         raise Exception.Create('Inscricao invalida');
 
   else
-    case FTipoCampo of
+    case FTipo of
       tcDataHora:
         if TmData.GetDataHora(Text) = 0 then
           raise Exception.Create('Data invalida');
       tcNumero:
         if TmFloat.GetNumero(Text) = 0 then
-          raise Exception.Create('Numero invalida');
+          raise Exception.Create('Numero invalido');
       tcPercentual, tcQuantidade, tcValor:
         if TmFloat.GetValor(Text) = 0 then
-          raise Exception.Create('Valor invalida');
+          raise Exception.Create('Valor invalido');
     end;
 
   end;
@@ -158,7 +158,7 @@ begin
   try
     Validar();
 
-    case FTipoCampo of
+    case FTipo of
       tcDataHora:
         Text := DateTimeToStr(TmData.GetDataHora(Text));
       tcNumero:
@@ -207,7 +207,7 @@ begin
 
   vLstTecla := [];
 
-  case FTipoFormatar of
+  case FFormato of
     tfEmail:
       vLstTecla := vLstEmail;
     tfSenha:
@@ -215,7 +215,7 @@ begin
     tfSite:
       vLstTecla := vLstSite;
   else
-    case FTipoCampo of
+    case FTipo of
       tcDataHora:
         vLstTecla := vLstData;
       tcNumero:
@@ -228,9 +228,8 @@ begin
   end;
 
   if vLstTecla <> [] then
-
-  if not (Key in vLstTecla) then
-    Key := #0;
+    if not (Key in vLstTecla) then
+      Key := #0;
 
   //DoKeyPress;
 end;
@@ -241,19 +240,19 @@ begin
   if (Text = '') then
     Exit;
 
-  case FTipoFormatar of
+  case FFormato of
     tfCnpj, tfCpf, tfInscricao:
-      Text := TmFormatar.Conteudo(FTipoFormatar, Value, '');
+      Text := TmFormatar.Conteudo(FFormato, Value, '');
   else
-    case FTipoCampo of
+    case FTipo of
       tcDataHora:
-        Text := FormatDateTime('dd/mm/yyyy', TmData.GetDataHora(Value));
+        Text := FormatDateTime(TipoCampoToFmt(FTipo), TmData.GetDataHora(Value));
       tcNumero:
-        Text := FormatFloat('0', TmFloat.GetNumero(Value));
-      tcPercentual, tcValor:
-        Text := FormatFloat('0.00', TmFloat.GetValor(Value));
-      tcQuantidade:
-        Text := FormatFloat('0.000', TmFloat.GetValor(Value));
+        Text := FormatFloat(TipoCampoToFmt(FTipo), TmFloat.GetNumero(Value));
+      tcPercentual, tcQuantidade, tcValor:
+        Text := FormatFloat(TipoCampoToFmt(FTipo), TmFloat.GetValor(Value));
+      tcDescricao, tcNome:
+        Text := TmString.AllTrim(Value);
     end;
   end;
 end;
@@ -264,19 +263,17 @@ begin
   if (Result = '') then
     Exit;
 
-  case FTipoFormatar of
+  case FFormato of
     tfCnpj, tfCpf, tfInscricao:
       Result := TmFormatar.Remover(Text);
   else
-    case FTipoCampo of
+    case FTipo of
       tcDataHora:
-        Result := FormatDateTime('dd/mm/yyyy', TmData.GetDataHora(Text));
+        Result := FormatDateTime(TipoCampoToFmt(FTipo), TmData.GetDataHora(Text));
       tcNumero:
-        Result := FormatFloat('0', TmFloat.GetNumero(Text));
-      tcPercentual, tcValor:
-        Result := FormatFloat('0.00', TmFloat.GetValor(Text));
-      tcQuantidade:
-        Result := FormatFloat('0.000', TmFloat.GetValor(Text));
+        Result := FormatFloat(TipoCampoToFmt(FTipo), TmFloat.GetNumero(Text));
+      tcPercentual, tcQuantidade, tcValor:
+        Result := FormatFloat(TipoCampoToFmt(FTipo), TmFloat.GetValor(Text));
       tcDescricao, tcNome:
         Result := TmString.AllTrim(Text);
     end;
@@ -292,24 +289,26 @@ begin
   end;
 end;
 
+procedure TmTextBox.SetTipo(const Value: TTipoCampo);
+begin
+  FTipo := Value;
+
+  case FTipo of
+    tcDataHora:
+      _Alignment := taCenter;
+    tcNumero, tcPercentual, tcQuantidade, tcValor:
+      _Alignment := taRightJustify;
+    tcDescricao, tcNome:
+      _Alignment := taLeftJustify;
+  end;
+end;
+
 procedure TmTextBox.CreateParams(var Params: TCreateParams);
 const
   Alignments: Array[TAlignment] of Cardinal = (ES_LEFT, ES_RIGHT, ES_CENTER);
 begin
   inherited CreateParams(Params);
   Params.Style := Params.Style and (not 0) or (Alignments[FAlignment]);
-end;
-
-procedure TmTextBox.SetTipoCampo(const Value: TTipoCampo);
-begin
-  FTipoCampo := Value;
-
-  case FTipoCampo of
-    tcNumero, tcPercentual, tcQuantidade, tcValor:
-      _Alignment := taRightJustify;
-    tcDataHora:
-      _Alignment := taCenter;
-  end;
 end;
 
 procedure TmTextBox.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -328,11 +327,6 @@ end;
 
 procedure TmTextBox.PosicaoLabel();
 begin
-end;
-
-procedure TmTextBox.SetCampo(const Value: TmProperty);
-begin
-  FCampo := Value;
 end;
 
 end.

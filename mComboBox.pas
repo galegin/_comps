@@ -11,6 +11,7 @@ type
   TmComboBox = class(TComboBox)
   private
     FLabel : TObject;
+    FEntidade : TCollectionItem;
     FCampo : String;
     FMover : Boolean;
     FLista : TmKeyValueList;
@@ -24,8 +25,12 @@ type
   public
     constructor create(AOwner: TComponent); overload; override;
     constructor create(AOwner : TComponent; AParent : TWinControl); overload;
+    procedure ClrLista;
+    procedure AddLista(const Value: TmKeyValue);
+    procedure SetListaArray(const Value: Array Of TmKeyValue);
   published
     property _Label : TObject read FLabel write FLabel;
+    property _Entidade : TCollectionItem read FEntidade write FEntidade;
     property _Campo : String read FCampo write FCampo;
     property _Lista : TmKeyValueList read FLista write SetLista;
     property _Mover : Boolean read FMover write FMover;
@@ -90,17 +95,38 @@ end;
 
 //--
 
+procedure TmComboBox.ClrLista;
+begin
+  FLista.Clear;
+  Items.Clear;
+end;
+
+procedure TmComboBox.AddLista(const Value: TmKeyValue);
+begin
+  FLista.Add(Value);
+  Items.AddObject(Value.Display, Value);
+end;
+
+//--
+
 procedure TmComboBox.SetLista(const Value: TmKeyValueList);
 var
   I : Integer;
 begin
-  FLista := Value;
+  ClrLista;
+  with FLista do
+    for I := 0 to Count - 1 do
+      AddLista(Items[I]);
+end;
 
-  Items.Clear;
-
-  for I := 0 to FLista.Count - 1 do
-    with FLista.Items[I] do
-      Items.AddObject(FLista.Items[I].Display, FLista.Items[I]);
+procedure TmComboBox.SetListaArray(const Value: Array Of TmKeyValue);
+var
+  I : Integer;
+begin
+  ClrLista;
+  with FLista do
+    for I := 0 to High(Value) do
+      AddLista(Value[I]);
 end;
 
 //--

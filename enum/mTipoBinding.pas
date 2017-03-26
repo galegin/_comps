@@ -7,7 +7,7 @@ uses
 
 type
   RTipoBinding = record
-    Entidade : TCollection;
+    Entidade : TCollectionItem;
     Campo : String;
     Formato : RTipoFormato;
   end;
