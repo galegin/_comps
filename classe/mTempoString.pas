@@ -92,27 +92,22 @@ implementation
         Result.Ano := StrToIntDef(vStringArray[0], 0);
         Result.Mes := StrToIntDef(vStringArray[1], 0);
       end;
-
       ttMes : begin
         Result.Mes := StrToIntDef(vStringArray[0], 0);
         Result.Dia := StrToIntDef(vStringArray[1], 0);
       end;
-
       ttDia : begin
         Result.Dia := StrToIntDef(vStringArray[0], 0);
         Result.Hor := StrToIntDef(vStringArray[1], 0);
       end;
-
       ttHor : begin
         Result.Hor := StrToIntDef(vStringArray[0], 0);
         Result.Min := StrToIntDef(vStringArray[1], 0);
       end;
-
       ttMin : begin
         Result.Min := StrToIntDef(vStringArray[0], 0);
         Result.Seg := StrToIntDef(vStringArray[1], 0);
       end;
-
       ttSeg : begin
         Result.Seg := StrToIntDef(vStringArray[0], 0);
         Result.Mil := StrToIntDef(vStringArray[1], 0);

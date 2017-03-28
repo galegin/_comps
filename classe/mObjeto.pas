@@ -4,16 +4,16 @@ interface
 
 uses
   Classes, SysUtils, StrUtils, TypInfo, Math,
-  mLogger, mProperty;
+  mLogger, mValue;
 
 type
   TmObjeto = class(TComponent)
   public
     class procedure ResetValues(AObject: TObject);
-    class function GetValues(AObject: TObject): TmPropertyList;
-    class procedure SetValues(AObject: TObject; AValues: TmPropertyList);
+    class function GetValues(AObject: TObject): TmValueList;
+    class procedure SetValues(AObject: TObject; AValues: TmValueList);
     class procedure ToObjeto(AObjectFrom: TObject; AObjectTo: TObject);
-    class function GetValuesObjeto(AObject : TObject; AInherited : TClass) : TmPropertyList;
+    class function GetValuesObjeto(AObject : TObject; AInherited : TClass) : TmValueList;
     class function GetValuesObjetoName(AObject : TObject; AInherited : TClass; ANome : String) : TObject;
   end;
 
@@ -60,12 +60,12 @@ begin
             tkEnumeration:
               if GetTypeData(PropInfo^.PropType^)^.BaseType^ = TypeInfo(Boolean) then
                 SetOrdProp(AObject, PropInfo, 0);
-            tkString, tkLString, tkWString:
-              SetStrProp(AObject, PropInfo, '');
             tkInteger:
               SetOrdProp(AObject, PropInfo, 0);
             tkFloat:
               SetFloatProp(AObject, PropInfo, 0);
+            tkString, tkLString, tkWString:
+              SetStrProp(AObject, PropInfo, '');
           end;
           
         end;
@@ -92,8 +92,11 @@ var
   PropInfo : PPropInfo;
   List : PPropList;
   Key : Boolean;
+  Nome : String;
+  TipoBase : String;
+  TipoField : TTipoField;
 begin
-  Result := TmPropertyList.Create;
+  Result := TmValueList.Create;
   Count := GetPropList(AObject.ClassInfo, tkProperties, nil, False);
   Size := Count * SizeOf(Pointer);
   GetMem(List, Size);
@@ -110,44 +113,35 @@ begin
         Continue;
 
       if (PropInfo^.PropType^.Kind in tkProperties) then begin
-        with Result.Add do begin
-          Nome := PropInfo^.Name;
-          TipoBase := PropInfo^.PropType^.Name;
+        Nome := PropInfo^.Name;
+        TipoBase := PropInfo^.PropType^.Name;
 
-          if LowerCase(Nome) = 'u_version' then
-            Key := False;
+        if LowerCase(Nome) = 'u_version' then
+          Key := False;
 
-          TipoField := TpField(IfThen(Key, Ord(tpfKey), Ord(tpfNul)));
+        TipoField := TTipoField(IfThen(Key, Ord(tfKey), Ord(tfNul)));
 
-          case PropInfo^.PropType^.Kind of
-            tkEnumeration: begin
-              if GetTypeData(PropInfo^.PropType^)^.BaseType^ = TypeInfo(Boolean) then begin
-                Tipo := tppBoolean;
-                ValueBoolean := GetOrdProp(AObject, PropInfo) = 1;
-              end;
-            end;
-            tkString, tkLString, tkWString: begin
-              Tipo := tppString;
-              ValueString := GetStrProp(AObject, PropInfo);
-            end;
-            tkInteger: begin
-              Tipo := tppInteger;
-              ValueInteger := GetOrdProp(AObject, PropInfo);
-            end;
-            tkFloat: begin
-              if TipoBase = 'TDateTime' then begin
-                Tipo := tppDateTime;
-                ValueDateTime := GetFloatProp(AObject, PropInfo);
-              end else if TipoBase = 'Real' then begin
-                Tipo := tppFloat;
-                ValueFloat := GetFloatProp(AObject, PropInfo);
-              end;
-            end;
-          else
-            Tipo := tppObject;
-            ValueObject := GetObjectProp(AObject, PropInfo);
+        case PropInfo^.PropType^.Kind of
+          tkEnumeration: begin
+            if GetTypeData(PropInfo^.PropType^)^.BaseType^ = TypeInfo(Boolean) then
+              Result.Add(TmValueBool.Create(Nome, GetOrdProp(AObject, PropInfo) = 1)).TipoField := TipoField;
           end;
+          tkFloat: begin
+            if TipoBase = 'TDateTime' then
+              Result.Add(TmValueDate.Create(Nome, GetFloatProp(AObject, PropInfo))).TipoField := TipoField
+            else if TipoBase = 'Real' then
+              Result.Add(TmValueFloat.Create(Nome, GetFloatProp(AObject, PropInfo))).TipoField := TipoField;
+          end;
+          tkInteger: begin
+            Result.Add(TmValueInt.Create(Nome, GetOrdProp(AObject, PropInfo))).TipoField := TipoField;
+          end;
+          tkString, tkLString, {tkUString,} tkWString: begin
+            Result.Add(TmValueStr.Create(Nome, GetStrProp(AObject, PropInfo))).TipoField := TipoField;
+          end;
+        else
+          Result.Add(TmValueObj.Create(Nome, GetObjectProp(AObject, PropInfo))).TipoField := TipoField;
         end;
+
       end;
     end;
   finally
@@ -160,39 +154,36 @@ var
   PropInfo : PPropInfo;
   I : Integer;
 begin
-  for I := 0 to AValues.Count - 1 do begin
-    with AValues.Items[I] do begin
+  with AValues do
+    for I := 0 to Count - 1 do begin
+      with Items[I] do begin
 
-      //-- read-only
-      PropInfo := GetPropInfo(AObject, Nome);
-      if PropInfo^.SetProc = nil then
-        Continue;
+        //-- read-only
+        PropInfo := GetPropInfo(AObject, Nome);
+        if PropInfo^.SetProc = nil then
+          Continue;
 
-      case Tipo of
-        tppBoolean:
-          if ValueBoolean then
-            SetOrdProp(AObject, Nome, 1)
-          else
-            SetOrdProp(AObject, Nome, 0);
-        tppDateTime:
-          SetFloatProp(AObject, Nome, ValueDateTime);
-        tppEnum:
-          SetOrdProp(AObject, Nome, ValueEnum);
-        tppInteger:
-          SetOrdProp(AObject, Nome, ValueInteger);
-        tppFloat:
-          SetFloatProp(AObject, Nome, ValueFloat);
-        tppString:
-          SetStrProp(AObject, Nome, ValueString);
-        //tppList:
-          //SetVariantProp(AObject, Nome, ValueList);
-        tppVariant:
-          SetVariantProp(AObject, Nome, ValueVariant);
-      else
-        SetStrProp(AObject, Nome, ValueString);
+        case Tipo of
+          tvBoolean:
+            if (Items[I] as TmValueBool).Value then
+              SetOrdProp(AObject, Nome, 1)
+            else
+              SetOrdProp(AObject, Nome, 0);
+          tvDateTime:
+            SetFloatProp(AObject, Nome, (Items[I] as TmValueDate).Value);
+          tvFloat:
+            SetFloatProp(AObject, Nome, (Items[I] as TmValueFloat).Value);
+          tvInteger:
+            SetOrdProp(AObject, Nome, (Items[I] as TmValueInt).Value);
+          tvString:
+            SetStrProp(AObject, Nome, (Items[I] as TmValueStr).Value);
+          tvVariant:
+            SetVariantProp(AObject, Nome, (Items[I] as TmValueVar).Value);
+        else
+          SetStrProp(AObject, Nome, (Items[I] as TmValueStr).Value);
+        end;
       end;
     end;
-  end;
 end;
 
 //--
@@ -206,10 +197,10 @@ end;
 
 class function TmObjeto.GetValuesObjeto;
 var
-  vValues : TmPropertyList;
+  vValues : TmValueList;
   I : Integer;
 begin
-  Result := TmPropertyList.Create;
+  Result := TmValueList.Create;
 
   if not Assigned(AObject) then
     Exit;
@@ -218,16 +209,16 @@ begin
 
   with vValues do
     for I := 0 to Count - 1 do
-      with Items[I] do
-        if IsValueObject then
-          if Assigned(ValueObject) then
-            if ValueObject.ClassType.InheritsFrom(AInherited) then
+      if Items[I] is TmValueObj then
+        with Items[I] as TmValueObj do
+          if Assigned(Value) then
+            if Value.ClassType.InheritsFrom(AInherited) then
               Result.Add(Items[I]);
 end;
 
 class function TmObjeto.GetValuesObjetoName;
 var
-  vValues : TmPropertyList;
+  vValues : TmValueList;
   I : Integer;
 begin
   Result := nil;
@@ -236,10 +227,11 @@ begin
 
   with vValues do
     for I := 0 to Count - 1 do
-      with Items[I] do
-        if Nome = ANome then
-          if ValueObject is AInherited then
-            Result := ValueObject;
+      if Items[I] is TmValueObj then
+        with Items[I] as TmValueObj do
+          if Nome = ANome then
+            if Value is AInherited then
+              Result := Value;
 end;
 
 end.

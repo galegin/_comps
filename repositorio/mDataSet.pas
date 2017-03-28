@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils, Math, DB, DBClient,
-  mProperty, mObjeto, mClasse, mString;
+  mObjeto, mClasse, mString, mValue;
 
 type
   TmDataSet_Notify = record
@@ -16,8 +16,8 @@ type
 
   TmDataSet = class(TComponent)
   public
-    class function GetValues(ADataSet: TDataSet): TmPropertyList;
-    class procedure SetValues(ADataSet: TDataSet; AValues : TmPropertyList);
+    class function GetValues(ADataSet: TDataSet): TmValueList;
+    class procedure SetValues(ADataSet: TDataSet; AValues : TmValueList);
 
     class function GetCollection(ADataSet: TDataSet; AItemClass: TCollectionItemClass): TCollection;
     class procedure SetCollection(ADataSet: TDataSet; ACollection: TCollection);
@@ -56,56 +56,48 @@ implementation
 
 { TmDataSet }
 
-class function TmDataSet.GetValues(ADataSet: TDataSet): TmPropertyList;
+class function TmDataSet.GetValues(ADataSet: TDataSet): TmValueList;
 var
   I : Integer;
   Key : Boolean;
+  Nome : String;
+  TipoField : TTipoField;
 begin
-  Result := TmPropertyList.Create;
+  Result := TmValueList.Create;
 
   Key := True;
 
   with ADataSet do begin
     for I := 0 to FieldCount - 1 do begin
       with Fields[I] do begin
-        with Result.Add do begin
-          Nome := FieldName;
+        Nome := FieldName;
 
-          if LowerCase(FieldName) = 'u_version' then
-            Key := False;
+        if LowerCase(FieldName) = 'u_version' then
+          Key := False;
 
-          TipoField := TpField(IfThen(Key, Ord(tpfKey), IfThen(Required, Ord(tpfReq), Ord(tpfNul))));
+        TipoField := TTipoField(IfThen(Key, Ord(tfKey), IfThen(Required, Ord(tfReq), Ord(tfNul))));
 
-          case DataType of
-            ftBoolean : begin
-              Tipo := tppBoolean;
-              ValueBoolean := AsBoolean;
-            end;
-            ftDate, ftDateTime, ftTime, ftTimeStamp : begin
-              Tipo := tppDateTime;
-              ValueDateTime := AsDateTime;
-            end;
-            ftInteger, ftSmallint, ftWord: begin
-              Tipo := tppInteger;
-              ValueInteger := AsInteger;
-            end;
-            ftFloat, ftBCD, ftFMTBcd: begin
-              Tipo := tppFloat;
-              ValueFloat := AsFloat;
-            end;
-            ftString, ftWideString, ftMemo, ftFmtMemo, ftOraClob: begin
-              if TmString.StartsWiths(LowerCase(FieldName), 'in_') then begin
-                Tipo := tppBoolean;
-                ValueBoolean := (AsString = 'T');
-              end else begin
-                Tipo := tppString;
-                ValueString := AsString;
-              end;
-            end;
-            ftVariant: begin
-              Tipo := tppVariant;
-              ValueVariant := AsVariant;
-            end;
+        case DataType of
+          ftBoolean : begin
+            Result.Add(TmValueBool.Create(Nome, AsBoolean)).TipoField := TipoField;
+          end;
+          ftDate, ftDateTime, ftTime, ftTimeStamp : begin
+            Result.Add(TmValueDate.Create(Nome, AsDateTime)).TipoField := TipoField;
+          end;
+          ftFloat, ftBCD, ftFMTBcd: begin
+            Result.Add(TmValueFloat.Create(Nome, AsFloat)).TipoField := TipoField;
+          end;
+          ftInteger, ftSmallint, ftWord: begin
+            Result.Add(TmValueInt.Create(Nome, AsInteger)).TipoField := TipoField;
+          end;
+          ftString, ftWideString, ftMemo, ftFmtMemo, ftOraClob: begin
+            if TmString.StartsWiths(LowerCase(FieldName), 'in_') then
+              Result.Add(TmValueBool.Create(Nome, (AsString = 'T'))).TipoField := TipoField
+            else
+              Result.Add(TmValueStr.Create(Nome, AsString)).TipoField := TipoField;
+          end;
+          ftVariant: begin
+            Result.Add(TmValueVar.Create(Nome, AsVariant)).TipoField := TipoField;
           end;
         end;
 
@@ -114,9 +106,9 @@ begin
   end;
 end;
 
-class procedure TmDataSet.SetValues(ADataSet: TDataSet; AValues: TmPropertyList);
+class procedure TmDataSet.SetValues(ADataSet: TDataSet; AValues: TmValueList);
 var
-  vProperty : TmProperty;
+  vValue : TmValue;
   vEdit : Boolean;
   I : Integer;
 begin
@@ -127,23 +119,23 @@ begin
 
     for I := 0 to FieldCount - 1 do begin
       with Fields[I] do begin
-        vProperty := AValues.IndexOf(FieldName);
+        vValue := AValues.IndexOf(FieldName);
 
-        if vProperty <> nil then begin
-          with vProperty do begin
+        if vValue <> nil then begin
+          with vValue do begin
             case Tipo of
-              tppBoolean:
-                AsBoolean := ValueBoolean;
-              tppDateTime:
-                AsDateTime := ValueDateTime;
-              tppInteger:
-                AsInteger := ValueInteger;
-              tppFloat:
-                AsFloat := ValueFloat;
-              tppString:
-                AsString := ValueString;
-              tppVariant:
-                AsVariant := ValueVariant;
+              tvBoolean:
+                AsBoolean := (vValue as TmValueBool).Value;
+              tvDateTime:
+                AsDateTime := (vValue as TmValueDate).Value;
+              tvInteger:
+                AsInteger := (vValue as TmValueInt).Value;
+              tvFloat:
+                AsFloat := (vValue as TmValueFloat).Value;
+              tvString:
+                AsString := (vValue as TmValueStr).Value;
+              tvVariant:
+                AsVariant := (vValue as TmValueVar).Value;
             end;
           end;
         end;
@@ -161,7 +153,7 @@ end;
 class function TmDataSet.GetCollection(ADataSet: TDataSet; AItemClass:
   TCollectionItemClass): TCollection;
 var
-  vValues : TmPropertyList;
+  vValues : TmValueList;
   vRecNo : Integer;
 begin
   Result := TCollection.Create(AItemClass);
@@ -189,7 +181,7 @@ class procedure TmDataSet.SetCollection(ADataSet: TDataSet; ACollection:
   TCollection);
 var
   vNotify : TmDataSet_Notify;
-  vValues : TmPropertyList;
+  vValues : TmValueList;
   I : Integer;
 begin
   with ADataSet do begin

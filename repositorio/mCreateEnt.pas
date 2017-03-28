@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils,
-  mCollectionMap, mProperty, mContexto, mObjeto, mClasse, mString;
+  mCollectionMap, mValue, mContexto, mObjeto, mClasse, mString;
 
 type
   TmCreateEnt = class(TComponent)
@@ -127,7 +127,7 @@ end;
 
 function TmCreateEnt.GetTipo;
 var
-  vProperties : TmPropertyList;
+  vProperties : TmValueList;
   I : Integer;
 begin
   Result := '';
@@ -138,7 +138,7 @@ begin
     for I := 0 to Count - 1 do
       with Items[I] do
         if Nome = AProperty.PropName then
-          Result := TipoDatabase;
+          Result := TipoBase;
 
   if Pos('{tamanho}', Result) > 0 then
     Result := AnsiReplaceStr(Result, '{tamanho}', IntToStr(AProperty.Length));
@@ -177,7 +177,7 @@ var
   begin
     Result := False;
     for J := 0 to vProperties.Count - 1 do
-      with TmProperty(vProperties[J]) do
+      with TmValue(vProperties[J]) do
         if ANome = Nome then begin
           Result := True;
           Exit;

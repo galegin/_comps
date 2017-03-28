@@ -4,18 +4,18 @@ interface
 
 uses
   Classes, SysUtils, StrUtils,
-  mProperty, mSelect, mObjeto;
+  mValue, mSelect, mObjeto;
 
 type
   TmComando = class(TmSelect)
   protected
     class function GetCampos(AObject : TObject) : String;
     class function GetValues(AObject : TObject) : String;
-    class function GetSets(AObject : TObject; AWheres : TmPropertyList) : String;
+    class function GetSets(AObject : TObject; AWheres : TmValueList) : String;
   public
     class function GetInsert(AObject : TObject) : String;
-    class function GetUpdate(AObject : TObject; AWheres : TmPropertyList) : String;
-    class function GetDelete(AObject : TObject; AWheres : TmPropertyList) : String;
+    class function GetUpdate(AObject : TObject; AWheres : TmValueList) : String;
+    class function GetDelete(AObject : TObject; AWheres : TmValueList) : String;
   end;
 
 implementation
@@ -26,54 +26,54 @@ implementation
 
 class function TmComando.GetCampos(AObject : TObject) : String;
 var
-  vProperties : TmPropertyList;
+  vValues : TmValueList;
   I : Integer;
 begin
   Result := '';
 
-  vProperties := TmObjeto.GetValues(AObject);
+  vValues := TmObjeto.GetValues(AObject);
 
-  with vProperties do
+  with vValues do
     for I := 0 to Count - 1 do
       with Items[I] do
-        if IsValueDatabase and IsValueStore then
+        if Items[I] is TmValueBase and IsStore then
           Result := Result + IfThen(Result <> '', ', ', '') + UpperCase(Nome);
 end;
 
 class function TmComando.GetValues(AObject : TObject) : String;
 var
-  vProperties : TmPropertyList;
+  vValues : TmValueList;
   I : Integer;
 begin
   Result := '';
 
-  vProperties := TmObjeto.GetValues(AObject);
+  vValues := TmObjeto.GetValues(AObject);
 
-  with vProperties do
+  with vValues do
     for I := 0 to Count - 1 do
       with Items[I] do
-        if IsValueDatabase and IsValueStore then
-          Result := Result + IfThen(Result <> '', ', ', '') + ValueDatabase;
+        if Items[I] is TmValueBase and IsStore then
+          Result := Result + IfThen(Result <> '', ', ', '') + ValueBase;
 end;
 
-class function TmComando.GetSets(AObject : TObject; AWheres : TmPropertyList) : String;
+class function TmComando.GetSets(AObject : TObject; AWheres : TmValueList) : String;
 var
-  vProperties : TmPropertyList;
-  vWhere : TmProperty;
+  vValues : TmValueList;
+  vWhere : TmValue;
   I : Integer;
 begin
   Result := '';
 
-  vProperties := TmObjeto.GetValues(AObject);
+  vValues := TmObjeto.GetValues(AObject);
 
-  with vProperties do
+  with vValues do
     for I := 0 to Count - 1 do begin
       with Items[I] do
-        if IsValueDatabase and IsValueStore then begin
-          vWhere := AWheres.IndexOf(Items[I].Nome);
+        if Items[I] is TmValueBase and IsStore then begin
+          vWhere := AWheres.IndexOf(Nome);
           if vWhere = nil then
             Result := Result + IfThen(Result <> '', ', ', '') +
-              UpperCase(Nome) + ' = ' + ValueDatabase;
+              UpperCase(Nome) + ' = ' + ValueBase;
         end;
     end;
 end;
@@ -88,7 +88,7 @@ begin
   Result := AnsiReplaceStr(Result, '{values}', GetValues(AObject));
 end;
 
-class function TmComando.GetUpdate(AObject: TObject; AWheres: TmPropertyList): String;
+class function TmComando.GetUpdate(AObject: TObject; AWheres: TmValueList): String;
 begin
   Result := 'update {entidade} set {sets} /*WHERE*/';
   Result := AnsiReplaceStr(Result, '{entidade}', GetEntidade(AObject));
@@ -96,7 +96,7 @@ begin
   Result := AnsiReplaceStr(Result, '/*WHERE*/', GetWheres(AObject, AWheres));
 end;
 
-class function TmComando.GetDelete(AObject: TObject; AWheres: TmPropertyList): String;
+class function TmComando.GetDelete(AObject: TObject; AWheres: TmValueList): String;
 begin
   Result := 'delete from {entidade} /*WHERE*/';
   Result := AnsiReplaceStr(Result, '{entidade}', GetEntidade(AObject));

@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, SysUtils,
-  mProperty, mObjeto,
+  mValue, mObjeto,
   ulkJSON;
 
 type
@@ -21,8 +21,8 @@ implementation
 class function TmObjetoJson.ObjetoToJson(AObjeto : TObject) : String;
 var
   vJSONobject : TlkJSONobject;
-  vValues : TmPropertyList;
-  vValue : TmProperty;
+  vValues : TmValueList;
+  vValue : TmValue;
   I : Integer;
 begin
   vValues := TmObjeto.GetValues(AObjeto);
@@ -30,33 +30,33 @@ begin
   vJSONobject := TlkJSONobject.Create();
 
   for I := 0 to vValues.Count - 1 do begin
-    vValue := TmProperty(vValues[I]);
+    vValue := TmValue(vValues[I]);
 
     with vValue do begin
       case Tipo of
-        tppBoolean: begin
-          vJSONobject.Add(Nome, TlkJSONboolean.Generate(ValueBoolean));
+        tvBoolean: begin
+          vJSONobject.Add(Nome, TlkJSONboolean.Generate((vValue as TmValueBool).Value));
         end;
-        tppDateTime: begin
-          vJSONobject.Add(Nome, TlkJSONstring.Generate(ValueStr));
+        tvDateTime: begin
+          vJSONobject.Add(Nome, TlkJSONstring.Generate((vValue as TmValueStr).Value));
         end;
-        tppFloat: begin
-          vJSONobject.Add(Nome, TlkJSONnumber.Generate(ValueFloat));
+        tvFloat: begin
+          vJSONobject.Add(Nome, TlkJSONnumber.Generate((vValue as TmValueFloat).Value));
         end;
-        tppInteger: begin
-          vJSONobject.Add(Nome, TlkJSONnumber.Generate(ValueInteger));
+        tvInteger: begin
+          vJSONobject.Add(Nome, TlkJSONnumber.Generate((vValue as TmValueInt).Value));
         end;
-        tppObject: begin
-          //vJSONobject.Add(Nome, ValueToJson(ValueObject));
+        tvObject: begin
+          //vJSONobject.Add(Nome, ValueToJson((vValue as TmValueObj).Value));
         end;
-        tppList: begin
-          //vJSONobject.Add(Nome, TlkJSONlist.Generate(ValueList));
+        tvList: begin
+          //vJSONobject.Add(Nome, TlkJSONlist.Generate((vValue as TmValueLst).Value));
         end;
-        tppString: begin
-          vJSONobject.Add(Nome, TlkJSONstring.Generate(ValueString));
+        tvString: begin
+          vJSONobject.Add(Nome, TlkJSONstring.Generate((vValue as TmValueStr).Value));
         end;
-        tppVariant: begin
-          vJSONobject.Add(Nome, TlkJSONstring.Generate(ValueStr));
+        tvVariant: begin
+          vJSONobject.Add(Nome, TlkJSONstring.Generate((vValue as TmValueVar).Value));
         end;
       end;
     end;
@@ -71,8 +71,8 @@ end;
 class function TmObjetoJson.JsonToObjeto(AClasse : TClass; AJson : String) : TObject;
 var
   vJSONobject : TlkJSONobject;
-  vValues : TmPropertyList;
-  vValue : TmProperty;
+  vValues : TmValueList;
+  vValue : TmValue;
   I : Integer;
 begin
   Result := AClasse.NewInstance;
@@ -82,57 +82,57 @@ begin
   vJSONobject := TlkJSON.ParseText(AJson) as TlkJSONobject;
 
   for I := 0 to vValues.Count - 1 do begin
-    vValue := TmProperty(vValues[I]);
+    vValue := TmValue(vValues[I]);
 
     with vValue do begin
       case Tipo of
-        tppBoolean: begin
+        tvBoolean: begin
           if not (vJSONobject.Field[Nome] is TlkJSONnull) then
-            ValueBoolean := vJSONobject.getBoolean(Nome)
+            (vValue as TmValueBool).Value := vJSONobject.getBoolean(Nome)
           else
-            ValueBoolean := False;
+            (vValue as TmValueBool).Value := False;
         end;
-        tppDateTime: begin
+        tvDateTime: begin
           if not (vJSONobject.Field[Nome] is TlkJSONnull) then
-            ValueDatabase := vJSONobject.getString(Nome)
+            (vValue as TmValueDate).Value := vJSONobject.getDouble(Nome)
           else
-            ValueDateTime := 0;
+            (vValue as TmValueDate).Value := 0;
         end;
-        tppFloat: begin
+        tvFloat: begin
           if not (vJSONobject.Field[Nome] is TlkJSONnull) then
-            ValueFloat := vJSONobject.getDouble(Nome)
+            (vValue as TmValueFloat).Value := vJSONobject.getDouble(Nome)
           else
-            ValueFloat := 0;
+            (vValue as TmValueFloat).Value := 0;
         end;
-        tppInteger: begin
+        tvInteger: begin
           if not (vJSONobject.Field[Nome] is TlkJSONnull) then
-            ValueInteger := vJSONobject.getInt(Nome)
+            (vValue as TmValueInt).Value := vJSONobject.getInt(Nome)
           else
-            ValueInteger := 0;
+            (vValue as TmValueInt).Value := 0;
         end;
-        tppObject: begin
+        tvObject: begin
           (* if not (vJSONobject.Field[Nome] is TlkJSONnull) then
-            ValueObject := vJSONobject.getObject(Nome)
+            (vValue as TmValueObj).Value := vJSONobject.getObject(Nome)
           else
-            ValueObject := nil; *)
+            (vValue as TmValueObj).Value :=  := nil; *)
         end;
-        tppList: begin
+        tvList: begin
           (* if not (vJSONobject.Field[Nome] is TlkJSONnull) then
-            ValueList := vJSONobject.getList(Nome);
+            (vValue as TmValueLst).Value := vJSONobject.getList(Nome);
           else
-            ValueList := nil; *)
+            (vValue as TmValueLst).Value := nil; *)
         end;
-        tppString: begin
+        tvString: begin
           if not (vJSONobject.Field[Nome] is TlkJSONnull) then
-            ValueString := vJSONobject.getString(Nome)
+            (vValue as TmValueStr).Value := vJSONobject.getString(Nome)
           else
-            ValueString := '';
+            (vValue as TmValueStr).Value := '';
         end;
-        tppVariant: begin
+        tvVariant: begin
           if not (vJSONobject.Field[Nome] is TlkJSONnull) then
-            ValueVariant := vJSONobject.getString(Nome)
+            (vValue as TmValueVar).Value := vJSONobject.getString(Nome)
           else
-            ValueVariant := '';
+            (vValue as TmValueVar).Value := '';
         end;
 
       end;

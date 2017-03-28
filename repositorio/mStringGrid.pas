@@ -6,15 +6,15 @@ interface
 
 uses
   Classes, SysUtils, StrUtils, Grids, DB,
-  mProperty, mObjeto, mClasse;
+  mValue, mObjeto, mClasse;
 
 type
   TmStringGrid = class(TComponent)
   private
     class function GetPropertiesClass(
-      ACollectionItemClass : TCollectionItemClass) : TmPropertyList;
+      ACollectionItemClass : TCollectionItemClass) : TmValueList;
     class function GetProperties(
-      ACollectionItem : TCollectionItem) : TmPropertyList;
+      ACollectionItem : TCollectionItem) : TmValueList;
   public
     class procedure ClrCollection(
       AStringGrid : TStringGrid; ACollection : TCollection);
@@ -40,10 +40,10 @@ var
 
 class function TmStringGrid.GetPropertiesClass;
 var
-  vProperties : TmPropertyList;
+  vProperties : TmValueList;
   I : Integer;
 begin
-  Result := TmPropertyList.Create;
+  Result := TmValueList.Create;
   vProperties := TmClasse.GetProperties(ACollectionItemClass);
   with vProperties do
     for I := 0 to Count - 1 do
@@ -54,10 +54,10 @@ end;
 
 class function TmStringGrid.GetProperties;
 var
-  vProperties : TmPropertyList;
+  vProperties : TmValueList;
   I : Integer;
 begin
-  Result := TmPropertyList.Create;
+  Result := TmValueList.Create;
   vProperties := TmObjeto.GetValues(ACollectionItem);
   with vProperties do
     for I := 0 to Count - 1 do
@@ -70,7 +70,7 @@ end;
 
 class procedure TmStringGrid.ClrCollection;
 var
-  vProperties : TmPropertyList;
+  vProperties : TmValueList;
   C : Integer;
 begin
   vProperties := GetPropertiesClass(ACollection.ItemClass);
@@ -91,7 +91,7 @@ end;
 
 class procedure TmStringGrid.SetCollection;
 var
-  vProperties : TmPropertyList;
+  vProperties : TmValueList;
   C, R : Integer;
 begin
   ClrCollection(AStringGrid, ACollection);

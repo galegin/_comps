@@ -5,7 +5,8 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, DB, mFrameIntf, mOrientacaoFrame, mTipoCampo, mPanel,
-  mGrade, mLabel, mButton, mCheckBox, mComboBox, mTextBox, mKeyValue;
+  mGrade, mLabel, mButton, mCheckBox, mComboBox, mTextBox, mKeyValue,
+  mTipoFormato, mValue;
 
 type
   TmFrame = class(TFrame, TmFrameIntf)
@@ -44,7 +45,8 @@ type
       ALargura : Integer;
       AEntidade : TCollectionItem;
       ACampo : String;
-      ATipo : TTipoCampo) : TmTextBox;
+      ATipo : TTipoValue;
+      AFormato : TTipoFormato) : TmTextBox;
   published
     property Orientacao : TOrientacaoFrame read fOrientacao write fOrientacao;
   end;
@@ -98,7 +100,7 @@ end;
 
 function TmFrame.AddTextBox;
 begin
-  Result := TmFormControl.AddTextBox(Owner, Self, ALargura, AEntidade, ACampo, ATipo);
+  Result := TmFormControl.AddTextBox(Owner, Self, ALargura, AEntidade, ACampo, ATipo, AFormato);
 end;
 
 end.

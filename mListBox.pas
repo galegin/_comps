@@ -12,6 +12,8 @@ type
   private
     FCampo: String;
     FLista : TmKeyValueList;
+    procedure ClrLista;
+    procedure AddLista(const Value: TmKeyValue);
     procedure SetLista(const Value: TmKeyValueList);
     function GetValue: TmKeyValue;
     procedure SetValue(const Value: TmKeyValue);
@@ -43,17 +45,26 @@ end;
 
 //--
 
+procedure TmListBox.ClrLista;
+begin
+  FLista.Clear;
+  Items.Clear;
+end;
+
+procedure TmListBox.AddLista(const Value: TmKeyValue);
+begin
+  FLista.Add(Value);
+  Items.AddObject(Value.Display, Value);
+end;
+
 procedure TmListBox.SetLista(const Value: TmKeyValueList);
 var
   I : Integer;
 begin
-  FLista := Value;
-
-  Items.Clear;
-
-  for I := 0 to FLista.Count - 1 do
-    with FLista.Items[I] do
-      Items.AddObject(FLista.Items[I].Display, FLista.Items[I]);
+  ClrLista;
+  with FLista do
+    for I := 0 to Count - 1 do
+      AddLista(Items[I]);
 end;
 
 //--

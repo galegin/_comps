@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, SysUtils, ComCtrls, DB,
-  mCollection, mCollectionItem, mProperty, mClasse, mObjeto, mField;
+  mCollection, mCollectionItem, mValue, mClasse, mObjeto, mField;
 
 type
   TmListView = class(TListView)
@@ -65,8 +65,8 @@ class procedure TmListView.AddItems(AListView : TListView;
   AFields : TmFieldList;
   ACollectionItem : TCollectionItem);
 var
-  vValues : TmPropertyList;
-  vValue : TmProperty;
+  vValues : TmValueList;
+  vValue : TmValue;
   I : Integer;
 begin
   with AListView do begin

@@ -59,7 +59,7 @@ type
 implementation
 
 uses
-  mProperty, mObjeto, mArquivo, mPath, mJson;
+  mValue, mObjeto, mArquivo, mPath, mJson;
 
 var
   _instance : TmTipoParametro;

@@ -5,7 +5,8 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, StdCtrls,
   mOrientacaoFrame, mFrame, mPanel, mGrade,
-  mLabel, mButton, mComboBox, mCheckBox, mTextBox, mTipoCampo, mKeyValue;
+  mLabel, mButton, mComboBox, mCheckBox, mTextBox, mTipoCampo, mKeyValue,
+  mTipoFormato, mValue;
 
 type
   TmFormControl = class
@@ -60,7 +61,8 @@ type
       ALargura : Integer;
       AEntidade : TCollectionItem;
       ACampo : String;
-      ATipo : TTipoCampo) : TmTextBox;
+      ATipo : TTipoValue;
+      AFormato : TTipoFormato) : TmTextBox;
 
   published
   end;

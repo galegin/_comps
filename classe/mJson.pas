@@ -17,13 +17,13 @@ type
 implementation
 
 uses
-  mString, mClasse, mProperty, mObjeto;
+  mString, mClasse, mValue, mObjeto;
 
 { TmJson }
 
 class function TmJson.ObjectToJson(AObject: TObject): String;
 var
-  vValues : TmPropertyList;
+  vValues : TmValueList;
   I : Integer;
 begin
   Result := '';
@@ -33,7 +33,7 @@ begin
   with vValues do
     for I := 0 to Count - 1 do
       with Items[I] do
-        if IsValueDatabase then
+        if Items[I] Is TmValueBase then
           Result := Result + IfThen(Result <> '', ',', '') +
             '"' + Nome + '":"' + ValueStr + '"' ;
 
@@ -44,8 +44,8 @@ end;
 class function TmJson.JsonToObject(AClass: TClass; AJson: String): TObject;
 var
   vStringList : TStringList;
-  vValues : TmPropertyList;
-  vValue : TmProperty;
+  vValues : TmValueList;
+  vValue : TmValue;
   vNome, vValor : String;
   I : Integer;
 begin
@@ -67,7 +67,7 @@ begin
     vValor := AnsiReplaceStr(TmString.RightStr(vStringList[I], '":"'), '"', '');
     vValue := vValues.IndexOf(vNome);
     if Assigned(vValue) then
-      vValue.ValueDatabase := vValor;
+      vValue.ValueBase := vValor;
   end;
 
   TmObjeto.SetValues(Result, vValues);
@@ -92,7 +92,7 @@ var
   vStringList : TStringList;
   vObjeto : TObject;
   vCollectionItem : TCollectionItem;
-  vValues : TmPropertyList;
+  vValues : TmValueList;
   I : Integer;
 begin
   vStringList := TStringList.Create;

@@ -4,13 +4,13 @@ interface
 
 uses
   Classes, SysUtils, Controls, StdCtrls,
-  mProperty;
+  mValue;
 
 type
   TmControl = class
   public
-    class function GetValues(AControl : TControl) : TmPropertyList;
-    class procedure SetValues(AControl : TControl; AValues : TmPropertyList);
+    class function GetValues(AControl : TControl) : TmValueList;
+    class procedure SetValues(AControl : TControl; AValues : TmValueList);
     class function NewControlName(AControl: TWinControl; AName: String): String;
     class function ControlNameExists(AControl: TWinControl; AName: String): Boolean;
     class function NewComponentName(AComponent: TComponent; AName: String): String;
@@ -21,80 +21,53 @@ implementation
 
 { TmControl }
 
-class function TmControl.GetValues(AControl: TControl): TmPropertyList;
+class function TmControl.GetValues(AControl: TControl): TmValueList;
 var
   I : Integer;
 begin
-  Result := TmPropertyList.Create;
+  Result := TmValueList.Create;
 
   with AControl do begin
     for I := 0 to ComponentCount - 1 do begin
 
       if Components[I] is TCheckBox then begin
-        with Result.Add, (Components[I] as TCheckBox) do begin
-          Nome := Name;
-          Tipo := tppBoolean;
-          ValueBoolean := Checked;
-        end;
+        Result.Add(TmValueBool.Create(Name, (Components[I] as TCheckBox).Checked));
 
       end else if Components[I] is TComboBox then begin
-        with Result.Add, (Components[I] as TComboBox) do begin
-          Nome := Name;
-          Tipo := tppInteger;
-          ValueInteger := ItemIndex;
-        end;
+        Result.Add(TmValueInt.Create(Name, (Components[I] as TComboBox).ItemIndex));
 
       end else if Components[I] is TEdit then begin
-        with Result.Add, (Components[I] as TEdit) do begin
-          Nome := Name;
-          case TpProperty(Tag) of
-            tppDateTime : begin
-              Tipo := tppDateTime;
-              ValueDateTime := StrToDateTimeDef(Text, 0);
-            end;
-            tppFloat : begin
-              Tipo := tppFloat;
-              ValueFloat := StrToFloatDef(Text, 0);
-            end;
-            tppInteger : begin
-              Tipo := tppInteger;
-              ValueInteger := StrToIntDef(Text, 0);
-            end;
-          else
-            Tipo := tppString;
-            ValueString := Text;
+        case TTipoValue(Tag) of
+          tvDateTime : begin
+            Result.Add(TmValueDate.Create(Name, StrToDateTimeDef((Components[I] as TEdit).Text, 0)));
           end;
+          tvFloat : begin
+            Result.Add(TmValueFloat.Create(Name, StrToFloatDef((Components[I] as TEdit).Text, 0)));
+          end;
+          tvInteger : begin
+            Result.Add(TmValueInt.Create(Name, StrToIntDef((Components[I] as TEdit).Text, 0)));
+          end;
+        else
+          Result.Add(TmValueStr.Create(Name, (Components[I] as TEdit).Text));
         end;
 
       end else if Components[I] is TListBox then begin
-        with Result.Add, (Components[I] as TListBox) do begin
-          Nome := Name;
-          Tipo := tppInteger;
-          ValueInteger := ItemIndex;
-        end;
+        Result.Add(TmValueInt.Create(Name, (Components[I] as TListBox).ItemIndex));
 
       end else if Components[I] is TMemo then begin
-        with Result.Add, (Components[I] as TMemo) do begin
-          Nome := Name;
-          Tipo := tppString;
-          ValueString := Text;
-        end;
+        Result.Add(TmValueStr.Create(Name, (Components[I] as TMemo).Text));
 
       end else if Components[I] is TRadioButton then begin
-        with Result.Add, (Components[I] as TRadioButton) do begin
-          Nome := Name;
-          Tipo := tppBoolean;
-          ValueBoolean := Checked;
-        end;
+        Result.Add(TmValueBool.Create(Name, (Components[I] as TRadioButton).Checked));
 
       end;
     end;
   end;
 end;
 
-class procedure TmControl.SetValues(AControl: TControl; AValues: TmPropertyList);
+class procedure TmControl.SetValues(AControl: TControl; AValues: TmValueList);
 var
-  vValue : TmProperty;
+  vValue : TmValue;
   I : Integer;
 begin
   with AControl do begin
@@ -103,27 +76,27 @@ begin
       if Components[I] is TCheckBox then begin
         with (Components[I] as TCheckBox) do begin
           vValue := AValues.IndexOf(Name);
-          if Assigned(vValue) then
-            Checked := vValue.ValueBoolean;
+          if (vValue is TmValueBool) then
+            Checked := (vValue as TmValueBool).Value;
         end;
 
       end else if Components[I] is TComboBox then begin
         with (Components[I] as TComboBox) do begin
           vValue := AValues.IndexOf(Name);
-          if Assigned(vValue) then
-            ItemIndex := vValue.ValueInteger;
+          if (vValue is TmValueInt) then
+            ItemIndex := (vValue as TmValueInt).Value;
         end;
 
       end else if Components[I] is TEdit then begin
         with (Components[I] as TEdit) do begin
           vValue := AValues.IndexOf(Name);
-          if Assigned(vValue) then begin
-            case TpProperty(Tag) of
-              tppDateTime : Text := DateTimeToStr(vValue.ValueDateTime);
-              tppFloat : Text := FloatToStr(vValue.ValueFloat);
-              tppInteger : Text := IntToStr(vValue.ValueInteger);
+          if (vValue is TmValue) then begin
+            case TTipoValue(Tag) of
+              tvDateTime : Text := vValue.ValueStr;
+              tvFloat : Text := vValue.ValueStr;
+              tvInteger : Text := vValue.ValueStr;
             else
-              Text := vValue.ValueString;
+              Text := vValue.ValueStr;
             end;
           end;
         end;
@@ -131,22 +104,22 @@ begin
       end else if Components[I] is TListBox then begin
         with (Components[I] as TListBox) do begin
           vValue := AValues.IndexOf(Name);
-          if Assigned(vValue) then
-            ItemIndex := vValue.ValueInteger;
+          if (vValue is TmValueInt) then
+            ItemIndex := (vValue as TmValueInt).Value;
         end;
 
       end else if Components[I] is TMemo then begin
         with (Components[I] as TMemo) do begin
           vValue := AValues.IndexOf(Name);
-          if Assigned(vValue) then
-            Text := vValue.ValueString;
+          if (vValue is TmValueStr) then
+            Text := (vValue as TmValueStr).Value;
         end;
 
       end else if Components[I] is TRadioButton then begin
         with (Components[I] as TRadioButton) do begin
           vValue := AValues.IndexOf(Name);
-          if Assigned(vValue) then
-            Checked := vValue.ValueBoolean;
+          if (vValue is TmValueBool) then
+            Checked := (vValue as TmValueBool).Value;
         end;
 
       end;

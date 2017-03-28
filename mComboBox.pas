@@ -15,6 +15,8 @@ type
     FCampo : String;
     FMover : Boolean;
     FLista : TmKeyValueList;
+    procedure ClrLista;
+    procedure AddLista(const Value: TmKeyValue);
     procedure SetLista(const Value: TmKeyValueList);
     function GetValue: TmKeyValue;
     procedure SetValue(const Value: TmKeyValue);
@@ -25,8 +27,6 @@ type
   public
     constructor create(AOwner: TComponent); overload; override;
     constructor create(AOwner : TComponent; AParent : TWinControl); overload;
-    procedure ClrLista;
-    procedure AddLista(const Value: TmKeyValue);
     procedure SetListaArray(const Value: Array Of TmKeyValue);
   published
     property _Label : TObject read FLabel write FLabel;

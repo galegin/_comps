@@ -11,12 +11,12 @@ type
     tsLabelRequerido,
     tsButton,
     tsButtonRequerido,
-    tsEdit,
-    tsEditRequerido,
     tsCheckBox,
     tsCheckBoxRequerido,
     tsComboBox,
-    tsComboBoxRequerido
+    tsComboBoxRequerido,
+    tsTextBox,
+    tsTextBoxRequerido
   );
 
   RTipoEstilo = record
@@ -40,12 +40,12 @@ const
     (Tipo: tsLabelRequerido   ; Codigo: 'tsLabelRequerido'   ; Classe: TLabel   ; Requerido: True ; Altura: 32; Largura: 157),
     (Tipo: tsButton           ; Codigo: 'tsButton'           ; Classe: TButton  ; Requerido: False; Altura: 32; Largura: 157),
     (Tipo: tsButtonRequerido  ; Codigo: 'tsButtonRequerido'  ; Classe: TButton  ; Requerido: True ; Altura: 32; Largura: 157),
-    (Tipo: tsEdit             ; Codigo: 'tsEdit'             ; Classe: TEdit    ; Requerido: False; Altura: 32; Largura: 157),
-    (Tipo: tsEditRequerido    ; Codigo: 'tsEditRequerido'    ; Classe: TEdit    ; Requerido: True ; Altura: 32; Largura: 157),
     (Tipo: tsCheckBox         ; Codigo: 'tsCheckBox'         ; Classe: TCheckBox; Requerido: False; Altura: 32; Largura: 157),
     (Tipo: tsCheckBoxRequerido; Codigo: 'tsCheckBoxRequerido'; Classe: TCheckBox; Requerido: True ; Altura: 32; Largura: 157),
     (Tipo: tsComboBox         ; Codigo: 'tsComboBox'         ; Classe: TComboBox; Requerido: False; Altura: 32; Largura: 157),
-    (Tipo: tsComboBoxRequerido; Codigo: 'tsComboBoxRequerido'; Classe: TComboBox; Requerido: True ; Altura: 32; Largura: 157)
+    (Tipo: tsComboBoxRequerido; Codigo: 'tsComboBoxRequerido'; Classe: TComboBox; Requerido: True ; Altura: 32; Largura: 157),
+    (Tipo: tsTextBox          ; Codigo: 'tsTextBox'          ; Classe: TEdit    ; Requerido: False; Altura: 32; Largura: 157),
+    (Tipo: tsTextBoxRequerido ; Codigo: 'tsTextBoxRequerido' ; Classe: TEdit    ; Requerido: True ; Altura: 32; Largura: 157)
   );
 
 function GetTipoEstilo(const s : string) : RTipoEstilo;

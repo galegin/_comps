@@ -4,13 +4,13 @@ interface
 
 uses
   Classes, SysUtils, TypInfo, Math, 
-  mProperty;
+  mValue;
 
 type
   TmClasse = class
   public
     class function CreateObjeto(AClass: TClass; AOwner : TComponent) : TObject;
-    class function GetProperties(AClass: TClass): TmPropertyList;
+    class function GetProperties(AClass: TClass): TmValueList;
   end;
 
   TCollectionClass = class of TCollection;
@@ -41,14 +41,17 @@ begin
   end;
 end;
 
-class function TmClasse.GetProperties(AClass: TClass): TmPropertyList;
+class function TmClasse.GetProperties(AClass: TClass): TmValueList;
 var
   Count, Size, I : Integer;
   PropInfo : PPropInfo;
   List : PPropList;
   Key : Boolean;
+  Nome : String;
+  TipoBase : String;
+  TipoField : TTipoField;
 begin
-  Result := TmPropertyList.Create;
+  Result := TmValueList.Create;
   Count := GetPropList(AClass.ClassInfo, tkProperties, nil, False);
   Size := Count * SizeOf(Pointer);
   GetMem(List, Size);
@@ -58,37 +61,33 @@ begin
     for I:=0 to Count-1 do begin
       PropInfo := List^[I];
       if (PropInfo^.PropType^.Kind in tkProperties) then begin
-        with Result.Add do begin
-          Nome := PropInfo^.Name;
-          TipoBase := PropInfo^.PropType^.Name;
+        Nome := PropInfo^.Name;
+        TipoBase := PropInfo^.PropType^.Name;
 
-          if LowerCase(Nome) = 'u_version' then
-            Key := False;
+        if LowerCase(Nome) = 'u_version' then
+          Key := False;
 
-          TipoField := TpField(IfThen(Key, Ord(tpfKey), Ord(tpfNul)));
+        TipoField := TTipoField(IfThen(Key, Ord(tfKey), Ord(tfNul)));
 
-          case PropInfo^.PropType^.Kind of
-            tkEnumeration: begin
-              if GetTypeData(PropInfo^.PropType^)^.BaseType^ = TypeInfo(Boolean) then begin
-                Tipo := tppBoolean;
-              end;
-            end;
-            tkString, tkLString, tkWString: begin
-              Tipo := tppString;
-            end;
-            tkInteger: begin
-              Tipo := tppInteger;
-            end;
-            tkFloat: begin
-              if TipoBase = 'TDateTime' then begin
-                Tipo := tppDateTime;
-              end else if TipoBase = 'Real' then begin
-                Tipo := tppFloat;
-              end;
-            end;
-          else
-            Tipo := tppObject;
+        case PropInfo^.PropType^.Kind of
+          tkEnumeration: begin
+            if GetTypeData(PropInfo^.PropType^)^.BaseType^ = TypeInfo(Boolean) then
+              Result.Add(TmValueBool.Create(Nome, False)).TipoField := TipoField;
           end;
+          tkFloat: begin
+            if TipoBase = 'TDateTime' then
+              Result.Add(TmValueDate.Create(Nome, 0)).TipoField := TipoField
+            else if TipoBase = 'Real' then
+              Result.Add(TmValueFloat.Create(Nome, 0)).TipoField := TipoField;
+          end;
+          tkInteger: begin
+            Result.Add(TmValueInt.Create(Nome, 0)).TipoField := TipoField;
+          end;
+          tkString, tkLString, {tkUString,} tkWString: begin
+            Result.Add(TmValueStr.Create(Nome, '')).TipoField := TipoField;
+          end;
+        else
+          Result.Add(TmValueObj.Create(Nome, nil)).TipoField := TipoField;
         end;
       end;
     end;

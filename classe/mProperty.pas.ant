@@ -3,10 +3,10 @@ unit mProperty;
 interface
 
 uses
-  Classes, SysUtils, StrUtils,
-  mParametroDatabase, mTipoCampo, mString;
+  Classes, SysUtils, StrUtils (*,
+  mParametroDatabase, mTipoCampo, mString*);
 
-type
+(* type
   TmProperty = class;
   TmPropertyClass = class of TmProperty;
 
@@ -93,13 +93,13 @@ type
     function Add : TmProperty; overload;
     function IndexOf(ANome : String) : TmProperty;
     property Items[Index: Integer] : TmProperty read GetItem write SetItem;
-  end;
+  end; *)
 
 implementation
 
 { TmProperty }
 
-function TmProperty.GetIsValueDatabase: Boolean;
+(* function TmProperty.GetIsValueDatabase: Boolean;
 begin
   Result := (Tipo in [tppBoolean, tppDateTime, tppEnum, tppInteger, tppFloat,
     tppString, tppVariant]);
@@ -226,6 +226,26 @@ begin
   end;
 end;
 
+procedure TmProperty.SetValueDatabase(const Value: String);
+begin
+  case Tipo of
+    tppBoolean:
+      ValueBoolean := (Value = 'T');
+    tppDateTime:
+      ValueDateTime := StrToDateTimeDef(Value, 0);
+    tppInteger:
+      ValueInteger := StrToIntDef(Value, 0);
+    tppEnum:
+      ValueInteger := StrToIntDef(Value, 0);
+    tppFloat:
+      ValueFloat := StrToFloatDef(Value, 0);
+    tppString:
+      ValueString := Value;
+    tppVariant:
+      ValueVariant := Value;
+  end;
+end;
+
 function TmProperty.GetValueIntegracao: String;
 begin
   case Tipo of
@@ -270,26 +290,6 @@ begin
   end;
 end;
 
-procedure TmProperty.SetValueDatabase(const Value: String);
-begin
-  case Tipo of
-    tppBoolean:
-      ValueBoolean := (Value = 'T');
-    tppDateTime:
-      ValueDateTime := StrToDateTimeDef(Value, 0);
-    tppInteger:
-      ValueInteger := StrToIntDef(Value, 0);
-    tppEnum:
-      ValueInteger := StrToIntDef(Value, 0);
-    tppFloat:
-      ValueFloat := StrToFloatDef(Value, 0);
-    tppString:
-      ValueString := Value;
-    tppVariant:
-      ValueVariant := Value;
-  end;
-end;
-
 procedure TmProperty.SetNome(const Value: String);
 begin
   fNome := Value;
@@ -325,6 +325,6 @@ begin
         Result := TmProperty(Self[I]);
         Exit;
       end;
-end;
+end; *)
 
 end.

@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, Controls, StdCtrls,
-  mFieldCtrl, mProperty, mTipoPosition, mTipoMarging;
+  mFieldCtrl, mValue, mTipoPosition, mTipoMarging;
 
 type
   TmFieldControl = class
@@ -23,8 +23,8 @@ type
     class procedure SetComboBox(AField : TmFieldCtrl);
     class procedure SetTextBox(AField : TmFieldCtrl);
 
-    class function GetValues(AControl : TControl; AFields : TmFieldCtrlList) : TmPropertyList;
-    class procedure SetValues(AControl : TControl; AFields : TmFieldCtrlList; AValues : TmPropertyList);
+    class function GetValues(AControl : TControl; AFields : TmFieldCtrlList) : TmValueList;
+    class procedure SetValues(AControl : TControl; AFields : TmFieldCtrlList; AValues : TmValueList);
   end;
 
 implementation
@@ -185,32 +185,25 @@ class function TmFieldControl.GetValues;
 var
   I : Integer;
 begin
-  Result := TmPropertyList.Create;
+  Result := TmValueList.Create;
 
   for I := 0 to AFields.Count - 1 do begin
     with AFields.Items[I] do begin
 
       if Assigned(Binding.Entidade) then begin
-        with Result.Add do begin
 
-          Nome := Binding.Campo;
-
-          case AFields.Items[I].Tipo of
-            mFieldCtrl.tfCheckBox : begin
-              Tipo := tppBoolean;
-              ValueBoolean := (Control as TmCheckBox).Checked;
-            end;
-            mFieldCtrl.tfComboBox : begin
-              Tipo := tppInteger;
-              ValueInteger := (Control as TmComboBox).ItemIndex;
-            end;
-            mFieldCtrl.tfTextBox : begin
-              Tipo := tppBoolean;
-              ValueString := (Control as TmTextBox)._Value;
-            end;
+        case AFields.Items[I].Tipo of
+          mFieldCtrl.tfCheckBox : begin
+            Result.Add(TmValueBool.Create(Binding.Campo, (Control as TmCheckBox).Checked));
           end;
-          
+          mFieldCtrl.tfComboBox : begin
+            Result.Add(TmValueInt.Create(Binding.Campo, (Control as TmComboBox).ItemIndex));
+          end;
+          mFieldCtrl.tfTextBox : begin
+            Result.Add(TmValueStr.Create(Binding.Campo, (Control as TmTextBox)._Value));
+          end;
         end;
+
       end;
 
     end;
@@ -220,7 +213,7 @@ end;
 
 class procedure TmFieldControl.SetValues;
 var
-  vValue : TmProperty;
+  vValue : TmValue;
   I : Integer;
 begin
   for I := 0 to AFields.Count - 1 do begin
@@ -232,11 +225,11 @@ begin
 
         case AFields.Items[I].Tipo of
           mFieldCtrl.tfCheckBox :
-            (Control as TmCheckBox).Checked := vValue.ValueBoolean;
+            (Control as TmCheckBox).Checked := (vValue as TmValueBool).Value;
           mFieldCtrl.tfComboBox :
-            (Control as TmComboBox).ItemIndex := vValue.ValueInteger;
+            (Control as TmComboBox).ItemIndex := (vValue as TmValueInt).Value;
           mFieldCtrl.tfTextBox :
-            (Control as TmTextBox)._Value := vValue.ValueString;
+            (Control as TmTextBox)._Value := (vValue as TmValueStr).Value;
         end;
 
       end;

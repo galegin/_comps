@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils,
-  mProperty;
+  mValue;
 
 type
   TmFilter = class;
@@ -29,10 +29,10 @@ type
   TmFilter = class
   private
     fNome: String;
-    fFinal: TmProperty;
-    fInicial: TmProperty;
+    fFinal: TmValue;
+    fInicial: TmValue;
     fTipo: TTipoFilter;
-    function GetValueDatabase: String;
+    function GetValueBase: String;
   public
     constructor Create(ANome : String; ATipo : TTipoFilter); overload;
 
@@ -57,10 +57,10 @@ type
 
     property Nome : String read fNome write fNome;
     property Tipo : TTipoFilter read fTipo write fTipo;
-    property Inicial : TmProperty read fInicial write fInicial;
-    property Final : TmProperty read fFinal write fFinal;
+    property Inicial : TmValue read fInicial write fInicial;
+    property Final : TmValue read fFinal write fFinal;
 
-    property ValueDatabase : String read GetValueDatabase;
+    property ValueBase : String read GetValueBase;
   end;
 
   TmFilterList = class(TList)
@@ -80,8 +80,8 @@ constructor TmFilter.Create(ANome: String; ATipo: TTipoFilter);
 begin
   Nome := ANome;
   Tipo := ATipo;
-  Inicial := TmProperty.Create;
-  Final := TmProperty.Create;
+  Inicial := TmValue.Create;
+  Final := TmValue.Create;
 end;
 
 //-- boolean
@@ -89,8 +89,7 @@ end;
 constructor TmFilter.CreateB(ANome: String; ATipo: TTipoFilter; AInicial: Boolean);
 begin
   Create(ANome, ATipo);
-  Inicial.Tipo := tppBoolean;
-  Inicial.ValueBoolean := AInicial;
+  Inicial := TmValueBool.Create(ANome, AInicial);
 end;
 
 constructor TmFilter.CreateB(ANome: String; AInicial: Boolean);
@@ -103,15 +102,13 @@ end;
 constructor TmFilter.CreateD(ANome : String; ATipo : TTipoFilter; AInicial : TDateTime);
 begin
   Create(ANome, ATipo);
-  Inicial.Tipo := tppDateTime;
-  Inicial.ValueDateTime := AInicial;
+  Inicial := TmValueDate.Create(ANome, AInicial);
 end;
 
 constructor TmFilter.CreateD(ANome : String; AInicial : TDateTime; AFinal : TDateTime);
 begin
   CreateD(ANome, tpfIntervalo, AInicial);
-  Final.Tipo := tppDateTime;
-  Final.ValueDateTime := AFinal;
+  Final := TmValueDate.Create(ANome, AFinal);
 end;
 
 constructor TmFilter.CreateD(ANome: String; AInicial: TDateTime);
@@ -124,15 +121,13 @@ end;
 constructor TmFilter.CreateF(ANome : String; ATipo : TTipoFilter; AInicial : Real);
 begin
   Create(ANome, ATipo);
-  Inicial.Tipo := tppFloat;
-  Inicial.ValueFloat := AInicial;
+  Inicial := TmValueFloat.Create(ANome, AInicial);
 end;
 
 constructor TmFilter.CreateF(ANome : String; AInicial : Real; AFinal : Real);
 begin
   CreateF(ANome, tpfIntervalo, AInicial);
-  Final.Tipo := tppFloat;
-  Final.ValueFloat := AFinal;
+  Final := TmValueFloat.Create(ANome, AFinal);
 end;
 
 constructor TmFilter.CreateF(ANome: String; AInicial: Real);
@@ -145,15 +140,13 @@ end;
 constructor TmFilter.CreateI(ANome : String; ATipo : TTipoFilter; AInicial : Integer);
 begin
   Create(ANome, ATipo);
-  Inicial.Tipo := tppDateTime;
-  Inicial.ValueInteger := AInicial;
+  Inicial := TmValueInt.Create(ANome, AInicial);
 end;
 
 constructor TmFilter.CreateI(ANome : String; AInicial : Integer; AFinal : Integer);
 begin
   CreateI(ANome, tpfIntervalo, AInicial);
-  Final.Tipo := tppInteger;
-  Final.ValueInteger := AFinal;
+  Final := TmValueInt.Create(ANome, AFinal);
 end;
 
 constructor TmFilter.CreateI(ANome: String; AInicial: Integer);
@@ -166,15 +159,13 @@ end;
 constructor TmFilter.CreateS(ANome : String; ATipo : TTipoFilter; AInicial : String);
 begin
   Create(ANome, ATipo);
-  Inicial.Tipo := tppString;
-  Inicial.ValueString := AInicial;
+  Inicial := TmValueStr.Create(ANome, AInicial);
 end;
 
 constructor TmFilter.CreateS(ANome : String; AInicial : String; AFinal : String);
 begin
   CreateS(ANome, tpfIntervalo, AInicial);
-  Final.Tipo := tppString;
-  Final.ValueString := AFinal;
+  Final := TmValueStr.Create(ANome, AFinal);
 end;
 
 constructor TmFilter.CreateS(ANome, AInicial: String);
@@ -198,12 +189,12 @@ const
     '{cod} like {ini}',
     '{cod} in ({ini})');
 
-function TmFilter.GetValueDatabase: String;
+function TmFilter.GetValueBase: String;
 var
   vInicial, vFinal : String;
 begin
-  vInicial := Inicial.ValueDatabase;
-  vFinal := Final.ValueDatabase;
+  vInicial := Inicial.ValueBase;
+  vFinal := Final.ValueBase;
 
   if Tipo in [tpfLista] then begin
     vInicial := AnsiReplaceStr(vInicial, '''', '');

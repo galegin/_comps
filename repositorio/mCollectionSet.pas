@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils, DB,
-  mCollectionCmd, mCollectionItem, mDataSet, mProperty, mSelect, mFilter;
+  mCollectionCmd, mCollectionItem, mDataSet, mValue, mSelect, mFilter;
 
 type
   TmCollectionSet = class(TComponent)
@@ -113,7 +113,7 @@ end;
 function TmCollectionSet.GetSelect;
 var
   vFields, vSql : String;
-  vValues : TmPropertyList;
+  vValues : TmValueList;
   vDataSet : TDataSet;
   I : Integer;
 begin

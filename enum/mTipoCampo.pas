@@ -5,7 +5,7 @@ interface
 uses
   SysUtils, StrUtils;
 
-type
+(* type
   TTipoCampo = (
     tcCodigo,
     tcDataHora,
@@ -34,11 +34,11 @@ type
   function TipoCampoToDes(const t : TTipoCampo) : string;
   function TipoCampoToTam(const t : TTipoCampo) : integer;
   function TipoCampoToDec(const t : TTipoCampo) : integer;
-  function TipoCampoToFmt(const t : TTipoCampo) : string;
+  function TipoCampoToFmt(const t : TTipoCampo) : string; *)
 
 implementation
 
-const
+(* const
   LTipoCampo : Array [TTipoCampo] of RTipoCampo = (
     (Tipo: tcCodigo    ; Codigo: 'Cd_'; Descricao: 'Cod.'; Tamanho: 10; Decimal: 0; Formato: ''),
     (Tipo: tcDataHora  ; Codigo: 'Dt_'; Descricao: 'Dt.' ; Tamanho: 10; Decimal: 0; Formato: 'dd/mm/yyyy'),
@@ -90,6 +90,6 @@ end;
 function TipoCampoToFmt(const t : TTipoCampo) : string;
 begin
   Result := LTipoCampo[TTipoCampo(t)].Formato;
-end;
+end; *)
 
 end.

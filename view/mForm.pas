@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StrUtils, ComCtrls, StdCtrls, ExtCtrls, DB,
   mFormIntf, mOrientacaoFrame, mTipoCampo, mFrame, mPanel, mGrade, mLabel,
-  mButton, mCheckBox, mComboBox, mTextBox, mKeyValue;
+  mButton, mCheckBox, mComboBox, mTextBox, mKeyValue, mTipoFormato, mValue;
 
 type
   TmForm = class(TForm, TmFormIntf)
@@ -47,7 +47,8 @@ type
       ALargura : Integer;
       AEntidade : TCollectionItem;
       ACampo : String;
-      ATipo : TTipoCampo) : TmTextBox;
+      ATipo : TTipoValue;
+      AFormato : TTipoFormato) : TmTextBox;
   published
 
   end;
@@ -106,7 +107,7 @@ end;
 
 function TmForm.AddTextBox;
 begin
-  Result := TmFormControl.AddTextBox(Owner, Self, ALargura, AEntidade, ACampo, ATipo);
+  Result := TmFormControl.AddTextBox(Owner, Self, ALargura, AEntidade, ACampo, ATipo, AFormato);
 end;
 
 end.

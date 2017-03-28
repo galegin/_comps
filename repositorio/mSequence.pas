@@ -6,7 +6,7 @@ uses
   Classes, SysUtils, StrUtils;
 
 type
-  TcSequence = class(TComponent)
+  TmSequence = class(TComponent)
   private
   protected
   public
@@ -22,7 +22,7 @@ type
   published
   end;
 
-  function Instance : TcSequence;
+  function Instance : TmSequence;
 
 implementation
 
@@ -30,21 +30,21 @@ uses
   mModulo;
 
 var
-  _instance : TcSequence;
+  _instance : TmSequence;
 
-  function Instance : TcSequence;
+  function Instance : TmSequence;
   begin
     if not Assigned(_instance) then
-      _instance := TcSequence.Create(nil);
+      _instance := TmSequence.Create(nil);
     Result := _instance;
   end;
 
-constructor TcSequence.Create(AOwner : TComponent);
+constructor TmSequence.Create(AOwner : TComponent);
 begin
   inherited;
 end;
 
-function TcSequence.GetSequencia;
+function TmSequence.GetSequencia;
 var
   vNome : String;
 begin

@@ -5,7 +5,7 @@ interface
 uses
   Classes,
   mOrientacaoFrame, mTipoCampo, mPanel, mGrade, mLabel, mButton,
-  mCheckBox, mComboBox, mTextBox, mKeyValue;
+  mCheckBox, mComboBox, mTextBox, mKeyValue, mValue, mTipoFormato;
 
 type
   TmControlIntf = interface
@@ -40,7 +40,8 @@ type
       ALargura : Integer;
       AEntidade : TCollectionItem;
       ACampo : String;
-      ATipo : TTipoCampo) : TmTextBox;
+      ATipo : TTipoValue;
+      AFormato : TTipoFormato) : TmTextBox;
   end;
 
 implementation

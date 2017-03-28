@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils, DBClient, DB, MidasLib, Math,
-  mProperty, mField;
+  mValue, mField;
 
 type
   TmClientDataSet = class(TComponent)

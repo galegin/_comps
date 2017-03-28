@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils,
-  mProperty, mObjeto, mFilter;
+  mValue, mObjeto, mFilter;
 
 type
   TmSelect = class(TComponent)
@@ -41,44 +41,44 @@ end;
 
 class function TmSelect.GetFields;
 var
-  vProperties : TmPropertyList;
+  vValues : TmValueList;
   I : Integer;
 begin
   Result := '';
 
-  vProperties := TmObjeto.GetValues(AObject);
+  vValues := TmObjeto.GetValues(AObject);
 
-  with vProperties do
+  with vValues do
     for I := 0 to Count - 1 do
       with Items[I] do
-        if IsValueDatabase then
+        if Items[I] is TmValueBase then
           Result := Result + IfThen(Result <> '', ', ', '') +
             UpperCase(Nome);
 end;
 
 class function TmSelect.GetWheres;
 var
-  vProperties : TmPropertyList;
-  vProperty : TmProperty;
+  vValues : TmValueList;
+  vValue : TmValue;
   vObjeto : TObject;
   I : Integer;
 
-  procedure SetarParametroP(AProperty : TmProperty);
+  procedure SetarParametroP(AProperty : TmValue);
   begin
-    vProperty := vProperties.IndexOf(AProperty.Nome);
-    if vProperty <> nil then
-      if vProperty.IsValueDatabase then
+    vValue := vValues.IndexOf(AProperty.Nome);
+    if vValue <> nil then
+      if vValue is TmValueBase then
         Result := Result + IfThen(Result <> '', ' and ', 'where ') +
-          UpperCase(AProperty.Nome) + ' = ' + AProperty.ValueDatabase;
+          UpperCase(AProperty.Nome) + ' = ' + AProperty.ValueBase;
   end;
 
   procedure SetarParametroF(AFilter : TmFilter);
   begin
-    vProperty := vProperties.IndexOf(AFilter.Nome);
-    if vProperty <> nil then
-      if vProperty.IsValueDatabase then
+    vValue := vValues.IndexOf(AFilter.Nome);
+    if vValue <> nil then
+      if vValue is TmValueBase then
         Result := Result + IfThen(Result <> '', ' and ', 'where ') +
-          AFilter.ValueDatabase;
+          AFilter.ValueBase;
   end;  
   
 begin
@@ -87,12 +87,12 @@ begin
   if not Assigned(AWheres) then
     Exit;
 
-  vProperties := TmObjeto.GetValues(AObject);
+  vValues := TmObjeto.GetValues(AObject);
 
   for I := 0 to AWheres.Count - 1 do begin
     vObjeto := AWheres[I];
-    if (vObjeto is TmProperty) then
-      SetarParametroP(vObjeto as TmProperty)
+    if (vObjeto is TmValue) then
+      SetarParametroP(vObjeto as TmValue)
     else if (vObjeto is TmFilter) then
       SetarParametroF(vObjeto as TmFilter);
   end;

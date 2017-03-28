@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils,
-  mProperty;
+  mValue;
 
 type
   TmCollectionCmd = class;
@@ -21,17 +21,17 @@ type
   private
     fCampo : String;
     fTipo : TTipoCollectionCmd;
-    fValor : TmProperty;
+    fValor : TmValue;
     function GetField: String;
   public
     constructor Create; overload;
     constructor Create(ACampo : String; ATipo : TTipoCollectionCmd); overload;
-    constructor Create(ACampo : String; ATipo : TTipoCollectionCmd; AValor : TmProperty); overload;
+    constructor Create(ACampo : String; ATipo : TTipoCollectionCmd; AValor : TmValue); overload;
     function GetComandoSelect() : String;
   published
     property Campo : String read fCampo write fCampo;
     property Tipo : TTipoCollectionCmd read fTipo write fTipo;
-    property Valor : TmProperty read fValor write fValor;
+    property Valor : TmValue read fValor write fValor;
     property Field : String read GetField;
   end;
 
@@ -76,7 +76,7 @@ begin
 end;
 
 constructor TmCollectionCmd.Create(ACampo: String;
-  ATipo: TTipoCollectionCmd; AValor: TmProperty);
+  ATipo: TTipoCollectionCmd; AValor: TmValue);
 begin
   fCampo := ACampo;
   fTipo := ATipo;

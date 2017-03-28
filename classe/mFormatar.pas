@@ -4,12 +4,12 @@ interface
 
 uses
   Classes, SysUtils, StrUtils, TypInfo,
-  mTipoFormatar;
+  mTipoFormato;
 
 type
   TmFormatar = class
   public
-    class function Conteudo(pTip: TTipoFormatar; pCnt : String; pSub : String) : String;
+    class function Conteudo(pTip: TTipoFormato; pCnt : String; pSub : String) : String;
     class function Remover(pCnt : String) : String;
 
     class function Documento(pCnt: String): String;
@@ -28,7 +28,7 @@ implementation
 
 { TmFormatar }
 
-class function TmFormatar.Conteudo(pTip: TTipoFormatar; pCnt: String; pSub: String): String;
+class function TmFormatar.Conteudo(pTip: TTipoFormato; pCnt: String; pSub: String): String;
 begin
   case pTip of
     tfCep:

@@ -5,7 +5,7 @@ interface
 uses
   Classes, SysUtils, DB, StrUtils, TypInfo, Math,
   mCollectionIntf, mConexao, mSelect, mComando, mObjeto, mDataSet,
-  mClasse, mProperty, mJson;
+  mClasse, mValue, mJson;
 
 type
   TmCollection = class;
@@ -103,8 +103,8 @@ var
 begin
   Result := nil;
   vCollectionItem := TmClasse.CreateObjeto(ItemClass, nil) as TmCollectionItem;
-  if (AFiltros is TmPropertyList) then
-    AFiltros := vCollectionItem.ValidateKey(AFiltros as TmPropertyList);
+  if (AFiltros is TmValueList) then
+    AFiltros := vCollectionItem.ValidateKey(AFiltros as TmValueList);
   vSql := TmSelect.GetSelect(vCollectionItem, AFiltros);
   vDataSet := vCollectionItem.Conexao.GetConsulta(vSql);
   with vDataSet do begin
@@ -162,8 +162,8 @@ var
 
   function GetDsChave(AObjeto : TObject) : String;
   var
-    vValues : TmPropertyList;
-    vProperty : TmProperty;
+    vValues : TmValueList;
+    vValue : TmValue;
     J : Integer;
   begin
     Result := '';
@@ -171,10 +171,10 @@ var
     vValues := TmObjeto.GetValues(AObjeto);
 
     for J := Low(ACampos) to High(ACampos) do begin
-      vProperty := vValues.IndexOf(ACampos[J]);
-      if vProperty <> nil then
+      vValue := vValues.IndexOf(ACampos[J]);
+      if vValue <> nil then
         Result := Result + IfThen(Result <> '', '#', '') +
-          vProperty.ValueIntegracao;
+          vValue.ValueInt;
     end;
   end;
 
