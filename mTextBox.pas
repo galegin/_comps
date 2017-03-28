@@ -4,7 +4,7 @@ interface
 
 uses
   SysUtils, Classes, Controls, StdCtrls, DB, Graphics, TypInfo, Messages, Forms,
-  Windows, StrUtils, mTipoCampo, mTipoFormato, mFormatar, mValidar, mValue;
+  Windows, StrUtils, mTipoFormato, mFormatar, mValidar, mValue;
 
 type
   TmTextBox = class(TEdit)

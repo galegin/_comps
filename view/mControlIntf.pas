@@ -4,7 +4,7 @@ interface
 
 uses
   Classes,
-  mOrientacaoFrame, mTipoCampo, mPanel, mGrade, mLabel, mButton,
+  mOrientacaoFrame, mPanel, mGrade, mLabel, mButton,
   mCheckBox, mComboBox, mTextBox, mKeyValue, mValue, mTipoFormato;
 
 type

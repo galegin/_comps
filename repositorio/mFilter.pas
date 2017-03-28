@@ -80,8 +80,8 @@ constructor TmFilter.Create(ANome: String; ATipo: TTipoFilter);
 begin
   Nome := ANome;
   Tipo := ATipo;
-  Inicial := TmValue.Create;
-  Final := TmValue.Create;
+  Inicial := TmValueStr.Create(ANome, '');
+  Final := TmValueStr.Create(ANome, '');
 end;
 
 //-- boolean

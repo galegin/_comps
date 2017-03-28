@@ -5,7 +5,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, StdCtrls,
   mOrientacaoFrame, mFrame, mPanel, mGrade,
-  mLabel, mButton, mComboBox, mCheckBox, mTextBox, mTipoCampo, mKeyValue,
+  mLabel, mButton, mComboBox, mCheckBox, mTextBox, mKeyValue,
   mTipoFormato, mValue;
 
 type

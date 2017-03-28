@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, DB, mFrameIntf, mOrientacaoFrame, mTipoCampo, mPanel,
+  Dialogs, StdCtrls, DB, mFrameIntf, mOrientacaoFrame, mPanel,
   mGrade, mLabel, mButton, mCheckBox, mComboBox, mTextBox, mKeyValue,
   mTipoFormato, mValue;
 

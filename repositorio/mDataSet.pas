@@ -79,25 +79,25 @@ begin
 
         case DataType of
           ftBoolean : begin
-            Result.Add(TmValueBool.Create(Nome, AsBoolean)).TipoField := TipoField;
+            Result.AddB(Nome, AsBoolean, TipoField);
           end;
           ftDate, ftDateTime, ftTime, ftTimeStamp : begin
-            Result.Add(TmValueDate.Create(Nome, AsDateTime)).TipoField := TipoField;
+            Result.AddD(Nome, AsDateTime, TipoField);
           end;
           ftFloat, ftBCD, ftFMTBcd: begin
-            Result.Add(TmValueFloat.Create(Nome, AsFloat)).TipoField := TipoField;
+            Result.AddF(Nome, AsFloat, TipoField);
           end;
           ftInteger, ftSmallint, ftWord: begin
-            Result.Add(TmValueInt.Create(Nome, AsInteger)).TipoField := TipoField;
+            Result.AddI(Nome, AsInteger, TipoField);
           end;
           ftString, ftWideString, ftMemo, ftFmtMemo, ftOraClob: begin
             if TmString.StartsWiths(LowerCase(FieldName), 'in_') then
-              Result.Add(TmValueBool.Create(Nome, (AsString = 'T'))).TipoField := TipoField
+              Result.AddB(Nome, (AsString = 'T'), TipoField)
             else
-              Result.Add(TmValueStr.Create(Nome, AsString)).TipoField := TipoField;
+              Result.AddS(Nome, AsString, TipoField);
           end;
           ftVariant: begin
-            Result.Add(TmValueVar.Create(Nome, AsVariant)).TipoField := TipoField;
+            Result.AddV(Nome, AsVariant, TipoField);
           end;
         end;
 

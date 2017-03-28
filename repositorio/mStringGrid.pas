@@ -54,11 +54,11 @@ end;
 
 class function TmStringGrid.GetProperties;
 var
-  vProperties : TmValueList;
+  vValues : TmValueList;
   I : Integer;
 begin
   Result := TmValueList.Create;
-  vProperties := TmObjeto.GetValues(ACollectionItem);
+  vValues := TmObjeto.GetValues(ACollectionItem);
   with vProperties do
     for I := 0 to Count - 1 do
       with Items[I] do
@@ -91,7 +91,6 @@ end;
 
 class procedure TmStringGrid.SetCollection;
 var
-  vProperties : TmValueList;
   C, R : Integer;
 begin
   ClrCollection(AStringGrid, ACollection);

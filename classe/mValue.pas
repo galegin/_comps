@@ -66,7 +66,7 @@ type
     function GetIsFiltro() : Boolean; override;
     function GetIsStore() : Boolean; override;
   public
-    constructor Create(const ANome : String; AValue : Boolean);
+    constructor Create(const ANome : String; AValue : Boolean; ATipo : TTipoField = tfNul);
   published
     property Value : Boolean read fValue write fValue;
   end;
@@ -83,7 +83,7 @@ type
     function GetIsFiltro() : Boolean; override;
     function GetIsStore() : Boolean; override;
   public
-    constructor Create(const ANome : String; AValue : TDateTime);
+    constructor Create(const ANome : String; AValue : TDateTime; ATipo : TTipoField = tfNul);
   published
     property Value : TDateTime read fValue write fValue;
   end;
@@ -100,7 +100,7 @@ type
     function GetIsFiltro() : Boolean; override;
     function GetIsStore() : Boolean; override;
   public
-    constructor Create(const ANome : String; AValue : Real);
+    constructor Create(const ANome : String; AValue : Real; ATipo : TTipoField = tfNul);
   published
     property Value : Real read fValue write fValue;
   end;
@@ -117,7 +117,7 @@ type
     function GetIsFiltro() : Boolean; override;
     function GetIsStore() : Boolean; override;
   public
-    constructor Create(const ANome : String; AValue : Integer);
+    constructor Create(const ANome : String; AValue : Integer; ATipo : TTipoField = tfNul);
   published
     property Value : Integer read fValue write fValue;
   end;
@@ -134,7 +134,7 @@ type
     function GetIsFiltro() : Boolean; override;
     function GetIsStore() : Boolean; override;
   public
-    constructor Create(const ANome : String; AValue : String);
+    constructor Create(const ANome : String; AValue : String; ATipo : TTipoField = tfNul);
   published
     property Value : String read fValue write fValue;
   end;
@@ -151,7 +151,7 @@ type
     function GetIsFiltro() : Boolean; override;
     function GetIsStore() : Boolean; override;
   public
-    constructor Create(const ANome : String; AValue : Variant);
+    constructor Create(const ANome : String; AValue : Variant; ATipo : TTipoField = tfNul);
   published
     property Value : Variant read fValue write fValue;
   end;
@@ -172,7 +172,7 @@ type
     function GetIsFiltro() : Boolean; override;
     function GetIsStore() : Boolean; override;
   public
-    constructor Create(const ANome : String; AValue : TObject);
+    constructor Create(const ANome : String; AValue : TObject; ATipo : TTipoField = tfNul);
   published
     property Value : TObject read fValue write fValue;
   end;
@@ -189,7 +189,7 @@ type
     function GetIsFiltro() : Boolean; override;
     function GetIsStore() : Boolean; override;
   public
-    constructor Create(const ANome : String; AValue : TList);
+    constructor Create(const ANome : String; AValue : TList; ATipo : TTipoField = tfNul);
   published
     property Value : TList read fValue write fValue;
   end;
@@ -200,10 +200,33 @@ type
   private
     function GetItem(Index: Integer): TmValue;
     procedure SetItem(Index: Integer; const AValue: TmValue);
+    function GetItemB(Index: Integer): TmValueBool;
+    function GetItemD(Index: Integer): TmValueDate;
+    function GetItemF(Index: Integer): TmValueFloat;
+    function GetItemI(Index: Integer): TmValueInt;
+    function GetItemL(Index: Integer): TmValueLst;
+    function GetItemO(Index: Integer): TmValueObj;
+    function GetItemS(Index: Integer): TmValueStr;
+    function GetItemV(Index: Integer): TmValueVar;
   public
-    function Add(const AValue : TmValue) : TmValue; overload;
+    function AddB(const ANome : String; AValue : Boolean; ATipo : TTipoField = tfNul) : TmValue;
+    function AddD(const ANome : String; AValue : TDateTime; ATipo : TTipoField = tfNul) : TmValue;
+    function AddF(const ANome : String; AValue : Real; ATipo : TTipoField = tfNul) : TmValue;
+    function AddI(const ANome : String; AValue : Integer; ATipo : TTipoField = tfNul) : TmValue;
+    function AddS(const ANome : String; AValue : String; ATipo : TTipoField = tfNul) : TmValue;
+    function AddV(const ANome : String; AValue : Variant; ATipo : TTipoField = tfNul) : TmValue;
+    function AddO(const ANome : String; AValue : TObject; ATipo : TTipoField = tfNul) : TmValue;
+    function AddL(const ANome : String; AValue : TList; ATipo : TTipoField = tfNul) : TmValue;
     function IndexOf(ANome : String) : TmValue;
     property Items[Index : Integer] : TmValue read GetItem write SetItem;
+    property ItemsB[Index : Integer] : TmValueBool read GetItemB;
+    property ItemsD[Index : Integer] : TmValueDate read GetItemD;
+    property ItemsF[Index : Integer] : TmValueFloat read GetItemF;
+    property ItemsI[Index : Integer] : TmValueInt read GetItemI;
+    property ItemsS[Index : Integer] : TmValueStr read GetItemS;
+    property ItemsV[Index : Integer] : TmValueVar read GetItemV;
+    property ItemsO[Index : Integer] : TmValueObj read GetItemO;
+    property ItemsL[Index : Integer] : TmValueLst read GetItemL;
   end;
 
 implementation
@@ -236,10 +259,11 @@ end;
 
 { TmValueBool }
 
-constructor TmValueBool.Create(const ANome: String; AValue: Boolean);
+constructor TmValueBool.Create(const ANome: String; AValue: Boolean; ATipo : TTipoField);
 begin
   fNome := ANome;
   fValue := AValue;
+  fTipoField := ATipo;
 end;
 
 function TmValueBool.GetTipoBase: String;
@@ -279,10 +303,11 @@ end;
 
 { TmValueDate }
 
-constructor TmValueDate.Create(const ANome: String; AValue: TDateTime);
+constructor TmValueDate.Create(const ANome: String; AValue: TDateTime; ATipo : TTipoField);
 begin
   fNome := ANome;
   fValue := AValue;
+  fTipoField := ATipo;
 end;
 
 function TmValueDate.GetTipoBase: String;
@@ -334,10 +359,11 @@ end;
 
 { TmValueFloat }
 
-constructor TmValueFloat.Create(const ANome: String; AValue: Real);
+constructor TmValueFloat.Create(const ANome: String; AValue: Real; ATipo : TTipoField);
 begin
   fNome := ANome;
   fValue := AValue;
+  fTipoField := ATipo;
 end;
 
 function TmValueFloat.GetTipoBase: String;
@@ -383,10 +409,11 @@ end;
 
 { TmValueInt }
 
-constructor TmValueInt.Create(const ANome: String; AValue: Integer);
+constructor TmValueInt.Create(const ANome: String; AValue: Integer; ATipo : TTipoField);
 begin
   fNome := ANome;
   fValue := AValue;
+  fTipoField := ATipo;
 end;
 
 function TmValueInt.GetTipoBase: String;
@@ -432,10 +459,11 @@ end;
 
 { TmValueStr }
 
-constructor TmValueStr.Create(const ANome: String; AValue: String);
+constructor TmValueStr.Create(const ANome: String; AValue: String; ATipo : TTipoField);
 begin
   fNome := ANome;
   fValue := AValue;
+  fTipoField := ATipo;
 end;
 
 function TmValueStr.GetTipoBase: String;
@@ -475,10 +503,11 @@ end;
 
 { TmValueVar }
 
-constructor TmValueVar.Create(const ANome: String; AValue: Variant);
+constructor TmValueVar.Create(const ANome: String; AValue: Variant; ATipo : TTipoField);
 begin
   fNome := ANome;
   fValue := AValue;
+  fTipoField := ATipo;
 end;
 
 function TmValueVar.GetTipoBase: String;
@@ -518,10 +547,11 @@ end;
 
 { TmValueObj }
 
-constructor TmValueObj.Create(const ANome: String; AValue: TObject);
+constructor TmValueObj.Create(const ANome: String; AValue: TObject; ATipo : TTipoField);
 begin
   fNome := ANome;
   fValue := AValue;
+  fTipoField := ATipo;
 end;
 
 function TmValueObj.GetTipoBase: String;
@@ -561,10 +591,11 @@ end;
 
 { TmValueLst }
 
-constructor TmValueLst.Create(const ANome: String; AValue: TList);
+constructor TmValueLst.Create(const ANome: String; AValue: TList; ATipo : TTipoField);
 begin
   fNome := ANome;
   fValue := AValue;
+  fTipoField := ATipo;
 end;
 
 function TmValueLst.GetTipoBase: String;
@@ -604,9 +635,57 @@ end;
 
 { TmValueList }
 
-function TmValueList.Add(const AValue: TmValue): TmValue;
+(* function TmValueList.Add(const AValue: TmValue): TmValue;
 begin
   Result := AValue;
+  Self.Add(Result);
+end; *)
+
+function TmValueList.AddB(const ANome : String; AValue : Boolean; ATipo : TTipoField) : TmValue;
+begin
+  Result := TmValueBool.Create(ANome, AValue, ATipo);
+  Self.Add(Result);
+end;
+
+function TmValueList.AddD(const ANome : String; AValue : TDateTime; ATipo : TTipoField) : TmValue;
+begin
+  Result := TmValueDate.Create(ANome, AValue, ATipo);
+  Self.Add(Result);
+end;
+
+function TmValueList.AddF(const ANome : String; AValue : Real; ATipo : TTipoField) : TmValue;
+begin
+  Result := TmValueFloat.Create(ANome, AValue, ATipo);
+  Self.Add(Result);
+end;
+
+function TmValueList.AddI(const ANome : String; AValue : Integer; ATipo : TTipoField) : TmValue;
+begin
+  Result := TmValueInt.Create(ANome, AValue, ATipo);
+  Self.Add(Result);
+end;
+
+function TmValueList.AddS(const ANome : String; AValue : String; ATipo : TTipoField) : TmValue;
+begin
+  Result := TmValueStr.Create(ANome, AValue, ATipo);
+  Self.Add(Result);
+end;
+
+function TmValueList.AddV(const ANome : String; AValue : Variant; ATipo : TTipoField) : TmValue;
+begin
+  Result := TmValueVar.Create(ANome, AValue, ATipo);
+  Self.Add(Result);
+end;
+
+function TmValueList.AddO(const ANome : String; AValue : TObject; ATipo : TTipoField) : TmValue;
+begin
+  Result := TmValueObj.Create(ANome, AValue, ATipo);
+  Self.Add(Result);
+end;
+
+function TmValueList.AddL(const ANome : String; AValue : TList; ATipo : TTipoField) : TmValue;
+begin
+  Result := TmValueLst.Create(ANome, AValue, ATipo);
   Self.Add(Result);
 end;
 
@@ -631,6 +710,46 @@ begin
         Result := TmValue(Self[I]);
         Exit;
       end;
+end;
+
+function TmValueList.GetItemB(Index: Integer): TmValueBool;
+begin
+  Result := TmValueBool(Self[Index]);
+end;
+
+function TmValueList.GetItemD(Index: Integer): TmValueDate;
+begin
+  Result := TmValueDate(Self[Index]);
+end;
+
+function TmValueList.GetItemF(Index: Integer): TmValueFloat;
+begin
+  Result := TmValueFloat(Self[Index]);
+end;
+
+function TmValueList.GetItemI(Index: Integer): TmValueInt;
+begin
+  Result := TmValueInt(Self[Index]);
+end;
+
+function TmValueList.GetItemS(Index: Integer): TmValueStr;
+begin
+  Result := TmValueStr(Self[Index]);
+end;
+
+function TmValueList.GetItemV(Index: Integer): TmValueVar;
+begin
+  Result := TmValueVar(Self[Index]);
+end;
+
+function TmValueList.GetItemL(Index: Integer): TmValueLst;
+begin
+  Result := TmValueLst(Self[Index]);
+end;
+
+function TmValueList.GetItemO(Index: Integer): TmValueObj;
+begin
+  Result := TmValueObj(Self[Index]);
 end;
 
 end.

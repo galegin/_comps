@@ -31,34 +31,34 @@ begin
     for I := 0 to ComponentCount - 1 do begin
 
       if Components[I] is TCheckBox then begin
-        Result.Add(TmValueBool.Create(Name, (Components[I] as TCheckBox).Checked));
+        Result.AddB(Name, (Components[I] as TCheckBox).Checked);
 
       end else if Components[I] is TComboBox then begin
-        Result.Add(TmValueInt.Create(Name, (Components[I] as TComboBox).ItemIndex));
+        Result.AddI(Name, (Components[I] as TComboBox).ItemIndex);
 
       end else if Components[I] is TEdit then begin
         case TTipoValue(Tag) of
           tvDateTime : begin
-            Result.Add(TmValueDate.Create(Name, StrToDateTimeDef((Components[I] as TEdit).Text, 0)));
+            Result.AddD(Name, StrToDateTimeDef((Components[I] as TEdit).Text, 0));
           end;
           tvFloat : begin
-            Result.Add(TmValueFloat.Create(Name, StrToFloatDef((Components[I] as TEdit).Text, 0)));
+            Result.AddF(Name, StrToFloatDef((Components[I] as TEdit).Text, 0));
           end;
           tvInteger : begin
-            Result.Add(TmValueInt.Create(Name, StrToIntDef((Components[I] as TEdit).Text, 0)));
+            Result.AddI(Name, StrToIntDef((Components[I] as TEdit).Text, 0));
           end;
         else
-          Result.Add(TmValueStr.Create(Name, (Components[I] as TEdit).Text));
+          Result.AddS(Name, (Components[I] as TEdit).Text);
         end;
 
       end else if Components[I] is TListBox then begin
-        Result.Add(TmValueInt.Create(Name, (Components[I] as TListBox).ItemIndex));
+        Result.AddI(Name, (Components[I] as TListBox).ItemIndex);
 
       end else if Components[I] is TMemo then begin
-        Result.Add(TmValueStr.Create(Name, (Components[I] as TMemo).Text));
+        Result.AddS(Name, (Components[I] as TMemo).Text);
 
       end else if Components[I] is TRadioButton then begin
-        Result.Add(TmValueBool.Create(Name, (Components[I] as TRadioButton).Checked));
+        Result.AddB(Name, (Components[I] as TRadioButton).Checked);
 
       end;
     end;

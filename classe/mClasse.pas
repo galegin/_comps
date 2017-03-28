@@ -72,22 +72,22 @@ begin
         case PropInfo^.PropType^.Kind of
           tkEnumeration: begin
             if GetTypeData(PropInfo^.PropType^)^.BaseType^ = TypeInfo(Boolean) then
-              Result.Add(TmValueBool.Create(Nome, False)).TipoField := TipoField;
+              Result.AddB(Nome, False, TipoField);
           end;
           tkFloat: begin
             if TipoBase = 'TDateTime' then
-              Result.Add(TmValueDate.Create(Nome, 0)).TipoField := TipoField
+              Result.AddD(Nome, 0, TipoField)
             else if TipoBase = 'Real' then
-              Result.Add(TmValueFloat.Create(Nome, 0)).TipoField := TipoField;
+              Result.AddF(Nome, 0, TipoField);
           end;
           tkInteger: begin
-            Result.Add(TmValueInt.Create(Nome, 0)).TipoField := TipoField;
+            Result.AddI(Nome, 0, TipoField);
           end;
           tkString, tkLString, {tkUString,} tkWString: begin
-            Result.Add(TmValueStr.Create(Nome, '')).TipoField := TipoField;
+            Result.AddS(Nome, '', TipoField);
           end;
         else
-          Result.Add(TmValueObj.Create(Nome, nil)).TipoField := TipoField;
+          Result.AddO(Nome, nil, TipoField);
         end;
       end;
     end;

@@ -124,22 +124,22 @@ begin
         case PropInfo^.PropType^.Kind of
           tkEnumeration: begin
             if GetTypeData(PropInfo^.PropType^)^.BaseType^ = TypeInfo(Boolean) then
-              Result.Add(TmValueBool.Create(Nome, GetOrdProp(AObject, PropInfo) = 1)).TipoField := TipoField;
+              Result.AddB(Nome, (GetOrdProp(AObject, PropInfo) = 1), TipoField);
           end;
           tkFloat: begin
             if TipoBase = 'TDateTime' then
-              Result.Add(TmValueDate.Create(Nome, GetFloatProp(AObject, PropInfo))).TipoField := TipoField
+              Result.AddD(Nome, GetFloatProp(AObject, PropInfo), TipoField)
             else if TipoBase = 'Real' then
-              Result.Add(TmValueFloat.Create(Nome, GetFloatProp(AObject, PropInfo))).TipoField := TipoField;
+              Result.AddF(Nome, GetFloatProp(AObject, PropInfo), TipoField);
           end;
           tkInteger: begin
-            Result.Add(TmValueInt.Create(Nome, GetOrdProp(AObject, PropInfo))).TipoField := TipoField;
+            Result.AddI(Nome, GetOrdProp(AObject, PropInfo), TipoField);
           end;
           tkString, tkLString, {tkUString,} tkWString: begin
-            Result.Add(TmValueStr.Create(Nome, GetStrProp(AObject, PropInfo))).TipoField := TipoField;
+            Result.AddS(Nome, GetStrProp(AObject, PropInfo), TipoField);
           end;
         else
-          Result.Add(TmValueObj.Create(Nome, GetObjectProp(AObject, PropInfo))).TipoField := TipoField;
+          Result.AddO(Nome, GetObjectProp(AObject, PropInfo), TipoField);
         end;
 
       end;
@@ -170,17 +170,17 @@ begin
             else
               SetOrdProp(AObject, Nome, 0);
           tvDateTime:
-            SetFloatProp(AObject, Nome, (Items[I] as TmValueDate).Value);
+            SetFloatProp(AObject, Nome, ItemsD[I].Value);
           tvFloat:
-            SetFloatProp(AObject, Nome, (Items[I] as TmValueFloat).Value);
+            SetFloatProp(AObject, Nome, ItemsF[I].Value);
           tvInteger:
-            SetOrdProp(AObject, Nome, (Items[I] as TmValueInt).Value);
+            SetOrdProp(AObject, Nome, ItemsI[I].Value);
           tvString:
-            SetStrProp(AObject, Nome, (Items[I] as TmValueStr).Value);
+            SetStrProp(AObject, Nome, ItemsS[I].Value);
           tvVariant:
-            SetVariantProp(AObject, Nome, (Items[I] as TmValueVar).Value);
+            SetVariantProp(AObject, Nome, ItemsV[I].Value);
         else
-          SetStrProp(AObject, Nome, (Items[I] as TmValueStr).Value);
+          SetStrProp(AObject, Nome, ItemsS[I].Value);
         end;
       end;
     end;
