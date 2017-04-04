@@ -3,7 +3,7 @@ unit mFormControl;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, StdCtrls,
+  Classes, SysUtils, Forms, Controls, StdCtrls, Graphics,
   mOrientacaoFrame, mFrame, mPanel, mGrade,
   mLabel, mButton, mComboBox, mCheckBox, mTextBox, mKeyValue,
   mTipoFormato, mValue;
@@ -64,13 +64,25 @@ type
       ATipo : TTipoValue;
       AFormato : TTipoFormato) : TmTextBox;
 
+    class procedure SetEstilo(
+      AControl :  TControl);
+
+    class function GetOrientacao(
+      AControl :  TControl) : TOrientacaoFrame;
+
+    class procedure SetInitial(
+      AControl :  TControl);
+
+    class procedure SetSize(
+      AControl :  TControl);
+
   published
   end;
 
 implementation
 
 uses
-  mControl;
+  mControl, mTipoEstilo;
 
 { TmFormControl }
 
@@ -81,7 +93,15 @@ begin
     Name := TmControl.NewComponentName(AOwner, '_Frame');
     Parent := AParent;
     Orientacao := AOrientacao;
+    case Orientacao of
+      toHorizontal : begin
+        Align := alTop;
+        Height := 0;
+      end;
+    end;
   end;
+
+  SetInitial(Result);
 end;
 
 class function TmFormControl.AddPanel;
@@ -91,7 +111,11 @@ begin
     Name := TmControl.NewComponentName(AOwner, '_Panel');
     Parent := AParent;
     Orientacao := AOrientacao;
+    Align := alTop;
+    Height := 0;
   end;
+
+  SetInitial(Result);
 end;
 
 //--
@@ -104,6 +128,9 @@ begin
     Parent := AParent;
     Collection := ACollection;
   end;
+
+  SetEstilo(Result);
+  SetSize(Result);
 end;
 
 //--
@@ -117,6 +144,9 @@ begin
     Width := ALargura;
     Caption := ADescricao;
   end;
+
+  SetEstilo(Result);
+  SetSize(Result);
 end;
 
 class function TmFormControl.AddButton;
@@ -128,6 +158,9 @@ begin
     Width := ALargura;
     Caption := ADescricao;
   end;
+
+  SetEstilo(Result);
+  SetSize(Result);
 end;
 
 //--
@@ -142,6 +175,9 @@ begin
     _Entidade := AEntidade;
     _Campo := ACampo;
   end;
+
+  SetEstilo(Result);
+  SetSize(Result);
 end;
 
 class function TmFormControl.AddComboBox;
@@ -155,6 +191,9 @@ begin
     _Campo := ACampo;
     SetListaArray(ALista);
   end;
+
+  SetEstilo(Result);
+  SetSize(Result);
 end;
 
 class function TmFormControl.AddTextBox;
@@ -168,6 +207,101 @@ begin
     _Campo := ACampo;
     _Tipo := ATipo;
   end;
+
+  SetEstilo(Result);
+  SetSize(Result);
+end;
+
+//--
+
+class procedure TmFormControl.SetEstilo;
+var
+  vEstilo : RTipoEstilo;
+begin
+  vEstilo := GetTipoEstiloFromClass(AControl);
+  if vEstilo.Tipo = TTipoEstilo(Ord(-1)) then
+    Exit;
+
+  with AControl do begin
+    Height := vEstilo.Altura;
+    Width := vEstilo.Largura;
+
+    if vEstilo.Requerido then
+      if (AControl is TLabel) then begin
+        with (AControl as TLabel) do
+          Font.Style := Font.Style + [fsBold];
+      end
+      else if (AControl is TButton) then
+        with (AControl as TButton) do
+          Font.Style := Font.Style + [fsBold];
+  end;
+end;
+
+//--
+
+class function TmFormControl.GetOrientacao;
+begin
+  Result := toVertical;    
+  if (AControl is TmFrame) then begin
+    with (AControl as TmFrame) do
+      Result := Orientacao;
+  end
+  else if (AControl is TmPanel) then
+    with (AControl as TmPanel) do
+      Result := Orientacao;
+end;
+//--
+
+class procedure TmFormControl.SetInitial;
+var
+  vOrientacaoFrame : TOrientacaoFrame;
+begin
+  vOrientacaoFrame := GetOrientacao(AControl);
+
+  with AControl do
+    case vOrientacaoFrame of
+      toHorizontal : begin
+        Align := alTop;
+        Height := 0;
+      end;
+      toVertical : begin
+        Align := alLeft;
+        Width := 0;
+      end;
+    end;
+
+end;
+
+class procedure TmFormControl.SetSize;
+const
+  iREC = 4;
+var
+  vOrientacaoFrame : TOrientacaoFrame;
+  vParent : TWinControl;
+begin
+  vOrientacaoFrame := GetOrientacao(AControl);
+
+  vParent := AControl.Parent;
+
+  with AControl do begin
+    case vOrientacaoFrame of
+      toHorizontal : begin
+        Top := iREC;
+        Left := vParent.Width + iREC;
+        vParent.Width := vParent.Width + Top + Height;
+      end;
+
+      toVertical : begin
+        Top := vParent.Height + iREC;
+        Left := iREC;
+        vParent.Height := vParent.Height + Top + Height;
+
+      end;
+      
+    end;
+    
+  end;
+
 end;
 
 end.

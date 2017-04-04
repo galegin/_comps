@@ -22,9 +22,9 @@ type
     Dica : String;
   end;
 
-  function GetTipoMensagem(const s : string) : RTipoMensagem;
-  function StrToTipoMensagem(const s : string) : TTipoMensagem;
-  function TipoMensageToStr(const t : TTipoMensagem) : string;
+  function GetTipoMensagem(const pCodigo : string) : RTipoMensagem;
+  function StrToTipoMensagem(const pCodigo : string) : TTipoMensagem;
+  function TipoMensageToStr(const pTipo : TTipoMensagem) : string;
 
 implementation
 
@@ -38,28 +38,28 @@ const
 
 { TmTipoMensagem }
 
-function GetTipoMensagem(const s : string) : RTipoMensagem;
+function GetTipoMensagem(const pCodigo : string) : RTipoMensagem;
 var
   I : Integer;
 begin
   Result.Tipo := TTipoMensagem(Ord(-1));
   Result.Status := tsErro;
-  Result.Codigo := s;
+  Result.Codigo := pCodigo;
   Result.Mensagem := 'Mensagem nao catalogada';
 
   for I := Ord(Low(TTipoMensagem)) to Ord(High(TTipoMensagem)) do
-    if LTipoMensagem[TTipoMensagem(I)].Codigo = s then
+    if LTipoMensagem[TTipoMensagem(I)].Codigo = pCodigo then
       Result := LTipoMensagem[TTipoMensagem(I)];
 end;
 
-function StrToTipoMensagem(const s : string) : TTipoMensagem;
+function StrToTipoMensagem(const pCodigo : string) : TTipoMensagem;
 begin
-  Result := GetTipoMensagem(s).Tipo;
+  Result := GetTipoMensagem(pCodigo).Tipo;
 end;
 
-function TipoMensageToStr(const t : TTipoMensagem) : string;
+function TipoMensageToStr(const pTipo : TTipoMensagem) : string;
 begin
-  Result := LTipoMensagem[TTipoMensagem(t)].Codigo;
+  Result := LTipoMensagem[pTipo].Codigo;
 end;
 
 end.

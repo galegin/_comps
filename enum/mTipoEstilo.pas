@@ -3,7 +3,7 @@ unit mTipoEstilo;
 interface
 
 uses
-  Classes, StdCtrls;
+  Classes, StdCtrls, Controls, mValue;
 
 type
   TTipoEstilo = (
@@ -28,9 +28,10 @@ type
     Largura : Integer;
   end;
 
-  function GetTipoEstilo(const s : string) : RTipoEstilo;
-  function StrToTipoEstilo(const s : string) : TTipoEstilo;
-  function TipoEstiloToStr(const t : TTipoEstilo) : String;
+  function GetTipoEstilo(const pCodigo : string) : RTipoEstilo;
+  function GetTipoEstiloFromClass(const pControl : TControl) : RTipoEstilo;
+  function StrToTipoEstilo(const pCodigo : string) : TTipoEstilo;
+  function TipoEstiloToStr(const pTipo : TTipoEstilo) : String;
 
 implementation
 
@@ -48,24 +49,34 @@ const
     (Tipo: tsTextBoxRequerido ; Codigo: 'tsTextBoxRequerido' ; Classe: TEdit    ; Requerido: True ; Altura: 32; Largura: 157)
   );
 
-function GetTipoEstilo(const s : string) : RTipoEstilo;
+function GetTipoEstilo(const pCodigo : string) : RTipoEstilo;
 var
   I : Integer;
 begin
   Result.Tipo := TTipoEstilo(-1);
   for I := Ord(Low(TTipoEstilo)) to Ord(High(TTipoEstilo)) do
-    if LTipoEstilo[TTipoEstilo(I)].Codigo = s then
+    if LTipoEstilo[TTipoEstilo(I)].Codigo = pCodigo then
       Result := LTipoEstilo[TTipoEstilo(I)];
 end;
 
-function StrToTipoEstilo(const s : string) : TTipoEstilo;
+function GetTipoEstiloFromClass(const pControl : TControl) : RTipoEstilo;
+var
+  I : Integer;
 begin
-  Result := GetTipoEstilo(s).Tipo;
+  Result.Tipo := TTipoEstilo(-1);
+  for I := Ord(Low(TTipoEstilo)) to Ord(High(TTipoEstilo)) do
+    if pControl.InheritsFrom(LTipoEstilo[TTipoEstilo(I)].Classe) then
+      Result := LTipoEstilo[TTipoEstilo(I)];
 end;
 
-function TipoEstiloToStr(const t : TTipoEstilo) : String;
+function StrToTipoEstilo(const pCodigo : string) : TTipoEstilo;
 begin
-  Result := LTipoEstilo[TTipoEstilo(t)].Codigo;
+  Result := GetTipoEstilo(pCodigo).Tipo;
+end;
+
+function TipoEstiloToStr(const pTipo : TTipoEstilo) : String;
+begin
+  Result := LTipoEstilo[pTipo].Codigo;
 end;
 
 end.

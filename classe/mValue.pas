@@ -635,12 +635,6 @@ end;
 
 { TmValueList }
 
-(* function TmValueList.Add(const AValue: TmValue): TmValue;
-begin
-  Result := AValue;
-  Self.Add(Result);
-end; *)
-
 function TmValueList.AddB(const ANome : String; AValue : Boolean; ATipo : TTipoField) : TmValue;
 begin
   Result := TmValueBool.Create(ANome, AValue, ATipo);
