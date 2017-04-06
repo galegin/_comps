@@ -70,6 +70,9 @@ type
     class function GetOrientacao(
       AControl :  TControl) : TOrientacaoFrame;
 
+    class function GetLastControl(
+      AControl :  TWinControl) : TControl;
+
     class procedure SetInitial(
       AControl :  TControl);
 
@@ -241,7 +244,7 @@ end;
 
 class function TmFormControl.GetOrientacao;
 begin
-  Result := toVertical;    
+  Result := toVertical;
   if (AControl is TmFrame) then begin
     with (AControl as TmFrame) do
       Result := Orientacao;
@@ -250,6 +253,18 @@ begin
     with (AControl as TmPanel) do
       Result := Orientacao;
 end;
+
+//--
+
+class function TmFormControl.GetLastControl;
+begin
+  with AControl do
+    if ControlCount > 1 then
+      Result := Controls[ControlCount - 2]
+    else
+      Result := nil;
+end;
+
 //--
 
 class procedure TmFormControl.SetInitial;
@@ -261,11 +276,13 @@ begin
   with AControl do
     case vOrientacaoFrame of
       toHorizontal : begin
-        Align := alTop;
+        //Align := alTop;
+        Top := 0; //Parent.Height;
         Height := 0;
       end;
       toVertical : begin
-        Align := alLeft;
+        //Align := alLeft;
+        Left := 0;
         Width := 0;
       end;
     end;
@@ -277,29 +294,45 @@ const
   iREC = 4;
 var
   vOrientacaoFrame : TOrientacaoFrame;
+  vLastControl : TControl;
   vParent : TWinControl;
 begin
-  vOrientacaoFrame := GetOrientacao(AControl);
-
+  vOrientacaoFrame := GetOrientacao(AControl.Parent);
+  vLastControl := GetLastControl(AControl.Parent);
   vParent := AControl.Parent;
 
   with AControl do begin
     case vOrientacaoFrame of
       toHorizontal : begin
         Top := iREC;
-        Left := vParent.Width + iREC;
-        vParent.Width := vParent.Width + Top + Height;
+
+        if Assigned(vLastControl) then begin
+          Left := (vLastControl.Left + vLastControl.Width) + iREC;
+        end else begin
+          Left := iREC;
+        end;
+
+        vParent.Height := (Height + iREC);
+        vParent.Width := vParent.Width + (Top + Height);
+
       end;
 
       toVertical : begin
-        Top := vParent.Height + iREC;
         Left := iREC;
-        vParent.Height := vParent.Height + Top + Height;
+
+        if Assigned(vLastControl) then begin
+          Top := (vLastControl.Top + vLastControl.Height) + iREC;
+        end else begin
+          Top := iREC;
+        end;
+
+        vParent.Height := vParent.Height + (Height + iREC);
+        vParent.Width := vParent.Width + (Top + Height);
 
       end;
-      
+
     end;
-    
+
   end;
 
 end;

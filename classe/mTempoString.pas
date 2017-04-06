@@ -5,7 +5,7 @@ unit mTempoString;
 interface
 
 uses
-  Classes, SysUtils, StrUtils,
+  Classes, SysUtils, StrUtils, Math,
   mTipoTempo, mString;
 
 type
@@ -163,7 +163,7 @@ implementation
     Result.Seg := 0;
     Result.Mil := 0;
 
-    vMultiplo := GetTpTipoTempo(TpTipoTempoToStr(ATipo)).Multiplo;
+    vMultiplo := GetTipoTempo(TipoTempoToStr(ATipo)).Multiplo;
 
     case ATipo of
       ttAno : begin
@@ -199,7 +199,7 @@ implementation
   begin
     Result := 0;
 
-    vMultiplo := GetTpTipoTempo(TpTipoTempoToStr(ATipo)).Multiplo;
+    vMultiplo := GetTipoTempo(TipoTempoToStr(ATipo)).Multiplo;
 
     case ATipo of
       ttAno : begin

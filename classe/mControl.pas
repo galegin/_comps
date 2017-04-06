@@ -130,7 +130,8 @@ end;
 //--
 
 class function TmControl.NewControlName(AControl: TWinControl; AName: String): String;
-var X : Integer;
+var
+  X : Integer;
 begin
   X := 0;
   repeat
@@ -140,7 +141,8 @@ begin
 end;
 
 class function TmControl.ControlNameExists(AControl: TWinControl; AName: String): Boolean;
-var X : Integer;
+var
+  X : Integer;
 begin
   Result := False;
   with AControl do begin
@@ -156,7 +158,8 @@ end;
 //--
 
 class function TmControl.NewComponentName(AComponent: TComponent; AName: String): String;
-var X : Integer;
+var
+  X : Integer;
 begin
   X := 0;
   repeat
@@ -166,7 +169,8 @@ begin
 end;
 
 class function TmControl.ComponentNameExists(AComponent: TComponent; AName: String): Boolean;
-var X : Integer;
+var
+  X : Integer;
 begin
   Result := False;
   with AComponent do begin
