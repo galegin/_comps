@@ -9,14 +9,17 @@ uses
 type
   TmGrade = class(TListView)
   private
+    fFields : TmFieldList;
     fCollection : TCollection;
+    procedure SetFields(const AFields : TmFieldList);
+    procedure SetCollection(const ACollection : TCollection);
   public
-    procedure SetColumns(AFields : TmFieldList);
-    procedure ClrItems;
-    procedure AddItems(AFields : TmFieldList; ACollectionItem : TCollectionItem);
-    procedure SetItems(AFields : TmFieldList; ACollection : TCollection);
+    constructor Create(Owner : TComponent); override;
+    procedure Clear;
+    procedure Add(ACollectionItem : TCollectionItem);
   published
-    property Collection : TCollection read fCollection write fCollection;
+    property Collection : TCollection read fCollection write SetCollection;
+    property Fields : TmFieldList read fFields write SetFields;
   end;
 
 procedure Register;
@@ -28,10 +31,18 @@ begin
   RegisterComponents('Comps MIGUEL', [TmGrade]);
 end;
 
-procedure TmGrade.SetColumns(AFields : TmFieldList);
+constructor TmGrade.Create(Owner: TComponent);
+begin
+  inherited;
+
+end;
+
+procedure TmGrade.SetFields(const AFields : TmFieldList);
 var
   I : Integer;
 begin
+  fFields := AFields;
+
   SortType := stText;
   ViewStyle := vsReport;
 
@@ -45,12 +56,25 @@ begin
     end;
 end;
 
-procedure TmGrade.ClrItems;
+procedure TmGrade.SetCollection(const ACollection : TCollection);
+var
+  I : Integer;
+begin
+  fCollection := ACollection;
+
+  Clear;
+
+  with ACollection do
+    for I := 0 to Count - 1 do
+      Self.Add(Items[I]);
+end;
+
+procedure TmGrade.Clear;
 begin
   Items.Clear;
 end;
 
-procedure TmGrade.AddItems(AFields : TmFieldList; ACollectionItem : TCollectionItem);
+procedure TmGrade.Add(ACollectionItem : TCollectionItem);
 var
   vValues : TmValueList;
   vValue : TmValue;
@@ -59,8 +83,8 @@ begin
   vValues := TmObjeto.GetValues(ACollectionItem);
 
   with Items.Add do
-    for I := 0 to AFields.Count - 1 do begin
-      vValue := vValues.IndexOf(AFields.Items[I].Nome);
+    for I := 0 to fFields.Count - 1 do begin
+      vValue := vValues.IndexOf(fFields.Items[I].Nome);
       if not Assigned(vValue) then
         Continue;
 
@@ -69,17 +93,6 @@ begin
       else
         SubItems.Add(vValue.ValueStr);
     end;
-end;
-
-procedure TmGrade.SetItems(AFields : TmFieldList; ACollection : TCollection);
-var
-  I : Integer;
-begin
-  ClrItems;
-
-  with ACollection do
-    for I := 0 to Count - 1 do
-      AddItems(AFields, Items[I]);
 end;
 
 end.

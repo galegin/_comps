@@ -36,7 +36,7 @@ begin
   with vValues do
     for I := 0 to Count - 1 do
       with Items[I] do
-        if Items[I] is TmValueBase and IsStore then
+        if Items[I] is TmValueBase and IsInsert then
           Result := Result + IfThen(Result <> '', ', ', '') + UpperCase(Nome);
 end;
 
@@ -52,7 +52,7 @@ begin
   with vValues do
     for I := 0 to Count - 1 do
       with Items[I] do
-        if Items[I] is TmValueBase and IsStore then
+        if Items[I] is TmValueBase and IsInsert then
           Result := Result + IfThen(Result <> '', ', ', '') + ValueBase;
 end;
 
@@ -69,7 +69,7 @@ begin
   with vValues do
     for I := 0 to Count - 1 do begin
       with Items[I] do
-        if Items[I] is TmValueBase and IsStore then begin
+        if Items[I] is TmValueBase and IsUpdate then begin
           vWhere := AWheres.IndexOf(Nome);
           if vWhere = nil then
             Result := Result + IfThen(Result <> '', ', ', '') +

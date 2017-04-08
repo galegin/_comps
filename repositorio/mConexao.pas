@@ -67,8 +67,7 @@ begin
     Result := Database.GetConsulta(ASql, True);
   except
     on E : Exception do
-      raise TmException.Create(
-        'Erro na consulta / Erro: ' + E.Message + ' / ASql : ' + ASql, cDS_METHOD);
+      raise TmException.Create(cDS_METHOD, 'Erro na consulta / Erro: ' + E.Message + ' / ASql : ' + ASql);
   end;
 end;
 
@@ -80,8 +79,7 @@ begin
     Database.ExecComando(ACmd);
   except
     on E : Exception do
-      raise TmException.Create(
-        'Erro na comando / Erro: ' + E.Message + ' / ACmd : ' + ACmd, cDS_METHOD);
+      raise TmException.Create(cDS_METHOD, 'Erro no comando / Erro: ' + E.Message + ' / ACmd : ' + ACmd);
   end;
 end;
 

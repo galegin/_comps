@@ -72,8 +72,8 @@ begin
 
       except
         on E : Exception do begin
-          mLogger.Instance.Erro('Erro: ' + E.Message +
-            ' / vNome: ' + vNome + ' / vTipoBase: ' + vTipoBase, cDS_METHOD);
+          mLogger.Instance.Erro(cDS_METHOD, 'Erro: ' + E.Message +
+            ' / vNome: ' + vNome + ' / vTipoBase: ' + vTipoBase);
         end;
 
       end;

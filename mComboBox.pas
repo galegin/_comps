@@ -50,11 +50,12 @@ end;
 
 constructor TmComboBox.create(AOwner: TComponent);
 begin
-  inherited create(AOwner);
+  inherited;
   Style := csDropDownList;
   BevelKind := bkFlat;
   Sorted := True;
   FLista := TmKeyValueList.Create;
+  Font.Size := 16;
 end;
 
 constructor TmComboBox.create(AOwner: TComponent; AParent : TWinControl);

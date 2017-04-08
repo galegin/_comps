@@ -42,9 +42,9 @@ var
   I : Integer;
 begin
   if AArqZip = '' then
-    raise TmException.Create('Arquivo ZIP deve ser informado', cMETHOD);
+    raise TmException.Create(cMETHOD, 'Arquivo ZIP deve ser informado');
   if Length(ALstArq) = 0 then
-    raise TmException.Create('Lista de arquivo deve ser informada', cMETHOD);
+    raise TmException.Create(cMETHOD, 'Lista de arquivo deve ser informada');
 
   backupCurrentDir(ExtractFileDir(vArqZip));
 
@@ -66,9 +66,9 @@ var
   vtsqUnZip : TtsqUnZip;
 begin
   if AArqZip = '' then
-    raise TmException.Create('Arquivo ZIP deve ser informado', cMETHOD);
+    raise TmException.Create(cMETHOD, 'Arquivo ZIP deve ser informado');
   if ADirDes = '' then
-    raise TmException.Create('Dir destino deve ser informado', cMETHOD);
+    raise TmException.Create(cMETHOD, 'Dir destino deve ser informado');
 
   backupCurrentDir(ExtractFileDir(AArqZip));
 

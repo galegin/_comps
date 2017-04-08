@@ -6,22 +6,40 @@ uses
   Classes, SysUtils, StrUtils;
 
 type
-  TTipoLogger = (tpmDebug, tpmErro, tpmWarning);
+  TTipoLogger = (tpmDebug, tpmErro, tpmInfo, tpmWarning);
 
   TmLogger = class(TComponent)
   private
+    fArquivoTxt : String;
     fArquivoXml : String;
+    fTipoLog : Set Of TTipoLogger;
+    fInArquivo: Boolean;
+    function GetInDebug: Boolean;
+    function GetInErro: Boolean;
+    function GetInInfo: Boolean;
+    function GetInWarning: Boolean;
+    procedure SetInDebug(const Value: Boolean);
+    procedure SetInErro(const Value: Boolean);
+    procedure SetInInfo(const Value: Boolean);
+    procedure SetInWarning(const Value: Boolean);
   protected
   public
     constructor Create(AOwner : TComponent); override;
 
-    function Log(ATipoMensagemLog : TTipoLogger; AMensagem : String; AMetodo : String = '') : String;
+    function Log(ATipo : TTipoLogger; AMetodo, AMensagem : String) : String;
 
-    procedure Debug(AMensagem : String; AMetodo : String = '');
-    procedure Erro(AMensagem : String; AMetodo : String = '');
-    procedure Warning(AMensagem : String; AMetodo : String = '');
+    procedure Debug(AMetodo, AMensagem : String);
+    procedure Erro(AMetodo, AMensagem : String);
+    procedure Info(AMetodo, AMensagem : String);
+    procedure Warning(AMetodo, AMensagem : String);
   published
+    property ArquivoTxt : String read fArquivoTxt write fArquivoTxt;
     property ArquivoXml : String read fArquivoXml write fArquivoXml;
+    property InArquivo : Boolean read fInArquivo write fInArquivo;
+    property InDebug : Boolean read GetInDebug write SetInDebug;
+    property InErro : Boolean read GetInErro write SetInErro;
+    property InInfo : Boolean read GetInInfo write SetInInfo;
+    property InWarning : Boolean read GetInWarning write SetInWarning;
   end;
 
   function Instance : TmLogger;
@@ -29,11 +47,11 @@ type
 implementation
 
 uses
-  mProjeto, mArquivo, mPath;
+  mProjeto, mArquivo, mPath, mLoggerMem;
 
 const
   TTipoLogger_Codigo : Array [TTipoLogger] of string =
-    ('Debug', 'Erro', 'Warning');
+    ('Debug', 'Erro', 'Info', 'Warning');
 
 var
   _instance : TmLogger;
@@ -48,22 +66,51 @@ var
 constructor TmLogger.Create(AOwner : TComponent);
 begin
   inherited;
+  InArquivo := True;
+  InErro := True;
+  InInfo := True;
+  fArquivoTxt := TmPath.Log() + mProjeto.Instance.Codigo + FormatDateTime('yyyy.mm.dd', Date) + '.txt';
   fArquivoXml := TmPath.Log() + mProjeto.Instance.Codigo + FormatDateTime('yyyy.mm.dd', Date) + '.xml';
 end;
 
 //--
 
-function TmLogger.Log(ATipoMensagemLog : TTipoLogger; AMensagem, AMetodo : String) : String;
+function TmLogger.Log(ATipo : TTipoLogger; AMetodo, AMensagem : String) : String;
+var
+  vConteudoTxt, vConteudoXml : String;
 begin
-  Result :=
+
+  if not (ATipo in fTipoLog) then
+    Exit;
+
+  //-- txt
+
+  vConteudoTxt :=
+    '[ ' + DateTimeToStr(now) + ' ]' + sLineBreak +
+    'Tipo: ' + TTipoLogger_Codigo[ATipo] + sLineBreak +
+    'Mensagem: ' + AMensagem + sLineBreak +
+    'Metodo: ' + AMetodo + sLineBreak +
+    sLineBreak ;
+
+  if InArquivo then
+    TmArquivo.Adicionar(fArquivoTxt, vConteudoTxt);
+
+  //-- memoria
+
+  mLoggerMem.Instance.Add(vConteudoTxt);
+
+  //-- xml
+
+  vConteudoXml :=
     '<log>' + sLineBreak +
     '<data_hora>' + DateTimeToStr(now) + '</data_hora>' + sLineBreak +
-    '<tipo_mensagem>' + TTipoLogger_Codigo[ATipoMensagemLog] + '</tipo_mensagem>' + sLineBreak +
+    '<tipo_mensagem>' + TTipoLogger_Codigo[ATipo] + '</tipo_mensagem>' + sLineBreak +
     '<mensagem>' + AMensagem + '</mensagem>' + sLineBreak +
     '<metodo>' + AMetodo + '</metodo>' + sLineBreak +
     '</log>' + sLineBreak ;
 
-  TmArquivo.Adicionar(fArquivoXml, Result);
+  if InArquivo then
+    TmArquivo.Adicionar(fArquivoXml, vConteudoXml);
 
   //--
 
@@ -72,19 +119,78 @@ end;
 
 //--
 
-procedure TmLogger.Debug(AMensagem, AMetodo : String);
+procedure TmLogger.Debug(AMetodo, AMensagem : String);
 begin
-  Log(tpmDebug, AMensagem, AMetodo);
+  Log(tpmDebug, AMetodo, AMensagem);
 end;
 
-procedure TmLogger.Erro(AMensagem, AMetodo : String);
+procedure TmLogger.Erro(AMetodo, AMensagem : String);
 begin
-  Log(tpmErro, AMensagem, AMetodo);
+  Log(tpmErro, AMetodo, AMensagem);
 end;
 
-procedure TmLogger.Warning(AMensagem, AMetodo : String);
+procedure TmLogger.Info(AMetodo, AMensagem : String);
 begin
-  Log(tpmWarning, AMensagem, AMetodo);
+  Log(tpmInfo, AMetodo, AMensagem);
+end;
+
+procedure TmLogger.Warning(AMetodo, AMensagem : String);
+begin
+  Log(tpmWarning, AMetodo, AMensagem);
+end;
+
+//--
+
+function TmLogger.GetInDebug: Boolean;
+begin
+  Result := tpmDebug in fTipoLog;
+end;
+
+procedure TmLogger.SetInDebug(const Value: Boolean);
+begin
+  if Value then
+    fTipoLog := fTipoLog + [tpmDebug]
+  else
+    fTipoLog := fTipoLog - [tpmDebug]
+end;
+
+function TmLogger.GetInErro: Boolean;
+begin
+  Result := tpmErro in fTipoLog;
+end;
+
+procedure TmLogger.SetInErro(const Value: Boolean);
+begin
+  if Value then
+    fTipoLog := fTipoLog + [tpmErro]
+  else
+    fTipoLog := fTipoLog - [tpmErro]
+end;
+
+function TmLogger.GetInInfo: Boolean;
+begin
+  Result := tpmInfo in fTipoLog;
+end;
+
+procedure TmLogger.SetInInfo(const Value: Boolean);
+begin
+  if Value then
+    fTipoLog := fTipoLog + [tpmInfo]
+  else
+    fTipoLog := fTipoLog - [tpmInfo]
+end;
+
+function TmLogger.GetInWarning: Boolean;
+begin
+  Result := tpmWarning in fTipoLog;
+end;
+
+procedure TmLogger.SetInWarning(const Value: Boolean);
+begin
+  if Value then
+    fTipoLog := fTipoLog + [tpmWarning]
+  else
+    fTipoLog := fTipoLog - [tpmWarning]
 end;
 
 //--

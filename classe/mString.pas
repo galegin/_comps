@@ -43,6 +43,8 @@ type
     class function SoAlfaNumerico(AString : String) : String;
     class function SoDigitos(AString : String) : String;
     class function SoDigitosFloat(AString : String) : String;
+
+    class function IfNull(AString, ANulo : String) : String;
   end;
 
   TmStringList = class
@@ -275,6 +277,11 @@ begin
   for I := 1 to Length(AString) do
    if AString[I] in ['0'..'9', ','] then
      Result := Result + AString[I];
+end;
+
+class function TmString.IfNull(AString, ANulo: String): String;
+begin
+  Result := IfThen(AString <> '', AString, ANulo);
 end;
 
 { TmStringList }

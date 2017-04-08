@@ -32,9 +32,9 @@ type
 	Saida : String;
   end;
 
-  function GetTipoImpressao(const s : string) : LTipoImpressao;
-  function StrToTipoImpressao(const s : string) : TTipoImpressao;
-  function TipoImpressaoToStr(const t : TTipoImpressao) : string;
+  function GetTipoImpressao(const ACodigo : string) : LTipoImpressao;
+  function StrToTipoImpressao(const ACodigo : string) : TTipoImpressao;
+  function TipoImpressaoToStr(const ATipo : TTipoImpressao) : string;
 
 implementation
 
@@ -58,24 +58,24 @@ const
     (Tipo: tiW_VIS; Codigo: 'W_VIS'; Descricao: 'SOMENTE VISUALIZAR EM TELA'; Formato: 'VIS';  Saida: 'rel'));
 	
 
-function GetTipoImpressao(const s : string) : LTipoImpressao;
+function GetTipoImpressao(const ACodigo : string) : LTipoImpressao;
 var
   I : Integer;
 begin
   Result.Tipo := TTipoImpressao(Ord(-1));
   for I := Ord(Low(TTipoImpressao)) to Ord(High(TTipoImpressao)) do
-    if LTipoImpressao[TTipoImpressao(I)].Codigo = s then
+    if LTipoImpressao[TTipoImpressao(I)].Codigo = ACodigo then
       Result := LTipoImpressao[TTipoImpressao(I)];
 end;
 
-function StrToTipoImpressao(const s : string) : TTipoImpressao;
+function StrToTipoImpressao(const ACodigo : string) : TTipoImpressao;
 begin
-  Result := GetTipoImpressao(s).Tipo;
+  Result := GetTipoImpressao(ACodigo).Tipo;
 end;
 
-function TipoImpressaoToStr(const t : TTipoImpressao) : string;
+function TipoImpressaoToStr(const ATipo : TTipoImpressao) : string;
 begin
-  Result := LTipoImpressao[TTipoImpressao(t)].Codigo;
+  Result := LTipoImpressao[ATipo].Codigo;
 end;
 
 end.

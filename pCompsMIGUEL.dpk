@@ -34,28 +34,24 @@ requires
   dbrtl,
   dbexpress,
   dsnap,
-  indy,
   vclie,
   adortl,
-  bdertl,
-  ZComponentDesign;
+  bdertl;
 
 contains
-  mCombo in 'mCombo.pas',
-  mEdit in 'mEdit.pas',
-  mLabel in 'mLabel.pas',
+  mAdvancedPanel in 'mAdvancedPanel.pas',
   mButton in 'mButton.pas',
-  mMemo in 'mMemo.pas',
-  mListBox in 'mListBox.pas',
-  mPanel in 'mPanel.pas',
   mCheckBox in 'mCheckBox.pas',
   mCheckListBox in 'mCheckListBox.pas',
-  mGrid in 'mGrid.pas',
-  mSpeedButton in 'mSpeedButton.pas',
-  mScrollBox in 'mScrollBox.pas',
-  mAdvancedPanel in 'mAdvancedPanel.pas',
+  mComboBox in 'mComboBox.pas',
+  mGrade in 'mGrade.pas',
   mImage in 'mImage.pas',
+  mImageList in 'mImageList.pas',
+  mLabel in 'mLabel.pas',
+  mListBox in 'mListBox.pas',
+  mPanel in 'mPanel.pas',
   mPanelBorder in 'mPanelBorder.pas',
-  mImageList in 'mImageList.pas';
+  mSpeedButton in 'mSpeedButton.pas',
+  mTextBox in 'mTextBox.pas';
 
 end.

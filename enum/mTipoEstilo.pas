@@ -28,10 +28,10 @@ type
     Largura : Integer;
   end;
 
-  function GetTipoEstilo(const pCodigo : string) : RTipoEstilo;
-  function GetTipoEstiloFromClass(const pControl : TControl) : RTipoEstilo;
-  function StrToTipoEstilo(const pCodigo : string) : TTipoEstilo;
-  function TipoEstiloToStr(const pTipo : TTipoEstilo) : String;
+  function GetTipoEstilo(const ACodigo : string) : RTipoEstilo;
+  function GetTipoEstiloFromClass(const AControl : TControl) : RTipoEstilo;
+  function StrToTipoEstilo(const ACodigo : string) : TTipoEstilo;
+  function TipoEstiloToStr(const ATipo : TTipoEstilo) : String;
 
 implementation
 
@@ -49,34 +49,34 @@ const
     (Tipo: tsTextBoxRequerido ; Codigo: 'tsTextBoxRequerido' ; Classe: TEdit    ; Requerido: True ; Altura: 32; Largura: 157)
   );
 
-function GetTipoEstilo(const pCodigo : string) : RTipoEstilo;
+function GetTipoEstilo(const ACodigo : string) : RTipoEstilo;
 var
   I : Integer;
 begin
   Result.Tipo := TTipoEstilo(-1);
   for I := Ord(Low(TTipoEstilo)) to Ord(High(TTipoEstilo)) do
-    if LTipoEstilo[TTipoEstilo(I)].Codigo = pCodigo then
+    if LTipoEstilo[TTipoEstilo(I)].Codigo = ACodigo then
       Result := LTipoEstilo[TTipoEstilo(I)];
 end;
 
-function GetTipoEstiloFromClass(const pControl : TControl) : RTipoEstilo;
+function GetTipoEstiloFromClass(const AControl : TControl) : RTipoEstilo;
 var
   I : Integer;
 begin
   Result.Tipo := TTipoEstilo(-1);
   for I := Ord(Low(TTipoEstilo)) to Ord(High(TTipoEstilo)) do
-    if pControl.InheritsFrom(LTipoEstilo[TTipoEstilo(I)].Classe) then
+    if AControl.InheritsFrom(LTipoEstilo[TTipoEstilo(I)].Classe) then
       Result := LTipoEstilo[TTipoEstilo(I)];
 end;
 
-function StrToTipoEstilo(const pCodigo : string) : TTipoEstilo;
+function StrToTipoEstilo(const ACodigo : string) : TTipoEstilo;
 begin
-  Result := GetTipoEstilo(pCodigo).Tipo;
+  Result := GetTipoEstilo(ACodigo).Tipo;
 end;
 
-function TipoEstiloToStr(const pTipo : TTipoEstilo) : String;
+function TipoEstiloToStr(const ATipo : TTipoEstilo) : String;
 begin
-  Result := LTipoEstilo[pTipo].Codigo;
+  Result := LTipoEstilo[ATipo].Codigo;
 end;
 
 end.

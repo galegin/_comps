@@ -331,7 +331,7 @@ begin
   try
     vSerial := GetSerial();
     if vSerial <> ASerial then
-      raise TmException.Create('Serial invalido', cMETHOD);
+      raise TmException.Create(cMETHOD, 'Serial invalido');
   except
     on E : Exception do begin
       TmAppProtect.execute();

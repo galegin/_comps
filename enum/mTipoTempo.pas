@@ -23,9 +23,9 @@ type
     Formato : String;
   end;
 
-  function GetTipoTempo(const s : string) : RTipoTempo;
-  function StrToTipoTempo(const s : string) : TTipoTempo;
-  function TipoTempoToStr(const t : TTipoTempo) : string;
+  function GetTipoTempo(const ACodigo : string) : RTipoTempo;
+  function StrToTipoTempo(const ACodigo : string) : TTipoTempo;
+  function TipoTempoToStr(const ATipo : TTipoTempo) : string;
 
 implementation
 
@@ -38,25 +38,25 @@ const
     (Tipo: ttMin; Codigo: 'N'; Multiplo: 1            ; Formato: 'nnn:ss'),
     (Tipo: ttSeg; Codigo: 'S'; Multiplo: 1 / 60       ; Formato: 'sss:mm'));
 
-function GetTipoTempo(const s : string) : RTipoTempo;
+function GetTipoTempo(const ACodigo : string) : RTipoTempo;
 var
   I : Integer;
 begin
   Result.Tipo := TTipoTempo(Ord(-1));
-  Result.Codigo := s;
+  Result.Codigo := ACodigo;
   for I := Ord(Low(TTipoTempo)) to Ord(High(TTipoTempo)) do
-    if LTipoTempo[TTipoTempo(I)].Codigo = s then
+    if LTipoTempo[TTipoTempo(I)].Codigo = ACodigo then
       Result := LTipoTempo[TTipoTempo(I)];
 end;
 
-function StrToTipoTempo(const s : string) : TTipoTempo;
+function StrToTipoTempo(const ACodigo : string) : TTipoTempo;
 begin
-  Result := GetTipoTempo(s).Tipo;
+  Result := GetTipoTempo(ACodigo).Tipo;
 end;
 
-function TipoTempoToStr(const t : TTipoTempo) : string;
+function TipoTempoToStr(const ATipo : TTipoTempo) : string;
 begin
-  Result := LTipoTempo[t].Codigo;
+  Result := LTipoTempo[ATipo].Codigo;
 end;
 
 end.

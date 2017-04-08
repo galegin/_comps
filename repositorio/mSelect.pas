@@ -66,7 +66,7 @@ var
   procedure SetarParametroP(AProperty : TmValue);
   begin
     vValue := vValues.IndexOf(AProperty.Nome);
-    if vValue <> nil then
+    if Assigned(vValue) then
       if vValue is TmValueBase then
         Result := Result + IfThen(Result <> '', ' and ', 'where ') +
           UpperCase(AProperty.Nome) + ' = ' + AProperty.ValueBase;
@@ -75,7 +75,7 @@ var
   procedure SetarParametroF(AFilter : TmFilter);
   begin
     vValue := vValues.IndexOf(AFilter.Nome);
-    if vValue <> nil then
+    if Assigned(vValue) then
       if vValue is TmValueBase then
         Result := Result + IfThen(Result <> '', ' and ', 'where ') +
           AFilter.ValueBase;

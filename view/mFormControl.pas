@@ -277,7 +277,7 @@ begin
     case vOrientacaoFrame of
       toHorizontal : begin
         //Align := alTop;
-        Top := 0; //Parent.Height;
+        Top := Parent.Height;
         Height := 0;
       end;
       toVertical : begin

@@ -18,7 +18,7 @@ type
 implementation
 
 uses
-  mTipoMensagem, mLogger;
+  mTipoMensagem, mLogger, mMensagem, mString, mException;
 
 var
   _instance: TmAppException;
@@ -69,16 +69,26 @@ const
   cDS_METHOD = 'TmAppException._OnException';
 var
   vTipoMensagem : RTipoMensagem;
-  vMessage : String;
+  vMessage, vMetodo : String;
 begin
+  // exception
+  if E is TmException then begin
+    with E as TmException do begin
+      vMessage := Message;
+      vMetodo := Metodo;
+    end;
+  end else begin
+    vMessage := TmString.IfNull(TmString.LeftStr(E.Message, ' / '), E.Message);
+    vMetodo := TmString.IfNull(TmString.RightStr(E.Message, ' / '), cDS_METHOD);
+  end;
+
   // trata erro
-  _trataRetorno(E.Message, vTipoMensagem);
-  vMessage := IfThen(vTipoMensagem.Dica <> '', vTipoMensagem.Dica, E.Message);
-  mLogger.Instance.Erro(vMessage, cDS_METHOD);
+  _trataRetorno(vMessage, vTipoMensagem);
+  mLogger.Instance.Erro(vMetodo, vMessage);
 
   // mensagem
-  (* if vTipoMensagem.Status = tsErro then
-    mMensagem.Instance.Mensagem(vTipoMensagem); *)
+  if vTipoMensagem.Status = tsErro then
+    mMensagem.Instance.Mensagem(vTipoMensagem);
 
   //Show the exception
   //Application.ShowException(E);

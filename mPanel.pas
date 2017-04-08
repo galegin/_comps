@@ -30,8 +30,8 @@ end;
 
 constructor TmPanel.Create(Owner: TComponent);
 begin
-  inherited; //
-
+  inherited;
+  Caption := ' ';
 end;
 
 end.

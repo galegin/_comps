@@ -31,11 +31,14 @@ end;
 constructor TmButton.create(AOwner: TComponent);
 begin
   inherited; //
+  Height := 24;
+  Width := 129;
+  Font.Size := 16;
 end;
 
 constructor TmButton.create(AOwner: TComponent; AParent: TWinControl);
 begin
-  inherited create(AOwner);
+  create(AOwner);
   Parent := AParent;
 end;
 

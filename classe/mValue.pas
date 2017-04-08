@@ -36,7 +36,8 @@ type
     function GetValueInt() : String; virtual; abstract;
     function GetValueStr() : String; virtual; abstract;
     function GetIsFiltro() : Boolean; virtual; abstract;
-    function GetIsStore() : Boolean; virtual; abstract;
+    function GetIsInsert() : Boolean; virtual; abstract;
+    function GetIsUpdate() : Boolean; virtual; abstract;
   public
   published
     property Nome : String read fNome write fNome;
@@ -47,7 +48,8 @@ type
     property ValueInt : String read GetValueInt;
     property ValueStr : String read GetValueStr;
     property IsFiltro : Boolean read GetIsFiltro;
-    property IsStore : Boolean read GetIsStore;
+    property IsInsert : Boolean read GetIsInsert;
+    property IsUpdate : Boolean read GetIsUpdate;
   end;
 
   //-- database
@@ -64,7 +66,8 @@ type
     function GetValueInt() : String; override;
     function GetValueStr() : String; override;
     function GetIsFiltro() : Boolean; override;
-    function GetIsStore() : Boolean; override;
+    function GetIsInsert() : Boolean; override;
+    function GetIsUpdate() : Boolean; override;
   public
     constructor Create(const ANome : String; AValue : Boolean; ATipo : TTipoField = tfNul);
   published
@@ -81,7 +84,8 @@ type
     function GetValueInt() : String; override;
     function GetValueStr() : String; override;
     function GetIsFiltro() : Boolean; override;
-    function GetIsStore() : Boolean; override;
+    function GetIsInsert() : Boolean; override;
+    function GetIsUpdate() : Boolean; override;
   public
     constructor Create(const ANome : String; AValue : TDateTime; ATipo : TTipoField = tfNul);
   published
@@ -98,7 +102,8 @@ type
     function GetValueInt() : String; override;
     function GetValueStr() : String; override;
     function GetIsFiltro() : Boolean; override;
-    function GetIsStore() : Boolean; override;
+    function GetIsInsert() : Boolean; override;
+    function GetIsUpdate() : Boolean; override;
   public
     constructor Create(const ANome : String; AValue : Real; ATipo : TTipoField = tfNul);
   published
@@ -115,7 +120,8 @@ type
     function GetValueInt() : String; override;
     function GetValueStr() : String; override;
     function GetIsFiltro() : Boolean; override;
-    function GetIsStore() : Boolean; override;
+    function GetIsInsert() : Boolean; override;
+    function GetIsUpdate() : Boolean; override;
   public
     constructor Create(const ANome : String; AValue : Integer; ATipo : TTipoField = tfNul);
   published
@@ -132,7 +138,8 @@ type
     function GetValueInt() : String; override;
     function GetValueStr() : String; override;
     function GetIsFiltro() : Boolean; override;
-    function GetIsStore() : Boolean; override;
+    function GetIsInsert() : Boolean; override;
+    function GetIsUpdate() : Boolean; override;
   public
     constructor Create(const ANome : String; AValue : String; ATipo : TTipoField = tfNul);
   published
@@ -149,7 +156,8 @@ type
     function GetValueInt() : String; override;
     function GetValueStr() : String; override;
     function GetIsFiltro() : Boolean; override;
-    function GetIsStore() : Boolean; override;
+    function GetIsInsert() : Boolean; override;
+    function GetIsUpdate() : Boolean; override;
   public
     constructor Create(const ANome : String; AValue : Variant; ATipo : TTipoField = tfNul);
   published
@@ -170,7 +178,8 @@ type
     function GetValueInt() : String; override;
     function GetValueStr() : String; override;
     function GetIsFiltro() : Boolean; override;
-    function GetIsStore() : Boolean; override;
+    function GetIsInsert() : Boolean; override;
+    function GetIsUpdate() : Boolean; override;
   public
     constructor Create(const ANome : String; AValue : TObject; ATipo : TTipoField = tfNul);
   published
@@ -187,7 +196,8 @@ type
     function GetValueInt() : String; override;
     function GetValueStr() : String; override;
     function GetIsFiltro() : Boolean; override;
-    function GetIsStore() : Boolean; override;
+    function GetIsInsert() : Boolean; override;
+    function GetIsUpdate() : Boolean; override;
   public
     constructor Create(const ANome : String; AValue : TList; ATipo : TTipoField = tfNul);
   published
@@ -296,7 +306,12 @@ begin
   Result := fValue;
 end;
 
-function TmValueBool.GetIsStore: Boolean;
+function TmValueBool.GetIsInsert: Boolean;
+begin
+  Result := fValue;
+end;
+
+function TmValueBool.GetIsUpdate: Boolean;
 begin
   Result := fValue;
 end;
@@ -324,8 +339,12 @@ begin
 end;
 
 procedure TmValueDate.SetValueBase(const AValue: String);
+var
+  vFormatoDataHora : TFormatSettings;
 begin
-  fValue := StrToDateTimeDef(AValue, 0);
+  vFormatoDataHora.ShortDateFormat := 'dd/mm/yyyy';
+  vFormatoDataHora.ShortTimeFormat := 'hh:nn:ss';
+  fValue := StrToDateTimeDef(AValue, 0, vFormatoDataHora);
 end;
 
 function TmValueDate.GetValueInt: String;
@@ -346,7 +365,12 @@ begin
   Result := fValue > 0;
 end;
 
-function TmValueDate.GetIsStore: Boolean;
+function TmValueDate.GetIsInsert: Boolean;
+begin
+  Result := fValue > 0;
+end;
+
+function TmValueDate.GetIsUpdate: Boolean;
 var
   vMinValue : Integer;
 begin
@@ -396,7 +420,12 @@ begin
   Result := fValue > 0;
 end;
 
-function TmValueFloat.GetIsStore: Boolean;
+function TmValueFloat.GetIsInsert: Boolean;
+begin
+  Result := fValue > -1;
+end;
+
+function TmValueFloat.GetIsUpdate: Boolean;
 var
   vMinValue : Integer;
 begin
@@ -446,7 +475,12 @@ begin
   Result := fValue > 0;
 end;
 
-function TmValueInt.GetIsStore: Boolean;
+function TmValueInt.GetIsInsert: Boolean;
+begin
+  Result := fValue > -1;
+end;
+
+function TmValueInt.GetIsUpdate: Boolean;
 var
   vMinValue : Integer;
 begin
@@ -496,7 +530,12 @@ begin
   Result := fValue <> '';
 end;
 
-function TmValueStr.GetIsStore: Boolean;
+function TmValueStr.GetIsInsert: Boolean;
+begin
+  Result := fValue <> '';
+end;
+
+function TmValueStr.GetIsUpdate: Boolean;
 begin
   Result := fValue <> '';
 end;
@@ -540,7 +579,12 @@ begin
   Result := fValue <> varNull;
 end;
 
-function TmValueVar.GetIsStore: Boolean;
+function TmValueVar.GetIsInsert: Boolean;
+begin
+  Result := fValue <> varNull;
+end;
+
+function TmValueVar.GetIsUpdate: Boolean;
 begin
   Result := fValue <> varNull;
 end;
@@ -584,7 +628,12 @@ begin
   Result := False;
 end;
 
-function TmValueObj.GetIsStore: Boolean;
+function TmValueObj.GetIsInsert: Boolean;
+begin
+  Result := False;
+end;
+
+function TmValueObj.GetIsUpdate: Boolean;
 begin
   Result := False;
 end;
@@ -628,7 +677,12 @@ begin
   Result := False;
 end;
 
-function TmValueLst.GetIsStore: Boolean;
+function TmValueLst.GetIsInsert: Boolean;
+begin
+  Result := False;
+end;
+
+function TmValueLst.GetIsUpdate: Boolean;
 begin
   Result := False;
 end;

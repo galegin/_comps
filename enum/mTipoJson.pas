@@ -26,8 +26,8 @@ type
     Posicao : Integer;
   end;
 
-  function GetTipoJsonIni(const s : string) : TrTipoJson;
-  function GetTipoJsonFin(const s : string) : TrTipoJson;
+  function GetTipoJsonIni(const AString : string) : TrTipoJson;
+  function GetTipoJsonFin(const AString : string) : TrTipoJson;
   function GetValueTipoJson(const ATipo : TrTipoJson; const AString : String) : String;
   procedure RemoveStrTipoJson(const ATipo : TrTipoJson; var AString : String);
 
@@ -65,15 +65,15 @@ uses
 
 //--
 
-function GetTipoJsonIni(const s : string) : TrTipoJson;
+function GetTipoJsonIni(const AString : string) : TrTipoJson;
 begin
-  Result := BuscarTipoJson(s, ['[', '{', '"', ':'],
+  Result := BuscarTipoJson(AString, ['[', '{', '"', ':'],
     [tjLista, tjObjeto, tjAtributo, tjConteudo]);
 end;
 
-function GetTipoJsonFin(const s : string) : TrTipoJson;
+function GetTipoJsonFin(const AString : string) : TrTipoJson;
 begin
-  Result := BuscarTipoJson(s, [']', '}', ':', ','],
+  Result := BuscarTipoJson(AString, [']', '}', ':', ','],
     [tjLista, tjObjeto, tjAtributo, tjSeparador]);
 end;
 

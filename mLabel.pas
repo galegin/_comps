@@ -28,7 +28,7 @@ end;
 
 constructor TmLabel.create(AOwner : TComponent);
 begin
-  inherited create(AOwner);
+  inherited;
   AutoSize := False;
   Height := 24;
   Width := 129;

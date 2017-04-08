@@ -12,24 +12,22 @@ type
     fDescricao : String;
     fTipo : TFieldType;
     fTamanho : Integer;
-    fCasasDecimais : Integer;
+    fPrecisao : Integer;
     fRequerido : Boolean;
-    fVisible : Boolean;
+    fVisivel : Boolean;
   public
     constructor Create; overload;
-    constructor Create(
-      ANome : String; ADescricao : String;
-      ATipo : TFieldType;
-      ATamanho : Integer; ACasasDecimais : Integer = 0;
-      ARequerido : Boolean = False; AVisible : Boolean = True); overload;
+    constructor Create(ANome : String; ADescricao : String; ATipo : TFieldType;
+      ATamanho : Integer; APrecisao : Integer = 0;
+      ARequerido : Boolean = False; AVisivel : Boolean = True); overload;
   published
     property Nome : String read fNome write fNome;
     property Descricao : String read fDescricao write fDescricao;
     property Tipo : TFieldType read fTipo write fTipo;
     property Tamanho : Integer read fTamanho write fTamanho;
-    property CasasDecimais : Integer read fCasasDecimais write fCasasDecimais;
+    property Precisao : Integer read fPrecisao write fPrecisao;
     property Requerido : Boolean read fRequerido write fRequerido;
-    property Visible : Boolean read fVisible write fVisible;
+    property Visivel : Boolean read fVisivel write fVisivel;
   end;
 
   TmFieldList = class(TList)
@@ -49,19 +47,17 @@ constructor TmField.Create;
 begin
 end;
 
-constructor TmField.Create(
-  ANome : String; ADescricao: String;
-  ATipo : TFieldType;
-  ATamanho: Integer; ACasasDecimais: Integer;
-  ARequerido: Boolean; AVisible: Boolean);
+constructor TmField.Create(ANome : String; ADescricao: String; ATipo : TFieldType;
+  ATamanho: Integer; APrecisao: Integer;
+  ARequerido: Boolean; AVisivel: Boolean);
 begin
   fNome := ANome;
   fDescricao := ADescricao;
   fTipo := ATipo;
   fTamanho := ATamanho;
-  fCasasDecimais := ACasasDecimais;
+  fPrecisao := APrecisao;
   fRequerido := ARequerido;
-  fVisible := AVisible;
+  fVisivel := AVisivel;
 end;
 
 { TmFieldList }

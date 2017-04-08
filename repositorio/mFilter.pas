@@ -31,6 +31,7 @@ type
     fNome: String;
     fFinal: TmValue;
     fInicial: TmValue;
+    fLista: TmValueList;
     fTipo: TTipoFilter;
     function GetValueBase: String;
   public
@@ -42,18 +43,22 @@ type
     constructor CreateD(ANome : String; ATipo : TTipoFilter; AInicial : TDateTime); overload;
     constructor CreateD(ANome : String; AInicial : TDateTime; AFinal : TDateTime); overload;
     constructor CreateD(ANome : String; AInicial : TDateTime); overload;
+    constructor CreateD(ANome : String; ALista : Array Of TDateTime); overload;
 
     constructor CreateF(ANome : String; ATipo : TTipoFilter; AInicial : Real); overload;
     constructor CreateF(ANome : String; AInicial : Real; AFinal : Real); overload;
     constructor CreateF(ANome : String; AInicial : Real); overload;
+    constructor CreateF(ANome : String; ALista : Array Of Real); overload;
 
     constructor CreateI(ANome : String; ATipo : TTipoFilter; AInicial : Integer); overload;
     constructor CreateI(ANome : String; AInicial : Integer; AFinal : Integer); overload;
     constructor CreateI(ANome : String; AInicial : Integer); overload;
+    constructor CreateI(ANome : String; ALista : Array Of Integer); overload;
 
     constructor CreateS(ANome : String; ATipo : TTipoFilter; AInicial : String); overload;
     constructor CreateS(ANome : String; AInicial : String; AFinal : String); overload;
     constructor CreateS(ANome : String; AInicial : String); overload;
+    constructor CreateS(ANome : String; ALista : Array Of String); overload;
 
     property Nome : String read fNome write fNome;
     property Tipo : TTipoFilter read fTipo write fTipo;
@@ -78,10 +83,11 @@ implementation
 
 constructor TmFilter.Create(ANome: String; ATipo: TTipoFilter);
 begin
-  Nome := ANome;
-  Tipo := ATipo;
-  Inicial := TmValueStr.Create(ANome, '');
-  Final := TmValueStr.Create(ANome, '');
+  fNome := ANome;
+  fTipo := ATipo;
+  fInicial := TmValueStr.Create(ANome, '');
+  fFinal := TmValueStr.Create(ANome, '');
+  fLista := TmValueList.Create;
 end;
 
 //-- boolean
@@ -116,6 +122,17 @@ begin
   CreateD(ANome, tpfIgual, AInicial);
 end;
 
+constructor TmFilter.CreateD(ANome : String; ALista : Array Of TDateTime);
+var
+  I : Integer;
+begin
+  Create(ANome, tpfLista);
+
+  fLista.Clear;
+  for I := 0 to High(ALista) do
+    fLista.AddD(ANome, ALista[I]);
+end;
+
 //-- float
 
 constructor TmFilter.CreateF(ANome : String; ATipo : TTipoFilter; AInicial : Real);
@@ -133,6 +150,17 @@ end;
 constructor TmFilter.CreateF(ANome: String; AInicial: Real);
 begin
   CreateF(ANome, tpfIgual, AInicial);
+end;
+
+constructor TmFilter.CreateF(ANome : String; ALista : Array Of Real);
+var
+  I : Integer;
+begin
+  Create(ANome, tpfLista);
+
+  fLista.Clear;
+  for I := 0 to High(ALista) do
+    fLista.AddF(ANome, ALista[I]);
 end;
 
 //-- integer
@@ -154,6 +182,17 @@ begin
   CreateI(ANome, tpfIgual, AInicial);
 end;
 
+constructor TmFilter.CreateI(ANome : String; ALista : Array Of Integer);
+var
+  I : Integer;
+begin
+  Create(ANome, tpfLista);
+
+  fLista.Clear;
+  for I := 0 to High(ALista) do
+    fLista.AddI(ANome, ALista[I]);
+end;
+
 //-- string
 
 constructor TmFilter.CreateS(ANome : String; ATipo : TTipoFilter; AInicial : String);
@@ -171,6 +210,17 @@ end;
 constructor TmFilter.CreateS(ANome, AInicial: String);
 begin
   CreateS(ANome, tpfIgual, AInicial);
+end;
+
+constructor TmFilter.CreateS(ANome : String; ALista : Array Of String);
+var
+  I : Integer;
+begin
+  Create(ANome, tpfLista);
+
+  fLista.Clear;
+  for I := 0 to High(ALista) do
+    fLista.AddS(ANome, ALista[I]);
 end;
 
 //-- database
@@ -192,12 +242,19 @@ const
 function TmFilter.GetValueBase: String;
 var
   vInicial, vFinal : String;
+  I : Integer;
 begin
   vInicial := Inicial.ValueBase;
   vFinal := Final.ValueBase;
 
   if Tipo in [tpfLista] then begin
-    vInicial := AnsiReplaceStr(vInicial, '''', '');
+    vInicial := '';
+    if fLista.Count > 0 then begin
+      for I := 0 to fLista.Count - 1 do
+        vInicial := vInicial + IfThen(vInicial <> '', ',') +
+          fLista.Items[I].ValueBase;
+    end else
+      vInicial := AnsiReplaceStr(vInicial, '''', '');
   end else if Tipo in [tpfLike] then begin
     vInicial := AnsiReplaceStr(vInicial, '''', '');
     vInicial := '''%''' + AnsiReplaceStr(vInicial, ' ', '%') + '''%''';

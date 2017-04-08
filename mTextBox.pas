@@ -4,7 +4,7 @@ interface
 
 uses
   SysUtils, Classes, Controls, StdCtrls, DB, Graphics, TypInfo, Messages, Forms,
-  Windows, StrUtils, mTipoFormato, mFormatar, mValidar, mValue;
+  Windows, StrUtils, mTipoFormato, mFormatar, mValidar, mValue, mTipoTecla;
 
 type
   TmTextBox = class(TEdit)
@@ -67,7 +67,7 @@ end;
 
 constructor TmTextBox.create(AOwner: TComponent);
 begin
-  inherited create(AOwner);
+  inherited;
 
   FColorEnter := clYellow;
   FColorExit := clWhite;
@@ -79,6 +79,8 @@ begin
   Height := 24;
   BorderStyle := bsNone;
   Font.Size := 16;
+
+  Text := ' ';
 end;
 
 constructor TmTextBox.create(AOwner: TComponent; AParent : TWinControl);
@@ -175,48 +177,25 @@ end;
 
 procedure TmTextBox.KeyPress(var Key: Char);
 var
-  vLstDigitos : Set Of Char;
-  vLstLetras : Set Of Char;
-  vLstSimbolos : Set Of Char;
-  vLstData : Set Of Char;
-  vLstInteiro : Set Of Char;
-  vLstNumero : Set Of Char;
-  vLstTexto : Set Of Char;
-  vLstEmail : Set Of Char;
-  vLstSenha : Set Of Char;
-  vLstSite : Set Of Char;
   vLstTecla : Set Of Char;
 begin
-  vLstDigitos := ['0'..'9'];
-  vLstLetras := ['a'..'z', 'A'..'Z'];
-  vLstSimbolos := ['.', ',', '!', '@', '#', '%', '$', '%', '&', '*', '(', ')',
-    '[', ']', '{', '}', '_', '-', '+', '=', '/', '\', '?', '<', '>', ':', ' '];
-
-  vLstData := vLstDigitos + ['/', ':', Chr(8)];
-  vLstInteiro := vLstDigitos + [Chr(8)];
-  vLstNumero := vLstDigitos + [',', Chr(8)];
-  vLstTexto := vLstDigitos + vLstLetras + vLstSimbolos + [Chr(8)];
-  vLstEmail := vLstDigitos + vLstLetras + ['@', '.', Chr(8)];
-  vLstSenha := vLstDigitos + vLstLetras + ['!', '@', '#', '$', '%', '?', Chr(8)];
-  vLstSite := vLstDigitos + vLstLetras + ['.', Chr(8)];
-
   vLstTecla := [];
 
   case FFormato of
     tfEmail:
-      vLstTecla := vLstEmail;
+      vLstTecla := TmTipoTecla.GetLstEmail;
     tfSenha:
-      vLstTecla := vLstSenha;
+      vLstTecla := TmTipoTecla.GetLstSenha;
     tfSite:
-      vLstTecla := vLstSite;
+      vLstTecla := TmTipoTecla.GetLstSite;
     tfDataHora:
-      vLstTecla := vLstData;
+      vLstTecla := TmTipoTecla.GetLstData;
     tfNumero:
-      vLstTecla := vLstInteiro;
+      vLstTecla := TmTipoTecla.GetLstInteiro;
     tfPercentual, tfQuantidade, tfValor:
-      vLstTecla := vLstNumero;
+      vLstTecla := TmTipoTecla.GetLstNumero;
     tfDescricao, tfNome:
-      vLstTecla := vLstTexto;
+      vLstTecla := TmTipoTecla.GetLstTexto;
   end;
 
   if vLstTecla <> [] then

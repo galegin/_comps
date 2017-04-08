@@ -39,7 +39,7 @@ end;
 
 constructor TmCheckListBox.create(Aowner: TComponent);
 begin
-  inherited create(Aowner);
+  inherited;
   FLista := TmKeyValueList.Create;
 end;
 

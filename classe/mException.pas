@@ -10,7 +10,7 @@ type
   private
     fMetodo : String;
   public
-    constructor Create(AMensagem, AMetodo : String);
+    constructor Create(AMetodo, AMensagem : String);
   published
     property Metodo : String read fMetodo;
   end;
@@ -22,11 +22,11 @@ uses
 
 { TmException }
 
-constructor TmException.Create(AMensagem, AMetodo : String);
+constructor TmException.Create(AMetodo, AMensagem : String);
 begin
-  Message := AMensagem;
   fMetodo := AMetodo;
-  mLogger.Instance.Erro(AMensagem, AMetodo);
+  Message := AMensagem;
+  mLogger.Instance.Erro(AMetodo, AMensagem);
 end;
 
 end.

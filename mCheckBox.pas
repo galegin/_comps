@@ -44,7 +44,9 @@ end;
 
 constructor TmCheckBox.create(AOwner: TComponent);
 begin
-  inherited create(AOwner);
+  inherited;
+  Font.Size := 16;
+  Caption := ' ';
 end;
 
 constructor TmCheckBox.create(AOwner: TComponent; AParent: TWinControl);

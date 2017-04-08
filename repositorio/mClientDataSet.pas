@@ -36,7 +36,7 @@ begin
     for I := 0 to AFields.Count - 1 do
       with AFields.Items[I] do begin
         with FieldByName(Nome) do begin
-          Visible := AFields.Items[I].Visible;
+          Visible := AFields.Items[I].Visivel;
           if Descricao <> '' then
             DisplayLabel := Descricao;
           if Tamanho > 0 then

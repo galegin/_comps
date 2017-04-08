@@ -11,8 +11,8 @@ type
     fUf_Origem : String;   // 'PR'
     fTp_Ambiente : String; // 1 - Producao / 2 - Homologacao
     fTp_Emissao : String;  // 1 - Normal / 9 - OffLine
-    fTp_ModeloDF : String;   // NFE / NFCE
-    fTp_VersaoDF : String;   // 2.00 / 3.00 / 3.10
+    fTp_ModeloDF : String; // NFE / NFCE
+    fTp_VersaoDF : String; // 2.00 / 3.00 / 3.10
 
     fDs_ArquivoCert : String; // 'c:\projetos\venda\certificados\certificado.pfx'
     fDs_SenhaCert : String;   // '1234'
