@@ -62,13 +62,26 @@ end;
   begin
     with Result do begin
       case ATipoDatabase of
+        tpdDB2 : begin
+          ConnectionName := '';
+          DriverName := 'DB2';
+          GetDriverFunc := 'getSQLDriverDB2';
+          LibraryName := 'dbexpdb2.dll';
+          VendorLib := 'dbexpdb2.dll';
+          Parametro :=
+            'BlobSize=-1;ErrorResourceFile=;LocaleCode=0000;' +
+            'DB2 TransIsolation=ReadCommited';
+        end;
+
         tpdFirebird : begin
           ConnectionName := '';
           DriverName := 'Firebird';
           GetDriverFunc := 'getSQLDriverINTERBASE';
           LibraryName := 'dbexpint.dll';
           VendorLib := 'fbclient.dll';
-          Parametro := 'BlobSize=-1;CommitRetain=False;ServerCharSet=win1252;SQLDialect=3;Interbase TransIsolation=ReadCommited;WaitOnLocks=True';
+          Parametro :=
+            'BlobSize=-1;CommitRetain=False;ServerCharSet=win1252;SQLDialect=3;' +
+            'Interbase TransIsolation=ReadCommited;WaitOnLocks=True';
         end;
 
         tpdMySql : begin
@@ -77,6 +90,7 @@ end;
           GetDriverFunc := 'getSQLDriverMYSQL';
           LibraryName := 'dbexpmysql.dll';
           VendorLib := 'libmysql.dll';
+          Parametro := '';
         end;
 
         tpdOracle : begin
@@ -85,6 +99,10 @@ end;
           GetDriverFunc := 'getSQLDriverORACLE';
           LibraryName := 'dbexpora.dll';
           VendorLib := 'oci.dll';
+          Parametro :=
+            'BlobSize=-1;ErrorResourceFile=;LocaleCode=0000;RowsetSize=20;' +
+            'Oracle TransIsolation=ReadCommited;RowsetSize=2;0Trim Char=False;' +
+            'OS Authentication=False;Multiple Transaction=False';
         end;
 
         tpdPostgre : begin
@@ -93,6 +111,7 @@ end;
           GetDriverFunc := 'getSQLDriverPostgreSQL';
           LibraryName := 'dbexpmysql.dll';
           VendorLib := 'dbexppgsql.dll';
+          Parametro := '';
         end;
 
         tpdSqlServer : begin
@@ -101,6 +120,7 @@ end;
           GetDriverFunc := 'getSQLDriverSQLServer';
           LibraryName := 'dbexpsda.dll';
           VendorLib := 'sqloledb.dll';
+          Parametro := '';
         end;
       end;
     end;
@@ -123,6 +143,7 @@ end;
       VendorLib := vDatabaseX.VendorLib;
       TableScope := [tsTable, tsView];
       LoginPrompt := False;
+
       with Params do begin
         Clear();
         Params.Values['DataBase'] := Parametro.Cd_Database;
