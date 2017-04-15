@@ -6,7 +6,7 @@ uses
   mControlIntf;
 
 type
-  TmFrameIntf = interface(TmControlIntf)
+  IFrame = interface(IControl)
     ['{2541ABF4-EFBC-404B-8295-75EA6D9E77DE}']
 
   end;

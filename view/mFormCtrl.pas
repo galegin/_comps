@@ -1,4 +1,4 @@
-unit mFormControl;
+unit mFormCtrl;
 
 interface
 
@@ -9,7 +9,7 @@ uses
   mTipoFormato, mValue;
 
 type
-  TmFormControl = class
+  TmFormCtrl = class
   private
   protected
   public
@@ -87,9 +87,9 @@ implementation
 uses
   mControl, mTipoEstilo;
 
-{ TmFormControl }
+{ TmFormCtrl }
 
-class function TmFormControl.AddFrame;
+class function TmFormCtrl.AddFrame;
 begin
   Result := TmFrame.Create(AOwner);
   with Result do begin
@@ -107,7 +107,7 @@ begin
   SetInitial(Result);
 end;
 
-class function TmFormControl.AddPanel;
+class function TmFormCtrl.AddPanel;
 begin
   Result := TmPanel.Create(AOwner);
   with Result do begin
@@ -123,7 +123,7 @@ end;
 
 //--
 
-class function TmFormControl.AddGrade;
+class function TmFormCtrl.AddGrade;
 begin
   Result := TmGrade.Create(AOwner);
   with Result do begin
@@ -138,7 +138,7 @@ end;
 
 //--
 
-class function TmFormControl.AddLabel;
+class function TmFormCtrl.AddLabel;
 begin
   Result := TmLabel.Create(AOwner);
   with Result do begin
@@ -152,7 +152,7 @@ begin
   SetSize(Result);
 end;
 
-class function TmFormControl.AddButton;
+class function TmFormCtrl.AddButton;
 begin
   Result := TmButton.Create(AOwner);
   with Result do begin
@@ -168,7 +168,7 @@ end;
 
 //--
 
-class function TmFormControl.AddCheckBox;
+class function TmFormCtrl.AddCheckBox;
 begin
   Result := TmCheckBox.Create(AOwner);
   with Result do begin
@@ -183,7 +183,7 @@ begin
   SetSize(Result);
 end;
 
-class function TmFormControl.AddComboBox;
+class function TmFormCtrl.AddComboBox;
 begin
   Result := TmComboBox.Create(AOwner);
   with Result do begin
@@ -199,7 +199,7 @@ begin
   SetSize(Result);
 end;
 
-class function TmFormControl.AddTextBox;
+class function TmFormCtrl.AddTextBox;
 begin
   Result := TmTextBox.Create(AOwner);
   with Result do begin
@@ -217,7 +217,7 @@ end;
 
 //--
 
-class procedure TmFormControl.SetEstilo;
+class procedure TmFormCtrl.SetEstilo;
 var
   vEstilo : RTipoEstilo;
 begin
@@ -242,7 +242,7 @@ end;
 
 //--
 
-class function TmFormControl.GetOrientacao;
+class function TmFormCtrl.GetOrientacao;
 begin
   Result := toVertical;
   if (AControl is TmFrame) then begin
@@ -256,7 +256,7 @@ end;
 
 //--
 
-class function TmFormControl.GetLastControl;
+class function TmFormCtrl.GetLastControl;
 begin
   with AControl do
     if ControlCount > 1 then
@@ -267,7 +267,7 @@ end;
 
 //--
 
-class procedure TmFormControl.SetInitial;
+class procedure TmFormCtrl.SetInitial;
 var
   vOrientacaoFrame : TOrientacaoFrame;
 begin
@@ -289,7 +289,7 @@ begin
 
 end;
 
-class procedure TmFormControl.SetSize;
+class procedure TmFormCtrl.SetSize;
 const
   iREC = 4;
 var

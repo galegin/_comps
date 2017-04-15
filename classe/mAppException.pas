@@ -52,7 +52,7 @@ var
 
     for I := Low(LIgnorar) to High(LIgnorar) do begin
       if Pos(LIgnorar[I], AMensagem) > 0 then begin
-        ATipoMensagem.Status := tsNormal;
+        ATipoMensagem.Status := tsMensagem;
         Exit;
       end;
     end;

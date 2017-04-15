@@ -12,16 +12,24 @@ type
   private
     fList_Conexao : TmConexaoList;
     function Get(ATipoConexao: TTipoConexao) : TmConexao;
-    function GetConexaoAmbiente: TmConexao;
+    function Get_Conexao: TmConexao;
+    function Get_ConexaoCreate: TmConexao;
+    function Get_ConexaoInstance: TmConexao;
+    function Get_ConexaoGlobal: TmConexao;
+    function Get_ConexaoLogin: TmConexao;
   public
     constructor Create(AOwner : TComponent); override;
 
     function GetConexao(
-      ATipoConexao : TTipoConexao = tpcAmbiente) : TmConexao;
+      ATipoConexao : TTipoConexao) : TmConexao;
 
   published
     property List_Conexao : TmConexaoList read fList_Conexao write fList_Conexao;
-    property Conexao : TmConexao read GetConexaoAmbiente;
+    property Conexao : TmConexao read Get_Conexao;
+    property ConexaoCreate : TmConexao read Get_ConexaoCreate;
+    property ConexaoInstance : TmConexao read Get_ConexaoInstance;
+    property ConexaoGlobal : TmConexao read Get_ConexaoGlobal;
+    property ConexaoLogin : TmConexao read Get_ConexaoLogin;
   end;
 
   function Instance : TmModulo;
@@ -97,9 +105,31 @@ begin
   List_Conexao.Add(Result);
 end;
 
-function TmModulo.GetConexaoAmbiente: TmConexao;
+//--
+
+function TmModulo.Get_Conexao: TmConexao;
 begin
-  Result := GetConexao();
+  Result := GetConexao(tpcAmbiente);
+end;
+
+function TmModulo.Get_ConexaoCreate: TmConexao;
+begin
+  Result := GetConexao(tpcCreate);
+end;
+
+function TmModulo.Get_ConexaoInstance: TmConexao;
+begin
+  Result := GetConexao(tpcInstance);
+end;
+
+function TmModulo.Get_ConexaoGlobal: TmConexao;
+begin
+  Result := GetConexao(tpcGlobal);
+end;
+
+function TmModulo.Get_ConexaoLogin: TmConexao;
+begin
+  Result := GetConexao(tpcLogin);
 end;
 
 end.

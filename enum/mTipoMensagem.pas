@@ -4,9 +4,13 @@ interface
 
 type
   TStatusMensagem = (
+    tsAlerta,
+    tsAviso,
+    tsConfirmacao,
     tsErro,
-    tsNormal,
-    txExecutado);
+    tsInformacao,
+    tsMensagem,
+    tsSucesso);
 
   TTipoMensagem = (
     tmErroInformeOCodigo,
@@ -61,5 +65,7 @@ function TipoMensageToStr(const pTipo : TTipoMensagem) : string;
 begin
   Result := LTipoMensagem[pTipo].Codigo;
 end;
+
+//--
 
 end.

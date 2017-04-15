@@ -9,7 +9,7 @@ uses
   mButton, mCheckBox, mComboBox, mTextBox, mKeyValue, mTipoFormato, mValue;
 
 type
-  TmForm = class(TForm, TmFormIntf)
+  TmForm = class(TForm, IForm)
   private
   protected
   public
@@ -58,7 +58,7 @@ implementation
 {$R *.dfm}
 
 uses
-  mFormControl;
+  mFormCtrl;
 
 { TmForm }
 
@@ -72,42 +72,42 @@ end;
 
 function TmForm.AddFrame;
 begin
-  Result := TmFormControl.AddFrame(Owner, Self, AOrientacao);
+  Result := TmFormCtrl.AddFrame(Owner, Self, AOrientacao);
 end;
 
 function TmForm.AddPanel;
 begin
-  Result := TmFormControl.AddPanel(Owner, Self, AOrientacao);
+  Result := TmFormCtrl.AddPanel(Owner, Self, AOrientacao);
 end;
 
 function TmForm.AddGrade;
 begin
-  Result := TmFormControl.AddGrade(Owner, Self, ACollection);
+  Result := TmFormCtrl.AddGrade(Owner, Self, ACollection);
 end;
 
 function TmForm.AddLabel;
 begin
-  Result := TmFormControl.AddLabel(Owner, Self, ALargura, ADescricao);
+  Result := TmFormCtrl.AddLabel(Owner, Self, ALargura, ADescricao);
 end;
 
 function TmForm.AddButton;
 begin
-  Result := TmFormControl.AddButton(Owner, Self, ALargura, ADescricao);
+  Result := TmFormCtrl.AddButton(Owner, Self, ALargura, ADescricao);
 end;
 
 function TmForm.AddCheckBox;
 begin
-  Result := TmFormControl.AddCheckBox(Owner, Self, ALargura, AEntidade, ACampo);
+  Result := TmFormCtrl.AddCheckBox(Owner, Self, ALargura, AEntidade, ACampo);
 end;
 
 function TmForm.AddComboBox;
 begin
-  Result := TmFormControl.AddComboBox(Owner, Self, ALargura, AEntidade, ACampo, ALista);
+  Result := TmFormCtrl.AddComboBox(Owner, Self, ALargura, AEntidade, ACampo, ALista);
 end;
 
 function TmForm.AddTextBox;
 begin
-  Result := TmFormControl.AddTextBox(Owner, Self, ALargura, AEntidade, ACampo, ATipo, AFormato);
+  Result := TmFormCtrl.AddTextBox(Owner, Self, ALargura, AEntidade, ACampo, ATipo, AFormato);
 end;
 
 end.

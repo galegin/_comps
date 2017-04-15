@@ -9,7 +9,7 @@ uses
   mTipoFormato, mValue;
 
 type
-  TmFrame = class(TFrame, TmFrameIntf)
+  TmFrame = class(TFrame, IFrame)
   private
     fOrientacao : TOrientacaoFrame;
   protected
@@ -56,7 +56,7 @@ implementation
 {$R *.dfm}
 
 uses
-  mFormControl;
+  mFormCtrl;
 
 { TmFrame }
 
@@ -70,37 +70,37 @@ end;
 
 function TmFrame.AddPanel;
 begin
-  Result := TmFormControl.AddPanel(Owner, Self, AOrientacao);
+  Result := TmFormCtrl.AddPanel(Owner, Self, AOrientacao);
 end;
 
 function TmFrame.AddGrade;
 begin
-  Result := TmFormControl.AddGrade(Owner, Self, ACollection);
+  Result := TmFormCtrl.AddGrade(Owner, Self, ACollection);
 end;
 
 function TmFrame.AddLabel;
 begin
-  Result := TmFormControl.AddLabel(Owner, Self, ALargura, ADescricao);
+  Result := TmFormCtrl.AddLabel(Owner, Self, ALargura, ADescricao);
 end;
 
 function TmFrame.AddButton;
 begin
-  Result := TmFormControl.AddButton(Owner, Self, ALargura, ADescricao);
+  Result := TmFormCtrl.AddButton(Owner, Self, ALargura, ADescricao);
 end;
 
 function TmFrame.AddCheckBox;
 begin
-  Result := TmFormControl.AddCheckBox(Owner, Self, ALargura, AEntidade, ACampo);
+  Result := TmFormCtrl.AddCheckBox(Owner, Self, ALargura, AEntidade, ACampo);
 end;
 
 function TmFrame.AddComboBox;
 begin
-  Result := TmFormControl.AddComboBox(Owner, Self, ALargura, AEntidade, ACampo, ALista);
+  Result := TmFormCtrl.AddComboBox(Owner, Self, ALargura, AEntidade, ACampo, ALista);
 end;
 
 function TmFrame.AddTextBox;
 begin
-  Result := TmFormControl.AddTextBox(Owner, Self, ALargura, AEntidade, ACampo, ATipo, AFormato);
+  Result := TmFormCtrl.AddTextBox(Owner, Self, ALargura, AEntidade, ACampo, ATipo, AFormato);
 end;
 
 end.

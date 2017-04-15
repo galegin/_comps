@@ -8,7 +8,7 @@ uses
   mCheckBox, mComboBox, mTextBox, mKeyValue, mValue, mTipoFormato;
 
 type
-  TmControlIntf = interface
+  IControl = interface
     ['{5F6224AB-D18E-4D9A-90AD-F48479A8819E}']
 
     function AddPanel(

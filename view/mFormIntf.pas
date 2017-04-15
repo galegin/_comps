@@ -8,7 +8,7 @@ uses
   mFrame;
 
 type
-  TmFormIntf = interface(TmControlIntf)
+  IForm = interface(IControl)
     ['{FDB74BCC-E955-4CF9-9D8B-E6D95C55E1DD}']
 
     function AddFrame(
