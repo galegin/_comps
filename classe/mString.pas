@@ -18,8 +18,15 @@ type
   public
     class function PrimeiraMaiscula(AString : String) : String;
 
+    class function PosInv(ASubString, AString : String) : Integer;
+
+    class function QtdOccurrence(AString, ASubString : String) : Integer;
+    class function PosOccurrence(AString, ASubString : String; AOcurrence : Integer) : String;
+
     class function LeftStr(AString, ASubString : String) : String;
+    class function LeftStrInv(AString, ASubString : String) : String;
     class function RightStr(AString, ASubString : String) : String;
+    class function RightStrInv(AString, ASubString : String) : String;
 
     class function StartsWiths(AString, ASubString : String) : Boolean;
     class function EndWiths(AString, ASubString : String) : Boolean;
@@ -88,6 +95,41 @@ end;
 
 //--
 
+class function TmString.PosInv(ASubString, AString : String) : Integer;
+begin
+  Result := Length(AString);
+  while (Result > 0) and (Copy(AString, Result, Length(ASubString)) <> ASubString) do
+    Dec(Result);
+end;
+
+//--
+
+class function TmString.QtdOccurrence(AString, ASubString : String) : Integer;
+begin
+  Result := 0;
+  while Pos(ASubString, AString) > 0 do begin
+    Delete(AString, 1, Pos(ASubString, AString) + Length(ASubString));
+    Inc(Result);
+  end;
+end;
+
+class function TmString.PosOccurrence(AString, ASubString : String; AOcurrence : Integer) : String;
+var
+  vPosition, vIteration : Integer;
+begin
+  Result := '';
+  vIteration := 0;
+  while (vIteration < AOcurrence) do begin
+    vPosition := Pos(ASubString, AString);
+    if vPosition = 0 then Break;
+    Result := Result + Copy(AString, 1, vPosition + Length(ASubString));
+    Delete(AString, 1, vPosition + Length(ASubString));
+    Inc(vIteration);
+  end;
+end;
+
+//--
+
 class function TmString.LeftStr(AString, ASubString : String) : String;
 var
   P : Integer;
@@ -99,11 +141,33 @@ begin
     Result := '';
 end;
 
+class function TmString.LeftStrInv(AString, ASubString : String) : String;
+var
+  P : Integer;
+begin
+  P := PosInv(ASubString, AString);
+  if (P > 0) then
+    Result := Copy(AString, 1, P - 1)
+  else
+    Result := '';
+end;
+
 class function TmString.RightStr(AString, ASubString : String) : String;
 var
   P : Integer;
 begin
   P := Pos(ASubString, AString);
+  if (P > 0) then
+    Result := Copy(AString, P + Length(ASubString), Length(AString))
+  else
+    Result := '';
+end;
+
+class function TmString.RightStrInv(AString, ASubString : String) : String;
+var
+  P : Integer;
+begin
+  P := PosInv(ASubString, AString);
   if (P > 0) then
     Result := Copy(AString, P + Length(ASubString), Length(AString))
   else

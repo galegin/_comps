@@ -9,6 +9,11 @@ uses
   mButton, mCheckBox, mComboBox, mTextBox, mKeyValue, mTipoFormato, mValue;
 
 type
+  RStatusCor = record
+    CorFonte : TColor;
+    CorFundo : TColor;
+  end;
+
   TmDialog = class(TForm, IDialog)
     LabelTitulo: TLabel;
     LabelMensagem: TLabel;
@@ -16,14 +21,20 @@ type
     BevelSpace: TBevel;
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
+    fButtonList : TmButtonList;
+    fStatusCor : RStatusCor;
+    fOpcao : TmTipoDialogOpcao;
+    procedure SetDialogCor(const Value: RStatusCor);
   protected
     procedure SetOpcao(AOpcao : Array Of TmTipoDialogOpcao);
     procedure BtnExecutarClick(Sender : TObject);
   public
     constructor Create(Aowner : TComponent); override;
-    procedure Show(const Value : RTipoMensagem);
-    function ShowDialog(const Value : RTipoMensagem; const Opcao : Array Of TmTipoDialogOpcao) : TmTipoDialogOpcao;
+    procedure Show(const ATipo : RTipoMensagem);
+    function ShowDialog(const ATipo : RTipoMensagem; const AOpcao : Array Of TmTipoDialogOpcao) : TmTipoDialogOpcao;
   published
+    property DialogCor : RStatusCor read fStatusCor write SetDialogCor;
+    property Opcao : TmTipoDialogOpcao read fOpcao write fOpcao;
   end;
 
   function Instance : TmDialog;
@@ -31,6 +42,9 @@ type
 implementation
 
 {$R *.dfm}
+
+uses
+  mMensagem;
 
 var
   _instance : TmDialog;
@@ -52,12 +66,24 @@ const
     'Mensagem',
     'Sucesso');
 
+  TStatusMensagemCor : Array [TStatusMensagem] Of RStatusCor = (
+    (CorFonte: clBlack; CorFundo: clYellow),  // 'Alerta',
+    (CorFonte: clWhite; CorFundo: clBlue  ),  // 'Aviso',
+    (CorFonte: clBlack; CorFundo: clYellow),  // 'Confirmação',
+    (CorFonte: clWhite; CorFundo: clRed   ),  // 'Erro',
+    (CorFonte: clBlack; CorFundo: clYellow),  // 'Informação',
+    (CorFonte: clWhite; CorFundo: clGreen ),  // 'Mensagem',
+    (CorFonte: clBlack; CorFundo: clWhite )); // 'Sucesso'
+
 { TmDialog }
 
 constructor TmDialog.Create(Aowner: TComponent);
 begin
   inherited; //
 
+  fButtonList := TmButtonList.Create;
+
+  mMensagem.Instance.Dialog := Self;
 end;
 
 procedure TmDialog.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -65,6 +91,15 @@ begin
   case Key of
     VK_ESCAPE : Close;
   end;
+end;
+
+procedure TmDialog.SetDialogCor(const Value: RStatusCor);
+begin
+  fStatusCor := Value;
+  Color := fStatusCor.CorFundo;
+  LabelTitulo.Font.Color := fStatusCor.CorFonte;
+  LabelMensagem.Font.Color := fStatusCor.CorFonte;
+  PanelOpcao.Color := fStatusCor.CorFundo;
 end;
 
 //--
@@ -84,28 +119,26 @@ end;
     end;
   end;
 
-function TmDialog.ShowDialog(const Value : RTipoMensagem; const Opcao : Array Of TmTipoDialogOpcao) : TmTipoDialogOpcao;
+function TmDialog.ShowDialog(const ATipo : RTipoMensagem; const AOpcao : Array Of TmTipoDialogOpcao) : TmTipoDialogOpcao;
 begin
-  with TmDialog.Create(nil) do begin
-    try
-      LabelTitulo.Caption := TStatusMensagemTitulo[Value.Status];
-      LabelMensagem.Caption := Value.Mensagem + IfThen(Value.Dica <> '', sLineBreak) + Value.Dica;
+  DialogCor := TStatusMensagemCor[ATipo.Status];
+  LabelTitulo.Caption := TStatusMensagemTitulo[ATipo.Status];
+  LabelMensagem.Caption := ATipo.Mensagem + IfThen(ATipo.Dica <> '', sLineBreak) + ATipo.Dica;
 
-      if Length(Opcao) > 0 then
-        SetOpcao(Opcao)
-      else
-        SetOpcao(GetOpcao(Value.Status));
+  if Length(AOpcao) > 0 then
+    SetOpcao(AOpcao)
+  else
+    SetOpcao(GetOpcao(ATipo.Status));
 
-      Result := TmTipoDialogOpcao(Ord(ShowModal));
-    finally
-      Free;
-    end;
-  end;
+  if ShowModal = mrOk then
+    Result := Self.Opcao
+  else
+    Result := TmTipoDialogOpcao(Ord(-1));
 end;
 
-procedure TmDialog.Show(const Value: RTipoMensagem);
+procedure TmDialog.Show(const ATipo: RTipoMensagem);
 begin
-  ShowDialog(Value, [toFechar]);
+  ShowDialog(ATipo, [toFechar]);
 end;
 
 procedure TmDialog.SetOpcao(AOpcao: Array Of TmTipoDialogOpcao);
@@ -116,12 +149,15 @@ var
 begin
   vLeft := (PanelOpcao.Width div 2) - ((Length(AOpcao) * iLARGURA) div 2);
 
+  fButtonList.Clear;
+
   for I := 0 to High(AOpcao) do begin
-    with TmButton.Create(Self) do begin
+    with fButtonList.Add do begin
       Top := 0;
       Left := vLeft;
       Height := PanelOpcao.Height;
       Width := iLARGURA;
+      Font.Color := fStatusCor.CorFonte;
       Caption := TmTipoDialogOpcaoCaption[AOpcao[I]];
       Name := TmTipoDialogOpcaoName[AOpcao[I]];
       OnClick := BtnExecutarClick;
@@ -135,26 +171,20 @@ end;
 
 procedure TmDialog.BtnExecutarClick(Sender : TObject);
 begin
-  ModalResult := TmButton(Sender).ModalResult;
-  Close;
+  Opcao := TmTipoDialogOpcao(TmButton(Sender).ModalResult);
+  ModalResult := mrOk;
 end;
 
 procedure Testar;
-var
-  vValue: RTipoMensagem;
 begin
-  vValue.Tipo := tmErroInformeOCodigo;
-  vValue.Status := tsErro;
-  vValue.Mensagem := 'Mensagem';
-  Instance.Show(vValue);
-
-  vValue.Tipo := tmErroInformeOCodigo;
-  vValue.Status := tsConfirmacao;
-  vValue.Mensagem := 'Mensagem';
-  Instance.ShowDialog(vValue, []);
+  if Instance.ShowDialog(GetTipoMensagemStr(tsConfirmacao, 'Continuar'),
+      [toCancelar, toConfirmar]) = toConfirmar  then
+    Instance.Show(GetTipoMensagemStr(tsMensagem, 'Confirmado'))
+  else
+    Instance.Show(GetTipoMensagemStr(tsErro, 'Cancelado'));
 end;
 
 initialization
-  Testar();
+  //Testar();
 
 end.

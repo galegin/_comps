@@ -6,19 +6,19 @@ interface
 
 uses
   Classes, SysUtils, StrUtils,
-  mTipoMensagem, mMensagemIntf;
+  mTipoMensagem, mDialogIntf;
 
 type
   TmMensagem = class(TComponent)
   private
-    fDialog : IMensagem;
+    fDialog : IDialog;
   protected
   public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
     procedure Mensagem(ATipoMensagem : RTipoMensagem);
   published
-    property Dialog : IMensagem read fDialog write fDialog;
+    property Dialog : IDialog read fDialog write fDialog;
   end;
 
   function Instance : TmMensagem;

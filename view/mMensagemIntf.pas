@@ -7,8 +7,8 @@ uses
 
 type
   IMensagem = interface
-    procedure Show(const Value : RTipoMensagem);
-    function ShowDialog(const Value : RTipoMensagem; const Opcao : Array Of TmTipoDialogOpcao) : TmTipoDialogOpcao;
+    procedure Show(const ATipo : RTipoMensagem);
+    function ShowDialog(const ATipo : RTipoMensagem; const AOpcao : Array Of TmTipoDialogOpcao) : TmTipoDialogOpcao;
   end;
 
 implementation

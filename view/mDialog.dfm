@@ -1,9 +1,10 @@
 object mDialog: TmDialog
   Left = 230
   Top = 123
-  Width = 600
-  Height = 300
+  BorderStyle = bsNone
   Caption = 'mDialog'
+  ClientHeight = 262
+  ClientWidth = 584
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

@@ -30,6 +30,8 @@ type
   function StrToTipoMensagem(const pCodigo : string) : TTipoMensagem;
   function TipoMensageToStr(const pTipo : TTipoMensagem) : string;
 
+  function GetTipoMensagemStr(AStatus : TStatusMensagem; AMensagem : String) : RTipoMensagem;
+
 implementation
 
 const
@@ -67,5 +69,14 @@ begin
 end;
 
 //--
+
+function GetTipoMensagemStr(AStatus : TStatusMensagem; AMensagem : String) : RTipoMensagem;
+begin
+  Result.Tipo := TTipoMensagem(Ord(-1));
+  Result.Status := AStatus;
+  Result.Codigo := '';
+  Result.Mensagem := AMensagem;
+  Result.Dica := '';
+end;
 
 end.

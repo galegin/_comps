@@ -50,12 +50,9 @@ var
     ATipoMensagem.Status := tsErro;
     ATipoMensagem.Mensagem := AMensagem;
 
-    for I := Low(LIgnorar) to High(LIgnorar) do begin
-      if Pos(LIgnorar[I], AMensagem) > 0 then begin
+    for I := Low(LIgnorar) to High(LIgnorar) do
+      if Pos(LIgnorar[I], AMensagem) > 0 then
         ATipoMensagem.Status := tsMensagem;
-        Exit;
-      end;
-    end;
   end;
 
 constructor TmAppException.Create(Aowner: TComponent);
@@ -78,8 +75,8 @@ begin
       vMetodo := Metodo;
     end;
   end else begin
-    vMessage := TmString.IfNull(TmString.LeftStr(E.Message, ' / '), E.Message);
-    vMetodo := TmString.IfNull(TmString.RightStr(E.Message, ' / '), cDS_METHOD);
+    vMessage := TmString.IfNull(TmString.LeftStrInv(E.Message, ' / '), E.Message);
+    vMetodo := TmString.IfNull(TmString.RightStrInv(E.Message, ' / '), cDS_METHOD);
   end;
 
   // trata erro
