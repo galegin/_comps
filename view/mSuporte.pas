@@ -226,7 +226,6 @@ end;
 procedure TmSuporte.GerarEmail;
 var
   vAssunto, vConteudo : String;
-  I : Integer;
 begin
   //MensagemBal('Gerando email...');
 
