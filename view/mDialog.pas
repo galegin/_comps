@@ -19,12 +19,18 @@ type
     LabelMensagem: TLabel;
     PanelOpcao: TPanel;
     BevelSpace: TBevel;
+    LabelDetalhar: TLabel;
+    LabelSuporte: TLabel;
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure LabelDetalharDblClick(Sender: TObject);
+    procedure LabelSuporteClick(Sender: TObject);
   private
     fButtonList : TmButtonList;
     fStatusCor : RStatusCor;
     fOpcao : TmTipoDialogOpcao;
+    fTipo: RTipoMensagem;
     procedure SetDialogCor(const Value: RStatusCor);
+    procedure SetTipo(const Value: RTipoMensagem);
   protected
     procedure SetOpcao(AOpcao : Array Of TmTipoDialogOpcao);
     procedure BtnExecutarClick(Sender : TObject);
@@ -33,6 +39,7 @@ type
     procedure Show(const ATipo : RTipoMensagem);
     function ShowDialog(const ATipo : RTipoMensagem; const AOpcao : Array Of TmTipoDialogOpcao) : TmTipoDialogOpcao;
   published
+    property Tipo : RTipoMensagem read fTipo write SetTipo;
     property DialogCor : RStatusCor read fStatusCor write SetDialogCor;
     property Opcao : TmTipoDialogOpcao read fOpcao write fOpcao;
   end;
@@ -93,13 +100,18 @@ begin
   end;
 end;
 
+procedure TmDialog.SetTipo(const Value: RTipoMensagem);
+begin
+  fTipo := Value;
+  DialogCor := TStatusMensagemCor[Value.Status];
+  LabelTitulo.Caption := TStatusMensagemTitulo[Value.Status];
+  LabelMensagem.Caption := Value.Mensagem + IfThen(Value.Dica <> '', sLineBreak) + Value.Dica;
+end;
+
 procedure TmDialog.SetDialogCor(const Value: RStatusCor);
 begin
   fStatusCor := Value;
   Color := fStatusCor.CorFundo;
-  LabelTitulo.Font.Color := fStatusCor.CorFonte;
-  LabelMensagem.Font.Color := fStatusCor.CorFonte;
-  PanelOpcao.Color := fStatusCor.CorFundo;
 end;
 
 //--
@@ -121,9 +133,7 @@ end;
 
 function TmDialog.ShowDialog(const ATipo : RTipoMensagem; const AOpcao : Array Of TmTipoDialogOpcao) : TmTipoDialogOpcao;
 begin
-  DialogCor := TStatusMensagemCor[ATipo.Status];
-  LabelTitulo.Caption := TStatusMensagemTitulo[ATipo.Status];
-  LabelMensagem.Caption := ATipo.Mensagem + IfThen(ATipo.Dica <> '', sLineBreak) + ATipo.Dica;
+  Tipo := ATipo;
 
   if Length(AOpcao) > 0 then
     SetOpcao(AOpcao)
@@ -153,10 +163,10 @@ begin
 
   for I := 0 to High(AOpcao) do begin
     with fButtonList.Add do begin
-      Top := 0;
       Left := vLeft;
       Height := PanelOpcao.Height;
       Width := iLARGURA;
+      ParentFont := True;
       Font.Color := fStatusCor.CorFonte;
       Caption := TmTipoDialogOpcaoCaption[AOpcao[I]];
       Name := TmTipoDialogOpcaoName[AOpcao[I]];
@@ -175,6 +185,21 @@ begin
   ModalResult := mrOk;
 end;
 
+procedure TmDialog.LabelDetalharDblClick(Sender: TObject);
+begin
+  //mVisualizar.Instance.ShowDialog(mLogger.Instance.Conteudo);
+end;
+
+procedure TmDialog.LabelSuporteClick(Sender: TObject);
+begin
+  //mSuporte.Instance.ShowDialog();
+  // - mLoggerMem
+  // - mLogger
+  // - mImagemTela
+  // - mImagemDialog
+  // - mParametro
+end;
+
 procedure Testar;
 begin
   if Instance.ShowDialog(GetTipoMensagemStr(tsConfirmacao, 'Continuar'),
@@ -185,6 +210,6 @@ begin
 end;
 
 initialization
-  //Testar();
+  Testar();
 
 end.
