@@ -14,6 +14,7 @@ type
     class function DFe(): String;
     class function Log(): String;
     class function Schemas(): String;
+    class function Suporte(): String;
     class function Temp(): String;
   end;
 
@@ -53,6 +54,11 @@ end;
 class function TmPath.Schemas: String;
 begin
   Result := Current('Schemas\');
+end;
+
+class function TmPath.Suporte: String;
+begin
+  Result := Current('Suporte\');
 end;
 
 class function TmPath.Temp: String;

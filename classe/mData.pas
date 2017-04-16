@@ -278,10 +278,9 @@ const
     'dd', 'ddmm', 'ddmmyy', 'ddmmyyyy', 'dd/mm', 'dd/mm/yy', 'dd/mm/yyyy');
 var
   I : Integer;
-  vData : TDateTime;
   vFormat : TFormatSettings;
 begin
-  Result := 0;
+  ///Result := 0;
 
   vFormat.DateSeparator := '/';
   vFormat.TimeSeparator := ':';

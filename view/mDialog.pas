@@ -21,9 +21,13 @@ type
     BevelSpace: TBevel;
     LabelDetalhar: TLabel;
     LabelSuporte: TLabel;
+    LabelProjeto: TLabel;
+    LabelVersao: TLabel;
+    procedure FormShow(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure LabelDetalharDblClick(Sender: TObject);
     procedure LabelSuporteClick(Sender: TObject);
+    procedure LabelDetalharClick(Sender: TObject);
   private
     fButtonList : TmButtonList;
     fStatusCor : RStatusCor;
@@ -51,7 +55,7 @@ implementation
 {$R *.dfm}
 
 uses
-  mMensagem;
+  mVisualizar, mMensagem, mLoggerMem, mLogger, mProjeto, mSuporte;
 
 var
   _instance : TmDialog;
@@ -90,7 +94,20 @@ begin
 
   fButtonList := TmButtonList.Create;
 
+  LabelProjeto.Caption := mProjeto.Instance.Codigo;
+  LabelVersao.Caption := mProjeto.Instance.Versao;
+
   mMensagem.Instance.Dialog := Self;
+end;
+
+procedure TmDialog.FormShow(Sender: TObject);
+begin
+//
+end;
+
+procedure TmDialog.FormActivate(Sender: TObject);
+begin
+  mSuporte.Instance.SetarImage(tiErro);
 end;
 
 procedure TmDialog.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -134,6 +151,8 @@ end;
 function TmDialog.ShowDialog(const ATipo : RTipoMensagem; const AOpcao : Array Of TmTipoDialogOpcao) : TmTipoDialogOpcao;
 begin
   Tipo := ATipo;
+
+  mSuporte.Instance.SetarImage(tiTela);
 
   if Length(AOpcao) > 0 then
     SetOpcao(AOpcao)
@@ -185,23 +204,20 @@ begin
   ModalResult := mrOk;
 end;
 
-procedure TmDialog.LabelDetalharDblClick(Sender: TObject);
+procedure TmDialog.LabelDetalharClick(Sender: TObject);
 begin
-  //mVisualizar.Instance.ShowDialog(mLogger.Instance.Conteudo);
+  mVisualizar.Instance.ShowDialog(mLoggerMem.Instance.Conteudo);
 end;
 
 procedure TmDialog.LabelSuporteClick(Sender: TObject);
 begin
-  //mSuporte.Instance.ShowDialog();
-  // - mLoggerMem
-  // - mLogger
-  // - mImagemTela
-  // - mImagemDialog
-  // - mParametro
+  mSuporte.Instance.Gerar(LabelMensagem.Caption);
 end;
 
 procedure Testar;
 begin
+  mLogger.Instance.Info('Testar', 'Teste');
+
   if Instance.ShowDialog(GetTipoMensagemStr(tsConfirmacao, 'Continuar'),
       [toCancelar, toConfirmar]) = toConfirmar  then
     Instance.Show(GetTipoMensagemStr(tsMensagem, 'Confirmado'))

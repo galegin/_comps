@@ -64,6 +64,7 @@ type
     procedure Add(AString : String);
     function Count: Integer;
     property Items[Index : Integer] : String read GetItem write SetItem;
+    function GetString(ASeparador : String) : String;
   end;
 
 implementation
@@ -374,6 +375,15 @@ end;
 procedure TmStringList.SetItem(Index: Integer; const Value: String);
 begin
   fStringArray[Index] := Value;
+end;
+
+function TmStringList.GetString(ASeparador: String): String;
+var
+  I : Integer;
+begin
+  Result := '';
+  for I := 0 to High(fStringArray) do
+    Result := Result + IfThen(Result <> '', ASeparador) + fStringArray[I];
 end;
 
 end.

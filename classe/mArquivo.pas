@@ -3,7 +3,7 @@ unit mArquivo;
 interface
 
 uses
-  Classes, SysUtils; // mArquivo
+  Classes, SysUtils, Windows;
 
 type
   TmArquivo = class
@@ -11,6 +11,9 @@ type
     class procedure Adicionar(AArquivo, AConteudo : String);
     class procedure Gravar(AArquivo, AConteudo : String);
     class function Ler(AArquivo : String) : String;
+    class procedure Excluir(AArquivo : Array Of String);
+    class procedure Copiar(AOrigem, ADestino : String);
+    class procedure Mover(AOrigem, ADestino : String);
   end;
 
 implementation
@@ -33,6 +36,15 @@ begin
   finally
     CloseFile(vFile)
   end;
+end;
+
+class procedure TmArquivo.Excluir(AArquivo: array of String);
+var
+  I : Integer;
+begin
+  for I := 0 to High(AArquivo) do
+    if FileExists(AArquivo[I]) then
+      DeleteFile(PAnsiChar(AArquivo[I]));
 end;
 
 class procedure TmArquivo.Gravar(AArquivo, AConteudo: String);
@@ -82,6 +94,20 @@ begin
   until (readcnt = 0);
 
   CloseFile(vFile);
+end;
+
+class procedure TmArquivo.Copiar(AOrigem, ADestino: String);
+begin
+  if (AOrigem <> '') and (ADestino <> '') then
+    if FileExists(AOrigem) then
+      CopyFile(PAnsiChar(AOrigem), PAnsiChar(ADestino), False);
+end;
+
+class procedure TmArquivo.Mover(AOrigem, ADestino: String);
+begin
+  if (AOrigem <> '') and (ADestino <> '') then
+    if FileExists(AOrigem) then
+      MoveFile(PAnsiChar(AOrigem), PAnsiChar(ADestino));
 end;
 
 end.

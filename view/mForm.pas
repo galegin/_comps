@@ -10,6 +10,7 @@ uses
 
 type
   TmForm = class(TForm, IForm)
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
   protected
   public
@@ -66,6 +67,13 @@ constructor TmForm.Create(Aowner: TComponent);
 begin
   inherited; //
 
+end;
+
+procedure TmForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  case Key of
+    VK_ESCAPE : Close;
+  end;
 end;
 
 //--

@@ -46,7 +46,7 @@ begin
   if Length(ALstArq) = 0 then
     raise TmException.Create(cMETHOD, 'Lista de arquivo deve ser informada');
 
-  backupCurrentDir(ExtractFileDir(vArqZip));
+  backupCurrentDir(ExtractFileDir(AArqZip));
 
   vtsqZip := TtsqZip.Create(nil);
   vtsqZip.ZipFileName := ExtractFileName(AArqZip);
