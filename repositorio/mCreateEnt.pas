@@ -41,6 +41,7 @@ type
       AProperty: TmCollectionProp) : String;
   public
     constructor Create(AOwner : TComponent); override;
+    destructor Destroy; override;
 
     function GetCreate(
       AContexto : TmContexto;
@@ -58,6 +59,7 @@ type
   end;
 
   function Instance : TmCreateEnt;
+  procedure Destroy;
 
 implementation
 
@@ -74,10 +76,23 @@ var
     Result := _instance;
   end;
 
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
+  end;
+
 { TmCreateEnt }
 
 constructor TmCreateEnt.Create;
 begin
+  inherited;
+
+end;
+
+destructor TmCreateEnt.Destroy;
+begin
+
   inherited;
 end;
 
@@ -326,5 +341,11 @@ begin
       end;
     end;
 end;
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

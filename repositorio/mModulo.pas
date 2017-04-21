@@ -19,6 +19,7 @@ type
     function Get_ConexaoLogin: TmConexao;
   public
     constructor Create(AOwner : TComponent); override;
+    destructor Destroy; override;
 
     function GetConexao(
       ATipoConexao : TTipoConexao) : TmConexao;
@@ -33,6 +34,7 @@ type
   end;
 
   function Instance : TmModulo;
+  procedure Destroy;
 
 implementation
 
@@ -47,6 +49,12 @@ var
     if not Assigned(_instance) then
       _instance := TmModulo.Create(nil);
     Result := _instance;
+  end;
+
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
   end;
 
   function TmModulo.Get(ATipoConexao: TTipoConexao) : TmConexao;
@@ -71,7 +79,15 @@ var
 constructor TmModulo.Create(AOwner: TComponent);
 begin
   inherited;
+
   fList_Conexao := TmConexaoList.Create;
+end;
+
+destructor TmModulo.Destroy;
+begin
+  FreeAndNil(fList_Conexao);
+
+  inherited;
 end;
 
 function TmModulo.GetConexao(ATipoConexao: TTipoConexao): TmConexao;
@@ -131,5 +147,11 @@ function TmModulo.Get_ConexaoLogin: TmConexao;
 begin
   Result := GetConexao(tpcLogin);
 end;
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

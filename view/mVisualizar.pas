@@ -16,6 +16,7 @@ type
   end;
 
   function Instance : TF_Visualizar;
+  procedure Destroy;
 
 implementation
 
@@ -31,6 +32,12 @@ var
     Result := _instance;
   end;
 
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
+  end;
+
 { TF_Visualizar }
 
 procedure TF_Visualizar.FormCreate(Sender: TObject);
@@ -44,5 +51,11 @@ begin
   MemoConteudo.Text := AConteudo;
   ShowModal;
 end;
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

@@ -22,6 +22,7 @@ type
   end;
 
   function Instance : TmMensagem;
+  procedure Destroy;
 
 implementation
 
@@ -33,6 +34,12 @@ var
     if not Assigned(_instance) then
       _instance := TmMensagem.Create(nil);
     Result := _instance;
+  end;
+
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
   end;
 
 (* mMensagem *)
@@ -54,5 +61,11 @@ begin
   if Assigned(fDialog) then
     fDialog.Show(ATipoMensagem);
 end;
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

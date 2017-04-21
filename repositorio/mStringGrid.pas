@@ -22,19 +22,7 @@ type
       AStringGrid : TStringGrid; ACollection : TCollection);
   end;
 
-  function Instance : TmStringGrid;
-
 implementation
-
-var
-  _instance : TmStringGrid;
-
-  function Instance : TmStringGrid;
-  begin
-    if not Assigned(_instance) then
-      _instance := TmStringGrid.Create(nil);
-    Result := _instance;
-  end;
 
 (* mStringGrid *)
 

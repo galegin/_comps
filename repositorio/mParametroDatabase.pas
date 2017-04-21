@@ -9,16 +9,25 @@ uses
 type
   TmParametroDatabase = class
   private
+    fCd_Ambiente : String;
+    fTp_Database : TTipoDatabase;
+    fCd_Database : String;
+    fCd_Username : String;
+    fCd_Password : String;
+    fCd_Hostname : String;
+    fCd_Hostport : String;
+    fCd_Protocol : String;
+    
     function GetFormatoDataHora: String;
   public
-    Cd_Ambiente : String;
-    Tp_Database : TTipoDatabase;
-    Cd_Database : String;
-    Cd_Username : String;
-    Cd_Password : String;
-    Cd_Hostname : String;
-    Cd_Hostport : String;
-    Cd_Protocol : String;
+    property Cd_Ambiente : String read fCd_Ambiente write fCd_Ambiente;
+    property Tp_Database : TTipoDatabase read fTp_Database write fTp_Database;
+    property Cd_Database : String read fCd_Database write fCd_Database;
+    property Cd_Username : String read fCd_Username write fCd_Username;
+    property Cd_Password : String read fCd_Password write fCd_Password;
+    property Cd_Hostname : String read fCd_Hostname write fCd_Hostname;
+    property Cd_Hostport : String read fCd_Hostport write fCd_Hostport;
+    property Cd_Protocol : String read fCd_Protocol write fCd_Protocol;
 
     property FormatoDataHora : String read GetFormatoDataHora;
 
@@ -26,6 +35,7 @@ type
   end;
 
   function Instance : TmParametroDatabase;
+  procedure Destroy;
 
 implementation
 
@@ -51,6 +61,12 @@ var
     Result := _instance;
   end;
 
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
+  end;
+
 { TmParametroDatabase }
 
 function TmParametroDatabase.GetFormatoDataHora: String;
@@ -71,5 +87,11 @@ begin
     Cd_Hostport := TmIniFiles.PegarS('', '', 'Cd_Hostport', '');
   end;
 end;
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

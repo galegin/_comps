@@ -10,17 +10,19 @@ type
   TmVersao = class(TmCollectionItem)
   protected
     fCd_Versao : String;
-	fU_Version : String;
-	fDs_Versao : String;
+    fU_Version : String;
+    fDs_Versao : String;
   public
     constructor create(Aowner : TComponent); override;
+    destructor Destroy; override;
   published
     property Cd_Versao : String read fCd_Versao write fCd_Versao;
-	property U_Version : String read fU_Version write fU_Version;
-	property Ds_Versao : String read fDs_Versao write fDs_Versao;
+    property U_Version : String read fU_Version write fU_Version;
+    property Ds_Versao : String read fDs_Versao write fDs_Versao;
   end;
 
   function Instance : TmVersao;
+  procedure Destroy;
 
 implementation
 
@@ -36,15 +38,30 @@ var
     Result := _instance;
   end;
 
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
+  end;
+
   //--
 
 constructor TmVersao.create(Aowner: TComponent);
 begin
-  _Arquivo := 'versao.ini';
-  _Metadata :=
-    '<CdVersao cod="CD_VERSAO" des="Cd Versao" tpf="KEY" tpd="ALFA" tam="20" dec="0" />' +
-    '<DsVersao cod="DS_VERSAO" des="Ds Versao" tpf="NUL" tpd="ALFA" tam="60" dec="0" />' ;
+  inherited;
+
+end;
+
+destructor TmVersao.Destroy;
+begin
+
   inherited;
 end;
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

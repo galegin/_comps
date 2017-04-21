@@ -6,6 +6,7 @@ inherited F_Visualizar: TF_Visualizar
   ClientHeight = 478
   ClientWidth = 701
   Font.Height = -21
+  OldCreateOrder = True
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 24

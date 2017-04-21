@@ -29,6 +29,7 @@ type
     procedure Validar();
   public
     constructor Create(AOwner : TComponent); override;
+    destructor Destroy; override;
     procedure Enviar();
   published
     property Servidor : TmServidorEmail read fServidor write fServidor;
@@ -48,6 +49,7 @@ type
   end;
 
   function Instance : TmEmail;
+  procedure Destroy;
 
 implementation
 
@@ -62,6 +64,12 @@ var
     if not Assigned(_instance) then
       _instance := TmEmail.Create(nil);
     Result := _instance;
+  end;
+
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
   end;
 
 const
@@ -110,6 +118,16 @@ begin
   fTipoConteudo := TmIniFiles.PegarS('', 'EMAIL', 'TP_CONTEUDO', '');
   fConteudo := TmIniFiles.PegarS('', 'EMAIL', 'CONTEUDO', '');
   fLstAnexo := TmStringList.Create;
+end;
+
+destructor TmEmail.Destroy;
+begin
+  FreeAndNil(fEmailPara);
+  FreeAndNil(fEmailCC);
+  FreeAndNil(fEmailCCO);
+  FreeAndNil(fLstAnexo);
+
+  inherited;
 end;
 
 procedure TmEmail.Enviar;
@@ -193,6 +211,10 @@ begin
 end;
 
 initialization
+  //Instance();
   RegisterClass(TmEmail);
+
+finalization
+  Destroy();
 
 end.

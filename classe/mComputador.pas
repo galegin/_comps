@@ -19,6 +19,7 @@ type
     fUsuarioSistema : String;
   public
     constructor Create(AOwner : TComponent); override;
+    destructor Destroy; override;
   published
     property IpComputador : String read fIpComputador;
     property NomeComputador : String read fNomeComputador;
@@ -31,6 +32,7 @@ type
   end;
 
   function Instance : TmComputador;
+  procedure Destroy;
 
 implementation
 
@@ -42,6 +44,12 @@ var
     if not Assigned(_instance) then
       _instance := TmComputador.Create(nil);
     Result := _instance;
+  end;
+
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
   end;
 
   //-- ip computador
@@ -165,5 +173,17 @@ begin
 end;
 
 //--
+
+destructor TmComputador.Destroy;
+begin
+
+  inherited;
+end;
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

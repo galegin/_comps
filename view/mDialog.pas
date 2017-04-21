@@ -40,6 +40,7 @@ type
     procedure BtnExecutarClick(Sender : TObject);
   public
     constructor Create(Aowner : TComponent); override;
+    destructor Destroy; override;
     procedure Show(const ATipo : RTipoMensagem);
     function ShowDialog(const ATipo : RTipoMensagem; const AOpcao : Array Of TmTipoDialogOpcao) : TmTipoDialogOpcao;
   published
@@ -49,6 +50,7 @@ type
   end;
 
   function Instance : TmDialog;
+  procedure Destroy;
 
 implementation
 
@@ -65,6 +67,12 @@ var
     if not Assigned(_instance) then
       _instance := TmDialog.Create(nil);
     Result := _instance;
+  end;
+
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
   end;
 
 const
@@ -99,6 +107,15 @@ begin
 
   mMensagem.Instance.Dialog := Self;
 end;
+
+destructor TmDialog.Destroy;
+begin
+  FreeAndNil(fButtonList);
+  
+  inherited;
+end;
+
+//--
 
 procedure TmDialog.FormShow(Sender: TObject);
 begin
@@ -226,6 +243,9 @@ begin
 end;
 
 initialization
-  //Testar();
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

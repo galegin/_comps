@@ -49,6 +49,7 @@ begin
   inherited;
 
   fList:= TList.Create;
+
   fInDestroy:= False;
 end;
 
@@ -59,11 +60,7 @@ begin
   fInDestroy:= True;
 
   for I := fList.Count - 1 downto 0 do
-    if (fList[I] <> nil) then
-      try
-        TObject(fList[I]).Destroy;
-      except
-      end;
+    TObject(fList[I]).Destroy;
 
   FreeAndNil(fList);
 

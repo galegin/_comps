@@ -30,6 +30,7 @@ type
   protected
   public
     constructor Create(AOwner : TComponent); override;
+    destructor Destroy; override;
     procedure Carregar;
     procedure Salvar;
   published
@@ -55,6 +56,7 @@ type
   end;
 
   function Instance : TmTipoParametro;
+  procedure Destroy;
 
 implementation
 
@@ -71,10 +73,24 @@ var
     Result := _instance;
   end;
 
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
+  end;
+
 { TmTipoParametro }
 
 constructor TmTipoParametro.Create(AOwner: TComponent);
 begin
+  inherited;
+
+end;
+
+destructor TmTipoParametro.Destroy;
+begin
+  Salvar;
+
   inherited;
 end;
 
@@ -99,9 +115,9 @@ begin
 end;
 
 initialization
-  Instance.Carregar;
+  Instance.Carregar();
 
 finalization
-  Instance.Salvar;
+  Destroy();
 
 end.

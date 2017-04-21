@@ -5,7 +5,7 @@ interface
 uses
   Classes, SysUtils, DB, StrUtils, TypInfo, Math,
   mCollectionIntf, mConexao, mSelect, mComando, mObjeto, mDataSet,
-  mClasse, mValue, mJson, mDestroy;
+  mClasse, mValue, mJson;
 
 type
   TmCollection = class;
@@ -23,7 +23,7 @@ type
   public
     IsUpdate : Boolean;
 
-    constructor Create(ItemClass: TCollectionItemClass); reintroduce;
+    //constructor Create(ItemClass: TCollectionItemClass); reintroduce;
     destructor Destroy; override;
 
     procedure Limpar();
@@ -58,21 +58,18 @@ uses
 
 { TmCollection }
 
-constructor TmCollection.Create(ItemClass: TCollectionItemClass);
+(* constructor TmCollection.Create(ItemClass: TCollectionItemClass);
 begin
   inherited;
 
-  mDestroy.Instance.Add(Self);
-end;
+end; *)
 
 destructor TmCollection.Destroy;
-var
-  I : Integer;
+//var
+  //I : Integer;
 begin
-  for I := Count - 1 downto 0 do
-    Items[I].Destroy;
-
-  //mDestroy.Instance.Remove(Self);
+  (* for I := Count - 1 downto 0 do
+    Items[I].Destroy; *)
 
   inherited;
 end;

@@ -5,7 +5,7 @@ interface
 uses
   Classes, SysUtils, StrUtils, DB,
   mCollectionItemIntf, mCollection, mModulo, mLogger, mTipoConexao, mConexao,
-  mClasse, mSelect, mComando, mValue, mObjeto, mDataSet, mJson, mDestroy;
+  mClasse, mSelect, mComando, mValue, mObjeto, mDataSet, mJson;
 
 type
   TmCollectionItem = class;
@@ -82,25 +82,21 @@ begin
   inherited;
 
   fConexao := mModulo.Instance.Conexao;
-
-  mDestroy.Instance.Add(Self);
 end;
 
 destructor TmCollectionItem.Destroy;
-var
-  vCollectionItemArray : TmCollectionItemArray;
-  vCollectionArray : TmCollectionArray;
-  I : Integer;
+//var
+  //vCollectionItemArray : TmCollectionItemArray;
+  //vCollectionArray : TmCollectionArray;
+  //I : Integer;
 begin
-  vCollectionItemArray := GetValuesCollectionItem(Self);
+  (* vCollectionItemArray := GetValuesCollectionItem(Self);
   for I := High(vCollectionItemArray) downto Low(vCollectionItemArray) do
-    vCollectionItemArray[I].Destroy;
+    vCollectionItemArray[I].Destroy; *)
 
-  vCollectionArray := GetValuesCollection(Self);
+  (* vCollectionArray := GetValuesCollection(Self);
   for I := High(vCollectionArray) downto Low(vCollectionArray) do
-    vCollectionArray[I].Destroy;
-
-  //mDestroy.Instance.Remove(Self);
+    vCollectionArray[I].Destroy; *)
 
   inherited;
 end;

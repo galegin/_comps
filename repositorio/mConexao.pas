@@ -21,6 +21,7 @@ type
   protected
   public
     constructor Create(Aowner : TComponent); override;
+    destructor Destroy; override;
 
     function GetConsulta(ASql : String; AQtdeReg : Integer = -1) : TDataSet;
     procedure ExecComando(ACmd : String);
@@ -39,6 +40,7 @@ type
   end;
 
   function Instance : TmConexao;
+  procedure Destroy;
 
 implementation
 
@@ -54,8 +56,21 @@ var
     Result := _instance;
   end;
 
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
+  end;
+
 constructor TmConexao.Create(Aowner: TComponent);
 begin
+  inherited;
+
+end;
+
+destructor TmConexao.Destroy;
+begin
+
   inherited;
 end;
 
@@ -100,5 +115,11 @@ begin
   Result := TmConexao.Create(nil);
   Self.Add(Result);
 end;
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

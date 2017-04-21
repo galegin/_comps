@@ -9,6 +9,7 @@ type
   TmAppException = class(TComponent)
   public
     constructor Create(Aowner: TComponent); override;
+    destructor Destroy; override;
     procedure _OnException(Sender: TObject; E: Exception);
   end;
 
@@ -57,8 +58,16 @@ var
 
 constructor TmAppException.Create(Aowner: TComponent);
 begin
-  //Manipular as excecoes
+  inherited;
+
   Application.OnException := _OnException;
+end;
+
+destructor TmAppException.Destroy;
+begin
+  Application.OnException := nil;
+
+  inherited;
 end;
 
 procedure TmAppException._OnException(Sender: TObject; E: Exception);

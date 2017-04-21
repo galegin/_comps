@@ -16,6 +16,8 @@ type
     procedure SetExpression(const Value: String);
     function GetMatch(Index: TTipoRegXml): String;
   public
+    constructor Create(AOwner : TComponent); override;
+    destructor Destroy; override;
     function Exec(AString : String) : Boolean; overload;
     function Exec(ATipo : TTipoRegXml; AString, AExpression  : String) : String; overload;
     property Expression : String read fExpression write SetExpression;
@@ -23,6 +25,7 @@ type
   end;
 
   function Instance : TmRegXml;
+  procedure Destroy;
 
 implementation
 
@@ -39,7 +42,27 @@ var
     Result := _instance;
   end;
 
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
+  end;
+
 { TmRegXml }
+
+constructor TmRegXml.Create(AOwner: TComponent);
+begin
+  inherited;
+
+end;
+
+destructor TmRegXml.Destroy;
+begin
+
+  inherited;
+end;
+
+//--
 
 procedure TmRegXml.SetExpression(const Value: String);
 begin
@@ -104,5 +127,11 @@ begin
   if Exec(AString) then
     Result := Match[ATipo];
 end;
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

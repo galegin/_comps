@@ -14,6 +14,7 @@ type
     fCodigoUsuario : Integer;
   public
     constructor Create(AOwner : TComponent); override;
+    destructor Destroy; override;
   published
     property CodigoAmbiente : String read fCodigoAmbiente;
     property CodigoEmpresa : Integer read fCodigoEmpresa;
@@ -22,6 +23,7 @@ type
   end;
 
   function Instance : TmAmbienteConf;
+  procedure Destroy;
 
 implementation
 
@@ -38,6 +40,12 @@ var
     Result := _instance;
   end;
 
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
+  end;
+
 constructor TmAmbienteConf.Create(AOwner : TComponent);
 begin
   inherited;
@@ -47,5 +55,17 @@ begin
   fCodigoTerminal := TmIniFiles.PegarI('', '', 'Cd_Terminal');
   fCodigoUsuario := TmIniFiles.PegarI('', '', 'Cd_Usuario');
 end;
+
+destructor TmAmbienteConf.Destroy;
+begin
+
+  inherited;
+end;
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

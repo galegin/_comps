@@ -32,6 +32,7 @@ type
   end;
 
   function Instance : TmServidorEmail;
+  procedure Destroy;
 
 implementation
 
@@ -46,6 +47,12 @@ var
     if not Assigned(_instance) then
       _instance := TmServidorEmail.Create(nil);
     Result := _instance;
+  end;
+
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
   end;
 
 (* mServidorEmail *)
@@ -68,5 +75,11 @@ begin
 
   inherited;
 end;
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

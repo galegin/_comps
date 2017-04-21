@@ -15,16 +15,17 @@ type
     fTipoLog : Set Of TTipoLogger;
     fInArquivo: Boolean;
     function GetInDebug: Boolean;
-    function GetInErro: Boolean;
-    function GetInInfo: Boolean;
-    function GetInWarning: Boolean;
     procedure SetInDebug(const Value: Boolean);
+    function GetInErro: Boolean;
     procedure SetInErro(const Value: Boolean);
+    function GetInInfo: Boolean;
     procedure SetInInfo(const Value: Boolean);
+    function GetInWarning: Boolean;
     procedure SetInWarning(const Value: Boolean);
   protected
   public
     constructor Create(AOwner : TComponent); override;
+    destructor Destroy; override;
 
     function Log(ATipo : TTipoLogger; AMetodo, AMensagem : String) : String;
 
@@ -43,6 +44,7 @@ type
   end;
 
   function Instance : TmLogger;
+  procedure Destroy;
 
 implementation
 
@@ -63,14 +65,30 @@ var
     Result := _instance;
   end;
 
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
+  end;
+
 constructor TmLogger.Create(AOwner : TComponent);
 begin
   inherited;
+
   InArquivo := True;
+  InDebug := True;
   InErro := True;
   InInfo := True;
-  fArquivoTxt := TmPath.Log() + mProjeto.Instance.Codigo + FormatDateTime('yyyy.mm.dd', Date) + '.txt';
-  fArquivoXml := TmPath.Log() + mProjeto.Instance.Codigo + FormatDateTime('yyyy.mm.dd', Date) + '.xml';
+  InWarning := True;
+
+  fArquivoTxt := TmPath.Log() + mProjeto.Instance.Codigo + '.' + FormatDateTime('yyyy.mm.dd', Date) + '.txt';
+  fArquivoXml := TmPath.Log() + mProjeto.Instance.Codigo + '.' + FormatDateTime('yyyy.mm.dd', Date) + '.xml';
+end;
+
+destructor TmLogger.Destroy;
+begin
+
+  inherited;
 end;
 
 //--
@@ -154,6 +172,8 @@ begin
     fTipoLog := fTipoLog - [tpmDebug]
 end;
 
+//--
+
 function TmLogger.GetInErro: Boolean;
 begin
   Result := tpmErro in fTipoLog;
@@ -167,6 +187,8 @@ begin
     fTipoLog := fTipoLog - [tpmErro]
 end;
 
+//--
+
 function TmLogger.GetInInfo: Boolean;
 begin
   Result := tpmInfo in fTipoLog;
@@ -179,6 +201,8 @@ begin
   else
     fTipoLog := fTipoLog - [tpmInfo]
 end;
+
+//--
 
 function TmLogger.GetInWarning: Boolean;
 begin
@@ -194,5 +218,11 @@ begin
 end;
 
 //--
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

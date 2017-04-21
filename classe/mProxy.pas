@@ -17,6 +17,7 @@ type
   protected
   public
     constructor Create(AOwner : TComponent); override;
+    destructor Destroy; override;
   published
     property Host : String read fHost write fHost;
     property Porta : String read fPorta write fPorta;
@@ -25,6 +26,7 @@ type
   end;
 
   function Instance : TmProxy;
+  procedure Destroy;
 
 implementation
 
@@ -41,6 +43,12 @@ var
     Result := _instance;
   end;
 
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
+  end;
+
 constructor TmProxy.Create(AOwner : TComponent);
 begin
   inherited;
@@ -50,5 +58,17 @@ begin
   fUser := TmIniFiles.PegarS('', 'PROXY', 'User');
   fSenha := TmIniFiles.PegarS('', 'PROXY', 'Senha');
 end;
+
+destructor TmProxy.Destroy;
+begin
+
+  inherited;
+end;
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

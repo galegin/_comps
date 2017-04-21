@@ -11,6 +11,7 @@ type
   protected
   public
     constructor Create(AOwner : TComponent); override;
+    destructor Destroy; override;
 
     function GetSequencia(
       ANomeEntidade : String;
@@ -23,6 +24,7 @@ type
   end;
 
   function Instance : TmSequence;
+  procedure Destroy;
 
 implementation
 
@@ -39,8 +41,21 @@ var
     Result := _instance;
   end;
 
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
+  end;
+
 constructor TmSequence.Create(AOwner : TComponent);
 begin
+  inherited;
+
+end;
+
+destructor TmSequence.Destroy;
+begin
+
   inherited;
 end;
 
@@ -62,5 +77,11 @@ begin
 
   Result := mModulo.Instance.Conexao.Database.GetSequence(vNome);
 end;
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

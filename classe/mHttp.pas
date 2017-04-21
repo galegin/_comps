@@ -28,6 +28,7 @@ type
   end;
 
   function Instance : TmHttp;
+  procedure Destroy;
 
 implementation
 
@@ -44,6 +45,12 @@ var
     Result := _instance;
   end;
 
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
+  end;
+
 (* mHttp *)
 
 constructor TmHttp.Create(AOwner : TComponent);
@@ -56,6 +63,8 @@ end;
 
 destructor TmHttp.Destroy;
 begin
+  FreeAndNil(fHTTP);
+  FreeAndNil(fParamList);
 
   inherited;
 end;
@@ -108,5 +117,11 @@ begin
 
   FreeAndNil(vParamList);
 end;
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

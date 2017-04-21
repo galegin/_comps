@@ -17,6 +17,7 @@ type
   protected
   public
     constructor Create(AOwner : TComponent); override;
+    destructor Destroy; override;
 
     procedure CreateOrAlter(
       AContexto : TmContexto;
@@ -31,6 +32,7 @@ type
   end;
 
   function Instance : TmCollectionCreate;
+  procedure Destroy;
 
 implementation
 
@@ -47,10 +49,23 @@ var
     Result := _instance;
   end;
 
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
+  end;
+
 { TmCollectionCreate }
 
 constructor TmCollectionCreate.Create(AOwner : TComponent);
 begin
+  inherited;
+
+end;
+
+destructor TmCollectionCreate.Destroy;
+begin
+
   inherited;
 end;
 
@@ -100,5 +115,11 @@ begin
   for I := 0 to vLstForeignKey.Count - 1 do
     fContexto.Conexao.ExecComando(vLstForeignKey.Items[I]);
 end;
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

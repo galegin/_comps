@@ -38,6 +38,7 @@ type
   end;
 
   function Instance : TmFtp;
+  procedure Destroy;
 
 implementation
 
@@ -51,6 +52,12 @@ var
     Result := _instance;
   end;
 
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
+  end;
+
 (* mFtp *)
 
 constructor TmFtp.Create(AOwner : TComponent);
@@ -62,6 +69,7 @@ end;
 
 destructor TmFtp.Destroy;
 begin
+  FreeAndNil(fIdFTP);
 
   inherited;
 end;
@@ -238,5 +246,11 @@ begin
 
   vStringList.Free;
 end;
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

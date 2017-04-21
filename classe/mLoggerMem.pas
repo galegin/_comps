@@ -22,6 +22,7 @@ type
   end;
 
   function Instance : TmLoggerMem;
+  procedure Destroy;
 
 implementation
 
@@ -33,6 +34,12 @@ var
     if not Assigned(_instance) then
       _instance := TmLoggerMem.Create(nil);
     Result := _instance;
+  end;
+
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
   end;
 
 (* mLoggerMem *)
@@ -69,5 +76,11 @@ function TmLoggerMem.GetConteudo: String;
 begin
   Result := fLista.Text;
 end;
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

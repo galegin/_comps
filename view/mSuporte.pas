@@ -54,6 +54,7 @@ type
   end;
 
   function Instance : TmSuporte;
+  procedure Destroy;
 
 implementation
 
@@ -70,6 +71,12 @@ var
     if not Assigned(_instance) then
       _instance := TmSuporte.Create(nil);
     Result := _instance;
+  end;
+
+  procedure Destroy;
+  begin
+    if Assigned(_instance) then
+      FreeAndNil(_instance);
   end;
 
   //Capturar Janela Ativa
@@ -131,6 +138,10 @@ end;
 
 destructor TmSuporte.Destroy;
 begin
+  FreeAndNil(fDetalhe);
+
+  FreeAndNil(fImagemTela);
+  FreeAndNil(fImagemErro);
 
   inherited;
 end;
@@ -271,5 +282,11 @@ begin
   //MensagemBal('Gerando site...');
 
 end;
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.
