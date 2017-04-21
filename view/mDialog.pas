@@ -226,6 +226,6 @@ begin
 end;
 
 initialization
-  Testar();
+  //Testar();
 
 end.

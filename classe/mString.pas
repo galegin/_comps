@@ -3,7 +3,7 @@ unit mString;
 interface
 
 uses
-  Classes, SysUtils, StrUtils;
+  Classes, SysUtils, StrUtils, Dialogs;
 
 type
   TmStringArray = Array Of String;
@@ -65,6 +65,30 @@ type
     function Count: Integer;
     property Items[Index : Integer] : String read GetItem write SetItem;
     function GetString(ASeparador : String) : String;
+  end;
+
+  (* TmStringListL = class(TList)
+  private
+    function GetItem(Index: Integer): TmStringObj;
+    procedure SetItem(Index: Integer; const Value: TmStringObj);
+  public
+    procedure Clear();
+    procedure Add(AString : String);
+    function Count: Integer;
+    property Items[Index : Integer] : TmStringObj read GetItem write SetItem;
+    function GetString(ASeparador : String) : String;
+  end; *)
+
+  TmStringListT = class(TStrings)
+  private
+    fList: Array Of String;
+  protected
+    function Get(Index: Integer): string; override;
+    function GetCount: Integer; override;
+  public
+    procedure Clear; override;
+    procedure Delete(Index: Integer); override;
+    procedure Insert(Index: Integer; const S: string); override;
   end;
 
 implementation
@@ -385,5 +409,67 @@ begin
   for I := 0 to High(fStringArray) do
     Result := Result + IfThen(Result <> '', ASeparador) + fStringArray[I];
 end;
+
+{ TmStringListT }
+
+procedure TmStringListT.Clear;
+begin
+  SetLength(fList, 0);
+end;
+
+procedure TmStringListT.Delete(Index: Integer);
+var
+  I : Integer;
+begin
+  if (Index < 0) or (Index >= Length(fList)) then
+    Exit;
+
+  for I := High(fList) downto Index do
+    fList[I-1] := fList[I];
+
+  SetLength(fList, Length(fList) - 1);
+end;
+
+function TmStringListT.Get(Index: Integer): string;
+begin
+  if (Index < 0) or (Index >= Length(fList)) then
+    Exit;
+
+  Result := fList[Index];
+end;
+
+function TmStringListT.GetCount: Integer;
+begin
+  Result := Length(fList);
+end;
+
+procedure TmStringListT.Insert(Index: Integer; const S: string);
+begin
+  SetLength(fList, Length(fList) + 1);
+  //fList[High(fList)] := S;
+  fList[Index] := S;
+end;
+
+procedure Testar;
+var
+  vStringList : TmStringList;
+  vStringListT : TmStringListT;
+  I : Integer;
+begin
+  vStringListT := TmStringListT.Create;
+  vStringListT.Add('teste 1');
+  vStringListT.Add('teste 2');
+  for I := 0 to vStringListT.Count - 1 do
+    ShowMessage(vStringListT[I]);
+
+  vStringList := TmStringList.Create;
+  vStringList.Add('teste 1');
+  vStringList.Add('teste 2');
+  for I := 0 to vStringList.Count - 1 do
+    ShowMessage(vStringList.Items[I]);
+end;
+
+initialization
+  //Testar();
 
 end.

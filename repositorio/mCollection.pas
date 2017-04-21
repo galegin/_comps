@@ -5,7 +5,7 @@ interface
 uses
   Classes, SysUtils, DB, StrUtils, TypInfo, Math,
   mCollectionIntf, mConexao, mSelect, mComando, mObjeto, mDataSet,
-  mClasse, mValue, mJson;
+  mClasse, mValue, mJson, mDestroy;
 
 type
   TmCollection = class;
@@ -23,9 +23,12 @@ type
   public
     IsUpdate : Boolean;
 
+    constructor Create(ItemClass: TCollectionItemClass); reintroduce;
+    destructor Destroy; override;
+
     procedure Limpar();
 
-    function Listar(AFiltros : TList) : TList;
+    function Listar(AFiltros : TList; AQtdeReg : Integer = -1) : TList;
 
     function Consultar(AFiltros : TList) : TObject;
 
@@ -54,6 +57,25 @@ uses
   mCollectionItem;
 
 { TmCollection }
+
+constructor TmCollection.Create(ItemClass: TCollectionItemClass);
+begin
+  inherited;
+
+  mDestroy.Instance.Add(Self);
+end;
+
+destructor TmCollection.Destroy;
+var
+  I : Integer;
+begin
+  for I := Count - 1 downto 0 do
+    Items[I].Destroy;
+
+  //mDestroy.Instance.Remove(Self);
+
+  inherited;
+end;
 
 //--
 
@@ -95,7 +117,7 @@ begin
   Clear();
 end;
 
-function TmCollection.Listar(AFiltros : TList) : TList;
+function TmCollection.Listar(AFiltros : TList; AQtdeReg : Integer) : TList;
 var
   vCollectionItem, vCollectionAdd : TmCollectionItem;
   vDataSet : TDataSet;
@@ -105,8 +127,8 @@ begin
   vCollectionItem := TmClasse.CreateObjeto(ItemClass, nil) as TmCollectionItem;
   if (AFiltros is TmValueList) then
     AFiltros := vCollectionItem.ValidateKey(AFiltros as TmValueList);
-  vSql := TmSelect.GetSelect(vCollectionItem, AFiltros);
-  vDataSet := vCollectionItem.Conexao.GetConsulta(vSql);
+  vSql := TmSelect.GetSelect(vCollectionItem, AFiltros, []);
+  vDataSet := vCollectionItem.Conexao.GetConsulta(vSql, AQtdeReg);
   with vDataSet do begin
     while not EOF do begin
       vCollectionAdd := Add as TmCollectionItem;

@@ -10,7 +10,7 @@ type
     ['{03D077D9-161D-4E74-A2A0-6C390B23F463}']
 
     procedure Limpar();
-    function Listar(AFiltros : TList) : TList;
+    function Listar(AFiltros : TList; AQtdeReg : Integer) : TList;
     function Consultar(AFiltros : TList) : TObject;
     procedure Incluir();
     procedure Alterar();

@@ -13,7 +13,8 @@ type
       AObject : TObject) : String;
 
     class function GetFields(
-      AObject : TObject) : String;
+      AObject : TObject;
+      AFields : Array Of String) : String;
 
     class function GetWheres(
       AObject : TObject;
@@ -23,7 +24,7 @@ type
     class function GetSelect(
       AObject : TObject;
       AWheres : TList;
-      AFields : String = '') : String;
+      AFields : Array Of String) : String;
 
   end;
 
@@ -45,6 +46,14 @@ var
   I : Integer;
 begin
   Result := '';
+
+  if Length(AFields) > 0 then begin
+    for I := 0 to High(AFields) do
+      Result := Result + IfThen(Result <> '', ', ', '') +
+        UpperCase(AFields[I]);
+
+    Exit;
+  end;
 
   vValues := TmObjeto.GetValues(AObject);
 
@@ -80,7 +89,7 @@ var
         Result := Result + IfThen(Result <> '', ' and ', 'where ') +
           AFilter.ValueBase;
   end;  
-  
+
 begin
   Result := '';
 
@@ -103,7 +112,7 @@ end;
 class function TmSelect.GetSelect;
 begin
   Result := 'select {fields} from {entidade} /*WHERE*/';
-  Result := AnsiReplaceStr(Result, '{fields}', IfThen(AFields <> '', AFields, GetFields(AObject)));
+  Result := AnsiReplaceStr(Result, '{fields}', GetFields(AObject, AFields));
   Result := AnsiReplaceStr(Result, '{entidade}', GetEntidade(AObject));
   Result := AnsiReplaceStr(Result, '/*WHERE*/', GetWheres(AObject, AWheres));
 end;

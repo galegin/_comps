@@ -3,9 +3,9 @@ unit mCollectionItem;
 interface
 
 uses
-  Classes, SysUtils, DB,
-  mCollectionItemIntf, mCollection, mModulo, mLogger,
-  mConexao, mClasse, mSelect, mComando, mValue, mObjeto, mDataSet, mJson;
+  Classes, SysUtils, StrUtils, DB,
+  mCollectionItemIntf, mCollection, mModulo, mLogger, mTipoConexao, mConexao,
+  mClasse, mSelect, mComando, mValue, mObjeto, mDataSet, mJson, mDestroy;
 
 type
   TmCollectionItem = class;
@@ -16,6 +16,7 @@ type
   private
     fConexao : TmConexao;
     function GetConexao: TmConexao;
+    procedure SetConexao(const Value: TmConexao);
   protected
     function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
     function _AddRef: Integer; stdcall;
@@ -31,6 +32,7 @@ type
     IsCreate : Boolean;
 
     constructor Create(Collection: TCollection); override;
+    destructor Destroy; override;
 
     function ValidateKey(AObject : TObject; AFiltros : TmValueList) : TmValueList; overload;
     function ValidateKey(AFiltros : TmValueList) : TmValueList; overload;
@@ -38,21 +40,24 @@ type
     procedure Limpar();
     procedure LimparDep();
 
-    function Listar(AFiltros : TList) : TList;
+    function Listar(AFiltros : TList; AQtdeReg : Integer = -1) : TList;
     procedure ListarDep();
 
-    function ConsultarAll(AFiltros : TList) : TObject;
+    function ConsultarAll(AFiltros : TList; AConsultar : Boolean = False) : TObject;
 
     function Consultar(AFiltros : TList) : TObject;
     procedure ConsultarDep();
 
-    procedure Incluir();
+    procedure Incluir(AListNulo : Array Of String); overload;
+    procedure Incluir(); overload;
     procedure IncluirDep();
 
-    procedure Alterar();
+    procedure Alterar(AListNulo : Array Of String); overload;
+    procedure Alterar(); overload;
     procedure AlterarDep();
 
-    procedure Salvar();
+    procedure Salvar(AListNulo : Array Of String); overload;
+    procedure Salvar(); overload;
 
     procedure Excluir();
     procedure ExcluirDep();
@@ -61,8 +66,11 @@ type
 
     function GetJson() : String;
     procedure SetJson(json : String);
+
+    function GetString(AListCampo : Array Of String) : String;
+    function GetStringKey() : String;
   published
-    property Conexao : TmConexao read GetConexao write fConexao;
+    property Conexao : TmConexao read GetConexao write SetConexao;
   end;
 
 implementation
@@ -72,7 +80,29 @@ implementation
 constructor TmCollectionItem.Create(Collection: TCollection);
 begin
   inherited;
+
   fConexao := mModulo.Instance.Conexao;
+
+  mDestroy.Instance.Add(Self);
+end;
+
+destructor TmCollectionItem.Destroy;
+var
+  vCollectionItemArray : TmCollectionItemArray;
+  vCollectionArray : TmCollectionArray;
+  I : Integer;
+begin
+  vCollectionItemArray := GetValuesCollectionItem(Self);
+  for I := High(vCollectionItemArray) downto Low(vCollectionItemArray) do
+    vCollectionItemArray[I].Destroy;
+
+  vCollectionArray := GetValuesCollection(Self);
+  for I := High(vCollectionArray) downto Low(vCollectionArray) do
+    vCollectionArray[I].Destroy;
+
+  //mDestroy.Instance.Remove(Self);
+
+  inherited;
 end;
 
 //--
@@ -99,6 +129,27 @@ begin
   if not Assigned(fConexao) then
     fConexao := mConexao.Instance;
   Result := fConexao;
+end;
+
+procedure TmCollectionItem.SetConexao(const Value: TmConexao);
+var
+  vCollectionItemArray : TmCollectionItemArray;
+  vCollectionArray : TmCollectionArray;
+  I : Integer;
+begin
+  fConexao := Value;
+
+  vCollectionItemArray := GetValuesCollectionItem(Self);
+  for I := Low(vCollectionItemArray) to High(vCollectionItemArray) do
+    with vCollectionItemArray[I] do
+      if Conexao.TipoConexao in [tpcAmbiente] then
+        Conexao := Value;
+
+  vCollectionArray := GetValuesCollection(Self);
+  for I := Low(vCollectionArray) to High(vCollectionArray) do
+    with vCollectionArray[I] do
+      if Conexao.TipoConexao in [tpcAmbiente] then
+        Conexao := Value;
 end;
 
 //--
@@ -232,7 +283,7 @@ end;
 
 //--
 
-function TmCollectionItem.Listar(AFiltros: TList): TList;
+function TmCollectionItem.Listar(AFiltros: TList; AQtdeReg : Integer): TList;
 var
   vSql : String;
   vClass : TClass;
@@ -246,8 +297,8 @@ begin
   if not Assigned(AFiltros) then
     AFiltros := GetValuesFiltro(Self);
 
-  vSql := TmSelect.GetSelect(Self, AFiltros);
-  vDataSet := Conexao.GetConsulta(vSql);
+  vSql := TmSelect.GetSelect(Self, AFiltros, []);
+  vDataSet := Conexao.GetConsulta(vSql, AQtdeReg);
   with vDataSet do begin
     while not EOF do begin
       vObject := TmClasse.createObjeto(vClass, nil);
@@ -278,15 +329,17 @@ end;
 
 //--
 
-function TmCollectionItem.ConsultarAll(AFiltros : TList) : TObject;
+function TmCollectionItem.ConsultarAll(AFiltros : TList; AConsultar : Boolean) : TObject;
 var
   vLista : TList;
 begin
   Result := nil;
-  vLista := Listar(AFiltros);
+  vLista := Listar(AFiltros, 1);
   if Assigned(vLista) and (vLista.Count > 0) then begin
     TmObjeto.ToObjeto(vLista[0], Self);
     Result := Self;
+    if AConsultar then
+      Consultar(nil);
   end;
 end;
 
@@ -305,7 +358,7 @@ begin
   if (AFiltros is TmValueList) then
     AFiltros := ValidateKey(Self, AFiltros as TmValueList);
 
-  vSql := TmSelect.GetSelect(Self, AFiltros);
+  vSql := TmSelect.GetSelect(Self, AFiltros, []);
   vDataSet := Conexao.GetConsulta(vSql, 1);
   with vDataSet do begin
     if not IsEmpty then begin
@@ -342,13 +395,18 @@ end;
 
 //--
 
-procedure TmCollectionItem.Incluir;
+procedure TmCollectionItem.Incluir(AListNulo : Array Of String);
 var
   vCmd : String;
 begin
-  vCmd := TmComando.GetInsert(Self);
+  vCmd := TmComando.GetInsert(Self, AListNulo);
   Conexao.ExecComando(vCmd);
   IncluirDep();
+end;
+
+procedure TmCollectionItem.Incluir;
+begin
+  Incluir([]);
 end;
 
 procedure TmCollectionItem.IncluirDep;
@@ -372,15 +430,20 @@ end;
 
 //--
 
-procedure TmCollectionItem.Alterar;
+procedure TmCollectionItem.Alterar(AListNulo : Array Of String);
 var
   vCmd : String;
   vKeys : TmValueList;
 begin
   vKeys := GetValuesKey(Self);
-  vCmd := TmComando.GetUpdate(Self, vKeys);
+  vCmd := TmComando.GetUpdate(Self, vKeys, AListNulo);
   Conexao.ExecComando(vCmd);
   AlterarDep();
+end;
+
+procedure TmCollectionItem.Alterar;
+begin
+  Alterar([]);
 end;
 
 procedure TmCollectionItem.AlterarDep;
@@ -404,18 +467,23 @@ end;
 
 //--
 
-procedure TmCollectionItem.Salvar;
+procedure TmCollectionItem.Salvar(AListNulo : Array Of String);
 begin
   try
     IsCreate := True;
 
     if Consultar(nil) <> nil then
-      Alterar()
+      Alterar(AListNulo)
     else
-      Incluir();
+      Incluir(AListNulo);
   finally
     IsCreate := False;
   end;
+end;
+
+procedure TmCollectionItem.Salvar;
+begin
+  Salvar([]);
 end;
 
 //--
@@ -484,5 +552,57 @@ begin
 end;
 
 //--
+
+function TmCollectionItem.GetString(AListCampo: Array Of String): String;
+var
+  vValues : TmValueList;
+  I : Integer;
+
+  function ValidaCampo(ACampo : String) : Boolean;
+  var
+    J : Integer;
+  begin
+    Result := True;
+    if Length(AListCampo) = 0 then begin
+      Result := False;
+      for J := 0 to High(AListCampo) do
+        if ACampo = AListCampo[J] then begin
+          Result := True;
+          Exit;
+        end;
+    end;
+  end;
+
+begin
+  Result := '';
+
+  vValues := TmObjeto.GetValues(Self);
+
+  with vValues do
+    for I := 0 to Count - 1 do
+      with Items[I] do
+        if Items[I] is TmValueBase then
+          if ValidaCampo(Nome) then
+            Result := Result + IfThen(Result <> '', ', ') +
+              '"' + Nome + '": ' + ValueStr;
+end;
+
+function TmCollectionItem.GetStringKey: String;
+var
+  vValues : TmValueList;
+  vListCampo : Array Of String;
+  I : Integer;
+begin
+  vValues := GetValuesKey(Self);
+
+  SetLength(vListCampo, vValues.Count);
+
+  with vValues do
+    for I := 0 to Count - 1 do
+      with Items[I] do
+        vListCampo[I] := Nome;
+
+  Result := GetString(vListCampo);
+end;
 
 end.
