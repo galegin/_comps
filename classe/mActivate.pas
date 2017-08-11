@@ -3,39 +3,35 @@ unit mActivate;
 interface
 
 uses
-  Classes, SysUtils, mThread;
+  Classes, SysUtils, mThread, mValue;
 
   function activateCmp(pClasse, pMetodo, pParams : String) : String;
   function activateDll(pClasse, pMetodo, pParams : String) : String;
   function activateExe(pClasse, pMetodo, pParams : String) : String;
 
-  function activateThrLst(pLstXml : String; pTpThread : TpThread = tpaCmp) : String;
-  function activateThr(pClasse, pMetodo, pParams : String; pTpThread : TpThread = tpaCmp) : String;
+  function activateThrLst(pLstParams : RParamThreadArray; pTpThread : TpThread = tpaCmp) : String;
+  function activateThr(pParams : RParamThread; pTpThread : TpThread = tpaCmp) : String;
 
 implementation
 
 uses
-  mClasseExec, mArquivo, mIniFiles,
-  mObjeto, mFuncao, mItem, mXml;
+  mClasseExec, mIniFiles, mArquivo, mClasse, mString;
 
   function getObjetoCmp(pClasse : String) : TObject;
   const
-    cLST_CLS = 'TC_|Tc|TF_|Tf|TS_|Ts|T_|T| ';
+    cLstClasse : Array [0..7] Of String = (
+      'TC_', 'Tc', 'TF_', 'Tf', 'TS_', 'Ts', 'T_', 'T');
   var
-    vClasse,
-    vLstTip, vTip : String;
+    vClasse : String;
+    I : Integer;
   begin
-    Result := mObjeto.get(vClasse, nil);
+    vClasse := pClasse;
+    Result := TmClasse.CreateObjeto(GetClass(vClasse), nil);
 
-    vLstTip := cLST_CLS;
-    while vLstTip <> '' do begin
-      vTip := getitem(vLstTip);
-      if vTip = '' then Break;
-      delitem(vLstTip);
-
-      vClasse := AllTrim(vTip + pClasse);
+    for I := 0 to High(cLstClasse) do begin
+      vClasse := TmString.AllTrim(cLstClasse[I] + pClasse);
       if GetClass(vClasse) <> nil then begin
-        Result := mObjeto.get(vClasse, nil);
+        Result := TmClasse.CreateObjeto(GetClass(vClasse), nil);
         Exit;
       end;
     end;
@@ -50,35 +46,33 @@ var
 begin
   Result := '';
 
-  pClasse := mIniFiles.pegar('', 'COMPONENTE', pClasse, pClasse);
+  pClasse := TmIniFiles.PegarS('', 'COMPONENTE', pClasse, pClasse);
 
-  vProgram := mIniFiles.pegar('', 'PROGRAM', pClasse, pClasse);
+  vProgram := TmIniFiles.PegarS('', 'PROGRAM', pClasse, pClasse);
   if vProgram <> '' then begin
     Result := activateExe(vProgram, pMetodo, pParams);
     Exit;
   end;
 
-  vLibrary := mIniFiles.pegar('', 'LIBRARY', pClasse, pClasse);
+  vLibrary := TmIniFiles.PegarS('', 'LIBRARY', pClasse, pClasse);
   if vLibrary <> '' then begin
     Result := execLibrary(vLibrary, pMetodo, pParams);
     Exit;
   end;
 
-  vPacote := mIniFiles.pegar('', 'PACKAGE', pClasse, pClasse);
+  vPacote := TmIniFiles.PegarS('', 'PACKAGE', pClasse, pClasse);
   if vPacote <> '' then begin
     Result := execPackage(vPacote, pClasse, pMetodo, pParams);
     Exit;
   end;
 
-  vObject := mObjeto.get(pClasse, nil);
-  if vObject <> nil then begin
+  vObject := TmClasse.CreateObjeto(GetClass(pClasse), nil);
+  if Assigned(vObject) then begin
     try
       Result := execObjeto(vObject, pMetodo, pParams);
-    except
+    finally
       FreeAndNil(vObject);
-      raise;
     end;
-    FreeAndNil(vObject);
     Exit;
   end;
 
@@ -95,53 +89,43 @@ begin
   Result := execProgram(pClasse, pMetodo, pParams);
 end;
 
-function activateThrLst(pLstXml : String; pTpThread : TpThread) : String;
+function activateThrLst(pLstParams : RParamThreadArray; pTpThread : TpThread) : String;
 const
   cMETHOD = 'mActivate.activateThrLst()';
 begin
   Result := '';
 
-  if pLstXml = '' then
-    raise Exception.create('XML deve ser informado! / ' + cMETHOD);
+  if Length(pLstParams) = 0 then
+    raise Exception.create('Parametro deve ser informado! / ' + cMETHOD);
 
   with TmThread.Create(True) do begin
-    _LstXml := pLstXml;
+    _LstParams := pLstParams;
     _TpThread := pTpThread;
     FreeOnTerminate := True;
     Resume;
   end;
 end;
 
-function activateThr(pClasse, pMetodo, pParams : String; pTpThread : TpThread) : String;
+function activateThr(pParams : RParamThread; pTpThread : TpThread) : String;
 const
   cMETHOD = 'mActivate.activateThr()';
 var
-  vLstXml, vXml, vParams : String;
+  vLstParams : RParamThreadArray;
 begin
   Result := '';
 
-  if pClasse = '' then
+  if pParams.Classe = '' then
     raise Exception.create('Classe deve ser informada! / ' + cMETHOD);
-  if pMetodo = '' then
+  if pParams.Metodo = '' then
     raise Exception.create('Metodo deve ser informado! / ' + cMETHOD);
-  if pParams = '' then
+  if pParams.Params = nil then
     raise Exception.create('Parametro deve ser informado! / ' + cMETHOD);
 
-  vLstXml := '';
+  SetLength(vLstParams, 1);
 
-  while pParams <> '' do begin
-    vParams := getitemX(pParams);
-    if vParams = '' then Break;
-    delitemX(pParams);
+  vLstParams[0] := pParams;
 
-    vXml := '';
-    putitemX(vXml, 'CD_CLASSE', pClasse);
-    putitemX(vXml, 'CD_METODO', pMetodo);
-    putitemX(vXml, 'DS_PARAMS', vParams);
-    putitemX(vLstXml, vXml);
-  end;
-
-  activateThrLst(vLstXml, pTpThread);
+  activateThrLst(vLstParams, pTpThread);
 end;
 
 end.

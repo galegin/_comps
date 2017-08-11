@@ -223,7 +223,7 @@ procedure TmFtp.Remove;
 const
   cDS_METHOD = 'TmFtp.Remove()';
 var
-  vStringList : TStringList;
+  vStringArquivo : TStringList;
   I : Integer;
 begin
   if APasta = '' then
@@ -234,17 +234,17 @@ begin
   if not fIdFTP.Connected then
     raise Exception.create('FTP deve ser conectado / ' + cDS_METHOD);
 
-  vStringList := TStringList.Create;
+  vStringArquivo := TStringList.Create;
 
   fIdFTP.ChangeDir(APasta);
 
-  fIdFTP.List(vStringList, '*.*', False);
+  fIdFTP.List(vStringArquivo, '*.*', False);
 
   for I := 0 to AListaArquivo.Count - 1 do
-    if vStringList.IndexOf(AListaArquivo.Items[I]) > -1 then
+    if vStringArquivo.IndexOf(AListaArquivo.Items[I]) > -1 then
       fIdFTP.Delete(AListaArquivo.Items[I]);
 
-  vStringList.Free;
+  vStringArquivo.Free;
 end;
 
 initialization

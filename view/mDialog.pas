@@ -110,6 +110,7 @@ end;
 
 destructor TmDialog.Destroy;
 begin
+  fButtonList.Clear;
   FreeAndNil(fButtonList);
   
   inherited;

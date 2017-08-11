@@ -11,6 +11,10 @@ uses
 type
   TmEmail = class(TComponent)
   private
+    fIdSSLIOHandlerSocket : TIdSSLIOHandlerSocketOpenSSL;
+    fIdMessage : TIdMessage;
+    fIdSMTP : TIdSMTP;
+
     fServidor : TmServidorEmail;
 
     fInRemet : Boolean;
@@ -105,6 +109,10 @@ constructor TmEmail.create(AOwner: TComponent);
 begin
   inherited; //
 
+  fIdMessage := TIdMessage.Create(nil);
+  fIdSMTP := TIdSMTP.Create(nil);
+  fIdSSLIOHandlerSocket := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+
   fServidor := mServidorEmail.Instance;
 
   fInRemet := TmIniFiles.PegarB('', 'EMAIL', 'IN_REMET', False);
@@ -127,6 +135,10 @@ begin
   FreeAndNil(fEmailCCO);
   FreeAndNil(fLstAnexo);
 
+  FreeAndNil(fIdMessage);
+  FreeAndNil(fIdSMTP);
+  FreeAndNil(fIdSSLIOHandlerSocket);
+
   inherited;
 end;
 
@@ -134,9 +146,6 @@ procedure TmEmail.Enviar;
 const
   cMETHOD = 'TmEmail.Enviar()';
 var
-  IdSSLIOHandlerSocket : TIdSSLIOHandlerSocketOpenSSL;
-  IdMessage : TIdMessage;
-  IdSMTP : TIdSMTP;
   I : Integer;
 begin
   //Validar email
@@ -147,72 +156,66 @@ begin
     fEmailCC.Add(fEmailDe);
 
   //Configuração do IdMessage (dados da mensagem)
-  IdMessage := TIdMessage.Create(Application);
+  fIdMessage.AttachmentEncoding := 'MIME';
+  fIdMessage.ContentType := 'text/html';
+  fIdMessage.Encoding := meMIME;
 
-  IdMessage.AttachmentEncoding := 'MIME';
-  IdMessage.ContentType := 'text/html';
-  IdMessage.Encoding := meMIME;
-
-  IdMessage.From.Address := FEmailDe;                               //e-mail do remetente
-  IdMessage.Recipients.EMailAddresses := fEmailPara.GetString(';'); //e-mail do destinatário
-  IdMessage.CCList.EMailAddresses := FEmailCC.GetString(';');       //e-mail com copia
-  IdMessage.BCCList.EMailAddresses := FEmailCCO.GetString(';');     //e-mail com copia oculta
-  IdMessage.Subject := FAssunto;                                    //assunto
+  fIdMessage.From.Address := FEmailDe;                               //e-mail do remetente
+  fIdMessage.Recipients.EMailAddresses := fEmailPara.GetString(';'); //e-mail do destinatário
+  fIdMessage.CCList.EMailAddresses := FEmailCC.GetString(';');       //e-mail com copia
+  fIdMessage.BCCList.EMailAddresses := FEmailCCO.GetString(';');     //e-mail com copia oculta
+  fIdMessage.Subject := FAssunto;                                    //assunto
 
   //Anexo
-  IdMessage.MessageParts.Clear;
+  fIdMessage.MessageParts.Clear;
   for I := 0 to fLstAnexo.Count - 1 do
-    TIdAttachmentFile.Create(IdMessage.MessageParts, fLstAnexo.Items[I]);
+    TIdAttachmentFile.Create(fIdMessage.MessageParts, fLstAnexo.Items[I]);
 
   //Tipo de conteudo
   if fTipoConteudo <> '' then
-    IdMessage.ContentType := fTipoConteudo;
+    fIdMessage.ContentType := fTipoConteudo;
 
   //Conteudo
-  IdMessage.Body.Text := TmString.IfNull(fConteudo, 'EMAIL GERADO AUTOMATICO');
+  fIdMessage.Body.Text := TmString.IfNull(fConteudo, 'EMAIL GERADO AUTOMATICO');
 
   //Configuração do IdSMTP
-  IdSMTP := TIdSMTP.Create(Application);
-  IdSMTP.Host := fServidor.Host;                  // Host do SMTP
-  IdSMTP.Port := StrToIntDef(fServidor.Port, 25); // Porta do SMTP
-  IdSMTP.Username := fServidor.User;              // Login do usuário
-  IdSMTP.Password := fServidor.Pass;              // Senha do usuário
+  fIdSMTP.Host := fServidor.Host;                  // Host do SMTP
+  fIdSMTP.Port := StrToIntDef(fServidor.Port, 25); // Porta do SMTP
+  fIdSMTP.Username := fServidor.User;              // Login do usuário
+  fIdSMTP.Password := fServidor.Pass;              // Senha do usuário
 
   //-- requer autenticacao
   if fServidor.Auth then
-    IdSMTP.AuthType := satSASL
+    fIdSMTP.AuthType := satSASL
   else
-    IdSMTP.AuthType := satNone;
+    fIdSMTP.AuthType := satNone;
 
   //-- conexao segura SSL
   if fServidor.SSL then begin
-    IdSSLIOHandlerSocket := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
-    IdSSLIOHandlerSocket.SSLOptions.Method := sslvSSLv3; //sslvTLSv1; //sslvSSLv2;
-    IdSSLIOHandlerSocket.SSLOptions.Mode := sslmClient;  //sslmUnassigned;
-    IdSMTP.IOHandler := IdSSLIOHandlerSocket;
+    fIdSSLIOHandlerSocket.SSLOptions.Method := sslvSSLv3; //sslvTLSv1; //sslvSSLv2;
+    fIdSSLIOHandlerSocket.SSLOptions.Mode := sslmClient;  //sslmUnassigned;
+    fIdSMTP.IOHandler := fIdSSLIOHandlerSocket;
   end else
-    IdSMTP.IOHandler := nil;
+    fIdSMTP.IOHandler := nil;
 
   //Envia o email
   try
-    IdSMTP.Connect; //(3000); //Estabelece a conexão
-    //IdSMTP.Authenticate;    //Faz a autenticação
-    if IdSMTP.Connected then
-      IdSMTP.Send(IdMessage); //Envia a mensagem
+    fIdSMTP.Connect; //(3000); //Estabelece a conexão
+    //fIdSMTP.Authenticate;    //Faz a autenticação
+    if fIdSMTP.Connected then
+      fIdSMTP.Send(fIdMessage); //Envia a mensagem
   except
     on E : Exception do begin
       mLogger.Instance.Erro(cMETHOD, 'Erro ao enviar email! / Erro: ' + E.Message);
       raise;
-    end;  
+    end;
   end;
 
-  IdSMTP.Free;
-  IdMessage.Free;
+  fIdSMTP.Disconnect;
 end;
 
 initialization
   //Instance();
-  RegisterClass(TmEmail);
 
 finalization
   Destroy();

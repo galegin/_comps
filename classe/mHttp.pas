@@ -11,19 +11,19 @@ uses
 type
   TmHttp = class(TComponent)
   private
-    fHTTP : TIdHTTP;
+    fIdHTTP : TIdHTTP;
     fUrl : String;
-    fParamList : TmStringList;
+    fListParam : TmStringList;
     fRetorno : String;
   protected
   public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
-    procedure Get(AUrl : String; AParamList : Array Of String);
+    procedure Get(AUrl : String; AListParam : Array Of String);
     procedure Post(AUrl : String; AContent : String);
   published
     property Url : String read fUrl write fUrl;
-    property ParamList : TmStringList read fParamList write fParamList;
+    property ListParam : TmStringList read fListParam write fListParam;
     property Retorno : String read fRetorno write fRetorno;
   end;
 
@@ -57,34 +57,34 @@ constructor TmHttp.Create(AOwner : TComponent);
 begin
   inherited;
 
-  fHTTP := TIdHTTP.Create;
-  fParamList := TmStringList.Create;
+  fIdHTTP := TIdHTTP.Create;
+  fListParam := TmStringList.Create;
 end;
 
 destructor TmHttp.Destroy;
 begin
-  FreeAndNil(fHTTP);
-  FreeAndNil(fParamList);
+  FreeAndNil(fIdHTTP);
+  FreeAndNil(fListParam);
 
   inherited;
 end;
 
 procedure TmHttp.Get;
 var
-  vParamList, vUrl : String;
+  vListParam, vUrl : String;
 begin
-  vParamList := fParamList.GetString('&');
+  vListParam := fListParam.GetString('&');
 
-  vUrl := fUrl + IfThen(vParamList <> '', '?') + vParamList;
+  vUrl := fUrl + IfThen(vListParam <> '', '?') + vListParam;
 
-  fHTTP := TIdHTTP.Create(nil);
-  fHTTP.Request.UserAgent := 'Mozilla/3.0 (compatible; IndyLibrary)';
-  fHTTP.Request.ContentType := 'application/x-www-form-urlencoded';
-  fHTTP.HandleRedirects := True;
-  fHTTP.Request.Accept := 'text/html, */*';
+  fIdHTTP := TIdHTTP.Create(nil);
+  fIdHTTP.Request.UserAgent := 'Mozilla/3.0 (compatible; IndyLibrary)';
+  fIdHTTP.Request.ContentType := 'application/x-www-form-urlencoded';
+  fIdHTTP.HandleRedirects := True;
+  fIdHTTP.Request.Accept := 'text/html, */*';
 
   try
-    fRetorno := fHTTP.Get(vUrl);
+    fRetorno := fIdHTTP.Get(vUrl);
   except
     on E : Exception do
       mLogger.Instance.Erro('TmHttp.Get', E.Message);
@@ -93,29 +93,29 @@ end;
 
 procedure TmHttp.Post;
 var
-  vParamList : TStringList;
+  vListParam : TStringList;
   I : Integer;
 begin
-  vParamList := TStringList.Create;
+  vListParam := TStringList.Create;
 
   // Add(vCod + '=' + vVal);
-  for I := 0 to fParamList.Count - 1 do
-    fParamList.Add(fParamList.Items[I]);
+  for I := 0 to fListParam.Count - 1 do
+    fListParam.Add(fListParam.Items[I]);
 
-  fHTTP := TIdHTTP.Create(nil);
-  fHTTP.Request.UserAgent := 'Mozilla/3.0 (compatible; IndyLibrary)';
-  fHTTP.Request.ContentType := 'application/x-www-form-urlencoded';
-  fHTTP.HandleRedirects := True;
-  fHTTP.Request.Accept := 'text/html, */*';
+  fIdHTTP := TIdHTTP.Create(nil);
+  fIdHTTP.Request.UserAgent := 'Mozilla/3.0 (compatible; IndyLibrary)';
+  fIdHTTP.Request.ContentType := 'application/x-www-form-urlencoded';
+  fIdHTTP.HandleRedirects := True;
+  fIdHTTP.Request.Accept := 'text/html, */*';
 
   try
-    fRetorno := fHTTP.Post(fUrl, vParamList);
+    fRetorno := fIdHTTP.Post(fUrl, vListParam);
   except
     on E : Exception do
       mLogger.Instance.Erro('TmHttp.Post', E.Message);
   end;
 
-  FreeAndNil(vParamList);
+  FreeAndNil(vListParam);
 end;
 
 initialization

@@ -8,12 +8,20 @@ uses
 type
   TpThread = (tpaCmp, tpaCls, tpaObj);
 
+  RParamThread = record
+    Classe : String;
+    Metodo : String;
+    Params : TObject;
+  end;
+
+  RParamThreadArray = Array Of RParamThread;
+
   TmThread = class(TThread)
   private
     FTabelaLabel : TThreadMethod;
     FTabelaIncr : TThreadMethod;
   protected
-    FLstXml : String;
+    FLstParams : RParamThreadArray;
     FQtAtual : Integer;
     FQtTotal : Integer;
     FTpThread : TpThread;
@@ -27,7 +35,7 @@ type
   public
     constructor Create(CreateSuspended : Boolean);
   published
-    property _LstXml : String read FLstXml write FLstXml;
+    property _LstParams : RParamThreadArray read FLstParams write FLstParams;
     property _TabelaLabel : TThreadMethod read FTabelaLabel write FTabelaLabel;
     property _TabelaIncr : TThreadMethod read FTabelaIncr write FTabelaIncr;
     property _TpThread : TpThread read FTpThread write FTpThread;
@@ -39,7 +47,7 @@ var
 implementation
 
 uses
-  mActivate, mClasseExec, mFuncao, mTipoSts, mLogger, mItem, mXml;
+  mActivate, mClasseExec, mLogger, mJson;
 
 { TC_Thread }
 
@@ -54,57 +62,49 @@ procedure TmThread.Execute;
 const
   cMETHOD = 'TmThread.Execute()';
 var
-  vLstXml, vXml,
-  vParams, vResult,
-  vCdClasse, vCdMetodo, vDsParams : String;
+  vParams, vResult : String;
+  vObjParams : RParamThread;
+  I : Integer;
 begin
-  vLstXml := FLstXml;
-  if vLstXml = '' then 
-    Exit;
-
   gInTerminado := False;
 
-  FQtTotal := itemCountX(vLstXml);
+  FQtTotal := Length(FLstParams);
   FQtAtual := 0;
 
-  while vLstXml <> '' do begin
-    vXml := getitemX(vLstXml);
-    if vXml = '' then Break;
-    delitemX(vLstXml);
-
+  for I := 0 to High(FLstParams) do begin
     Inc(FQtAtual);
 
-    mLogger.d(vXml + ' / ' + cMETHOD);
+    vObjParams := FLstParams[I];
+
+    mLogger.Instance.Info(cMETHOD, 'Classe -> ' + vObjParams.Classe + '.' + vObjParams.Metodo);
 
     // sincronizar label
-    if Assigned(_TabelaLabel) then 
+    if Assigned(_TabelaLabel) then
       Synchronize(_TabelaLabel);
 
-    vCdClasse := itemX('CD_CLASSE', vXml);
-    vCdMetodo := itemX('CD_METODO', vXml);
-    vDsParams := itemX('DS_PARAMS', vXml);
-
-    if vCdClasse = '' then
+    if vObjParams.Classe = '' then
       raise Exception.create('Classe deve ser informada / ' + cMETHOD);
-    if vCdMetodo = '' then
+    if vObjParams.Metodo = '' then
       raise Exception.create('Metodo deve ser informado / ' + cMETHOD);
-    if vDsParams = '' then
+    if vObjParams.Params = nil then
       raise Exception.create('Parametro deve ser informado / ' + cMETHOD);
 
     try
-      vParams := vDsParams;
-      putitemX(vParams, 'IN_BACKGROUND', True);
-      if (FTpThread = tpaCmp) then begin
-        vResult := activateCmp(vCdClasse, vCdMetodo, vParams);
-      end else if (FTpThread = tpaCls) then begin
-        vResult := execClasse(vCdClasse, vCdMetodo, vParams);
-      end else if (FTpThread = tpaObj) then begin
-        vResult := execObjeto(vCdClasse, vCdMetodo, vParams);
+      vParams := TmJson.ObjectToJson(vObjParams.Params);
+      //putitemX(vParams, 'IN_BACKGROUND', True);
+      case FTpThread of
+        tpaCmp :
+          vResult := activateCmp(vObjParams.Classe, vObjParams.Metodo, vParams);
+        tpaCls :
+          vResult := execClasse(vObjParams.Classe, vObjParams.Metodo, vParams);
+        tpaObj :
+          vResult := execObjeto(vObjParams.Classe, vObjParams.Metodo, vParams);
       end;
-      if itemXF('status', vResult) < 0 then
-        mLogger.e(vResult + ' / ' + cMETHOD);
     except
-      raise;
+      on E : Exception do begin
+        mLogger.Instance.Erro(cMETHOD, E.Message);
+        raise;
+      end;
     end;
 
     // sincronizar incremento
@@ -135,8 +135,8 @@ end; *)
 function TmThread.GetStatus(pParams : String) : String;
 begin
   Result := '';
-  putitemX(Result, 'QT_TOTAL', FQtTotal);
-  putitemX(Result, 'QT_ATUAL', FQtAtual);
+  //putitemX(Result, 'QT_TOTAL', FQtTotal);
+  //putitemX(Result, 'QT_ATUAL', FQtAtual);
 end;
 
 end.
