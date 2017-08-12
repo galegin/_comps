@@ -3,123 +3,109 @@ unit mConexao;
 interface
 
 uses
-  Classes, SysUtils, DB,
-  mDatabaseFactory, mDatabaseIntf, mDatabase, mTipoConexao,
-  mException;
+  Classes, SysUtils, StrUtils, TypInfo, DB,
+  mConexaoIntf, mParametro, mTipoDatabase; //, mDataSet;
 
 type
-  TmConexao = class;
-  TmConexaoClass = class of TmConexao;
+  TrDatabase_Sequence = record
+    Create : String;
+    Exists : String;
+    Execute : String;
+  end;
 
-  TmConexaoList = class;
-  TmConexaoListClass = class of TmConexaoList;
+  TrDatabase = record
+    Limits : String;
+    Metadata : String;
+    Sequences : TrDatabase_Sequence;
+    Tables : String;
+    Views : String;
+    Constraints : String;
+  end;
 
-  TmConexao = class(TComponent)
+  TmConexao = class(TComponent, IConexao)
   private
-    fTipoConexao : TTipoConexao;
-    fDatabase : IDatabaseIntf;
+    fParametro : TmParametro;
   protected
+    fConnection : TComponent;
   public
-    constructor Create(Aowner : TComponent); override;
-    destructor Destroy; override;
+    constructor create(Aowner : TComponent); override;
 
-    function GetConsulta(ASql : String; AQtdeReg : Integer = -1) : TDataSet;
-    procedure ExecComando(ACmd : String);
+    procedure ExecComando(ACmd : String); virtual; abstract;
+    function GetConsulta(ASql : String) : TDataSet; virtual; abstract;
+
+    procedure Transaction(); virtual; abstract;
+    procedure Commit(); virtual; abstract;
+    procedure Rollback(); virtual; abstract;
+
+    function GetParametro() : TmParametro;
+    procedure SetParametro(const Value : TmParametro);
   published
-    property TipoConexao : TTipoConexao read fTipoConexao write fTipoConexao;
-    property Database : IDatabaseIntf read fDatabase write fDatabase;
+    property Parametro : TmParametro read GetParametro write SetParametro;
   end;
-
-  TmConexaoList = class(TList)
-  private
-    function GetItem(Index: Integer): TmConexao;
-    procedure SetItem(Index: Integer; const Value: TmConexao);
-  public
-    function Add : TmConexao; overload;
-    property Items[Index: Integer] : TmConexao read GetItem write SetItem;
-  end;
-
-  function Instance : TmConexao;
-  procedure Destroy;
 
 implementation
 
 { TmConexao }
 
-var
-  _instance : TmConexao;
-
-  function Instance : TmConexao;
+  function GetDatabase(ATipoDatabase : TTipoDatabase) : TrDatabase;
   begin
-    if not Assigned(_instance) then
-      _instance := TmConexao.create(nil);
-    Result := _instance;
+    with Result do begin
+      case ATipoDatabase of
+        tpdDB2, tpdOracle : begin
+          Limits := 'select * from ({sql}) where ROWNUM <= {qtde}';
+          Metadata := 'select * from {entidade} where 1<>1';
+          Constraints := 'select CONSTRAINT_NAME from USER_CONSTRAINTS';
+          Tables := 'select TABLE_NAME from USER_TABLES';
+          Views := 'select VIEW_NAME from USER_VIEWS';
+          with Sequences do begin
+            Create := 'create sequence {sequence} start with 1 increment by 1 maxvalue 999999 cycle nocache';
+            Execute := 'select {sequence}.NEXTVAL as PROXIMO from DUAL';
+            Exists := 'select SEQUENCE_NAME from USER_SEQUENCES where SEQUENCE_NAME = ''{sequence}''';
+          end;
+        end;
+
+        tpdFirebird : begin
+          Limits := 'select FIRST {qtde} * from ({sql})';
+          Metadata := 'select * from {entidade} where 1<>1';
+          Constraints := 'select RDB$CONSTRAINT_NAME as CONSTRAINT_NAME from RDB$RELATION_CONSTRAINTS';
+          Tables := 'select RDB$RELATION_NAME as TABLE_NAME from RDB$RELATIONS where RDB$SYSTEM_FLAG = 0 and RDB$VIEW_BLR is null';
+          Views := 'select RDB$RELATION_NAME as VIEW_NAME from RDB$RELATIONS where RDB$SYSTEM_FLAG = 0 and RDB$VIEW_BLR is not null';
+          with Sequences do begin
+            Create := 'create sequence {sequence}';
+            Execute := 'select GEN_ID({sequence}, 1) as PROXIMO from RDB$DATABASE';
+            Exists := 'select RDB$GENERATOR_NAME as SEQUENCE_NAME from RDB$GENERATORS where RDB$GENERATOR_NAME = ''{sequence}'' and RDB$SYSTEM_FLAG = 0';
+          end;
+        end;
+
+        tpdMySql, tpdPostgre : begin
+          Limits := 'select * from ({sql}) LIMIT {qtde}';
+          Metadata := 'select * from {entidade} where 1<>1';
+          Constraints := 'select CONSTRAINT_NAME from INFORMATION_SCHEMA.CONSTRAINTS where TABLE_SCHEMA = database()';
+          Tables := 'select TABLE_NAME from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = database()';
+          Views := 'select VIEW_NAME from INFORMATION_SCHEMA.VIEWS where TABLE_SCHEMA = database()';
+        end;
+        
+      end;
+    end;
   end;
 
-  procedure Destroy;
-  begin
-    if Assigned(_instance) then
-      FreeAndNil(_instance);
-  end;
-
-constructor TmConexao.Create(Aowner: TComponent);
+constructor TmConexao.create(Aowner: TComponent);
 begin
   inherited;
-
 end;
 
-destructor TmConexao.Destroy;
+//--
+
+function TmConexao.GetParametro: TmParametro;
 begin
-
-  inherited;
+  Result := fParametro;
 end;
 
-function TmConexao.GetConsulta(ASql : String; AQtdeReg : Integer = -1) : TDataSet;
-const
-  cDS_METHOD = 'TmConexao.GetConsulta()';
+procedure TmConexao.SetParametro(const Value: TmParametro);
 begin
-  try
-    Result := Database.GetConsulta(ASql, True);
-  except
-    on E : Exception do
-      raise TmException.Create(cDS_METHOD, 'Erro na consulta / Erro: ' + E.Message + ' / ASql : ' + ASql);
-  end;
+  fParametro := Value;
 end;
 
-procedure TmConexao.ExecComando(ACmd : String);
-const
-  cDS_METHOD = 'TmConexao.ExecComando()';
-begin
-  try
-    Database.ExecComando(ACmd);
-  except
-    on E : Exception do
-      raise TmException.Create(cDS_METHOD, 'Erro no comando / Erro: ' + E.Message + ' / ACmd : ' + ACmd);
-  end;
-end;
-
-{ TmConexaoList }
-
-function TmConexaoList.GetItem(Index: Integer): TmConexao;
-begin
-  Result := TmConexao(Self[Index]);
-end;
-
-procedure TmConexaoList.SetItem(Index: Integer; const Value: TmConexao);
-begin
-  Self[Index] := Value;
-end;
-
-function TmConexaoList.Add: TmConexao;
-begin
-  Result := TmConexao.Create(nil);
-  Self.Add(Result);
-end;
-
-initialization
-  //Instance();
-
-finalization
-  Destroy();
+//--
 
 end.

@@ -1,152 +1,120 @@
 unit mContexto;
 
-(* contexto *)
+(* mContexto *)
 
 interface
 
 uses
-  Classes, SysUtils, StrUtils,
-  mCollectionMap, mCollectionSet, mConexao;
+  Classes, SysUtils, StrUtils, DB, TypInfo, Math,
+  mDatabase, mMapping, mParametro;
 
 type
   TmContexto = class(TComponent)
   private
-    fConexao : TmConexao;
-    fEntidades : TmCollectionMapClassArray;
+    FParametro: TmParametro;
+    FDatabase: TmDatabase;
   protected
   public
     constructor Create(AOwner : TComponent); override;
+    destructor Destroy; override;
 
-    procedure ClearEntidade();
-    procedure AddEntidade(AEntidade : TmCollectionMapClass);
-    procedure AddEntidadeList(AEntidadeList : Array Of TmCollectionMapClass);
-
-    function GetEntidade(
-      ACollectionItem : TCollectionItem) : TmCollectionMap;
-
-    function DbSet(
-      AClasse : TCollectionItemClass) : TmCollectionSet;
-
-    procedure AddOrUpdateItem(
-      ACollectionItem : TCollectionItem);
-
-    procedure AddOrUpdate(
-      ACollection : TCollection);
-
-    procedure RemoveItem(
-      ACollectionItem : TCollectionItem);
-
-    procedure Remove(
-      ACollection : TCollection);
-
-    procedure SaveChanges();
-
+    function GetLista(AClass : TClass; AWhere : String = '') : TList;
+    procedure SetLista(AList : TList);
+    procedure RemLista(AList : TList);
   published
-    property Conexao : TmConexao read fConexao write fConexao;
-    property Entidades : TmCollectionMapClassArray read fEntidades;
+    property Parametro : TmParametro read FParametro write FParametro;
+    property Database : TmDatabase read FDatabase write FDatabase;
   end;
 
 implementation
 
 uses
-  mCollectionItem, mCollection, mModulo;
+  mComando;
+
+(* mContexto *)
 
 constructor TmContexto.Create(AOwner : TComponent);
 begin
   inherited;
-  fConexao := mModulo.Instance.Conexao;
+
+  FParametro := TmParametro.Create;
+
+  FDatabase := TmDatabase.Create(Self);
+  FDatabase.Conexao.Parametro := FParametro;
 end;
 
-//--
-
-procedure TmContexto.ClearEntidade;
+destructor TmContexto.Destroy;
 begin
-  SetLength(fEntidades, 0);
+
+  inherited;
 end;
 
-procedure TmContexto.AddEntidade;
-begin
-  SetLength(fEntidades, Length(fEntidades) + 1);
-  fEntidades[High(fEntidades)] := AEntidade;
-end;
-
-procedure TmContexto.AddEntidadeList;
+function TmContexto.GetLista(AClass: TClass; AWhere: String): TList;
 var
+  vPropInfo : PPropInfo;
+  vTipoBase : String;
+  vDataSet : TDataSet;
+  vObject : TObject;
+  vSql : String;
   I : Integer;
 begin
-  for I := Low(AEntidadeList) to High(AEntidadeList) do
-    AddEntidade(AEntidadeList[I]);
-end;
+  Result := TList.Create;
 
-function TmContexto.GetEntidade;
-var
-  vCollectionMap : TmCollectionMap;
-  I : Integer;
-begin
-  Result := nil;
-  for I := Ord(Low(fEntidades)) to Ord(High(fEntidades)) do begin
-    vCollectionMap := TmCollectionMapClass(fEntidades[I]).Create(nil);
-    if ACollectionItem.ClassType = vCollectionMap.Classe then begin
-      Result := vCollectionMap;
-      Exit;
+  vSql := TmComando.GetSelect(AClass, AWhere);
+
+  vDataSet := FDatabase.Conexao.GetConsulta(vSql);
+  with vDataSet do begin
+    while not EOF do begin
+      vObject := TComponentClass(AClass).Create(nil);
+      Result.Add(vObject);
+
+      for I := 0 to FieldCount - 1 do
+        with Fields[I] do begin
+          vPropInfo := GetPropInfo(vObject, FieldName);
+          vTipoBase := vPropInfo^.PropType^.Name;
+          if vTipoBase = 'Boolean' then // mObjeto
+            SetOrdProp(vObject, FieldName, IfThen(AsString = 'T', 1, 0))
+          else if vTipoBase = 'TDateTime' then
+            SetFloatProp(vObject, FieldName, AsDateTime)
+          else if vTipoBase = 'Real' then
+            SetFloatProp(vObject, FieldName, AsFloat)
+          else if vTipoBase = 'Integer' then
+            SetOrdProp(vObject, FieldName, AsInteger)
+          else if vTipoBase = 'String' then
+            SetStrProp(vObject, FieldName, AsString);
+        end;
+
+      Next;
     end;
-
-    FreeAndNil(vCollectionMap);
   end;
 end;
 
-//--
-
-function TmContexto.DbSet;
-begin
-  Result := TmCollectionSet.Create(Self, AClasse);
-end;
-
-//--
-
-procedure TmContexto.AddOrUpdateItem;
-begin
-  if ACollectionItem is TmCollectionItem then
-    with ACollectionItem as TmCollectionItem do
-      Salvar();
-end;
-
-procedure TmContexto.AddOrUpdate;
+procedure TmContexto.SetLista(AList: TList);
 var
+  vDataSet : TDataSet;
+  vSql, vCmd : String;
   I : Integer;
 begin
-  with ACollection do
-    for I := 0 to Count - 1 do
-      AddOrUpdateItem(Items[I]);
+  for I := 0 to AList.Count - 1 do begin
+    vSql := TmComando.GetConsulta(AList[I]);
+    vDataSet := FDatabase.Conexao.GetConsulta(vSql);
+    if not vDataSet.IsEmpty then
+      vCmd := TmComando.GetUpdate(AList[I])
+    else
+      vCmd := TmComando.GetInsert(AList[I]);
+    FDatabase.Conexao.ExecComando(vCmd);
+  end;
 end;
 
-//--
-
-procedure TmContexto.RemoveItem;
-begin
-  if ACollectionItem is TmCollectionItem then
-    with ACollectionItem as TmCollectionItem do begin
-      Excluir();
-      Limpar();
-    end;
-end;
-
-procedure TmContexto.Remove;
+procedure TmContexto.RemLista(AList: TList);
 var
+  vCmd : String;
   I : Integer;
 begin
-  with ACollection do
-    for I := 0 to Count - 1 do
-      RemoveItem(Items[I]);
+  for I := 0 to AList.Count - 1 do begin
+    vCmd := TmComando.GetDelete(AList[I]);
+    FDatabase.Conexao.ExecComando(vCmd);
+  end;
 end;
-
-//--
-
-procedure TmContexto.SaveChanges;
-begin
-
-end;
-
-//--
 
 end.
