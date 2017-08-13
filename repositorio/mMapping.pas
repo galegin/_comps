@@ -54,13 +54,12 @@ begin
 
   for I := 0 to High(ACampos) do begin
     vCampoStr := TmString.Split(ACampos[I], '|');
-    if Length(vCampoStr) > 1 then begin
-      vAtributo := vCampoStr[0];
-      vCampo := vCampoStr[1];
-    end else begin
-      vAtributo := vCampoStr[0];
+    
+    vAtributo := vCampoStr[0];
+    if Length(vCampoStr) > 1 then
+      vCampo := vCampoStr[1]
+    else
       vCampo := vCampoStr[0];
-    end;
 
     AResult[I].Atributo := vAtributo;
     AResult[I].Campo := vCampo;
@@ -77,13 +76,12 @@ begin
 
   for I := 0 to High(ACampos) do begin
     vCampoStr := TmString.Split(ACampos[I], '|');
-    if Length(vCampoStr) > 1 then begin
-      vAtributo := vCampoStr[0];
-      vCampo := vCampoStr[1];
-    end else begin
-      vAtributo := vCampoStr[0];
+    
+    vAtributo := vCampoStr[0];
+    if Length(vCampoStr) > 1 then
+      vCampo := vCampoStr[1]
+    else
       vCampo := vCampoStr[0];
-    end;
 
     AResult[I].Atributo := vAtributo;
     AResult[I].Campo := vCampo;
