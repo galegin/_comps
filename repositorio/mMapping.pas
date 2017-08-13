@@ -46,25 +46,21 @@ implementation
 
 procedure AddKeysResult(var AResult : TmKeys; ACampos : Array Of String);
 var
-  vCampoStr, vAtributo, vCampo : String;
-  P, I : Integer;
+  vAtributo, vCampo : String;
+  vCampoStr : TmStringArray;
+  I : Integer;
 begin
   SetLength(AResult, Length(ACampos));
 
   for I := 0 to High(ACampos) do begin
-    vCampoStr := ACampos[I];
-    P := Pos('|', vCampoStr);
-    if P > 0 then begin
-      vAtributo := Copy(vCampoStr, 1, P - 1);
-      Delete(vCampoStr, 1, P);
-      vCampo := vCampoStr;
+    vCampoStr := TmString.Split(ACampos[I], '|');
+    if Length(vCampoStr) > 1 then begin
+      vAtributo := vCampoStr[0];
+      vCampo := vCampoStr[1];
     end else begin
-      vAtributo := vCampoStr;
-      vCampo := vCampoStr;
+      vAtributo := vCampoStr[0];
+      vCampo := vCampoStr[0];
     end;
-
-    if vCampo = '' then
-      vCampo := vAtributo;
 
     AResult[I].Atributo := vAtributo;
     AResult[I].Campo := vCampo;
@@ -73,25 +69,21 @@ end;
 
 procedure AddCamposResult(var AResult : TmCampos; ACampos : Array Of String);
 var
-  vCampoStr, vAtributo, vCampo : String;
-  P, I : Integer;
+  vAtributo, vCampo : String;
+  vCampoStr : TmStringArray;
+  I : Integer;
 begin
   SetLength(AResult, Length(ACampos));
 
   for I := 0 to High(ACampos) do begin
-    vCampoStr := ACampos[I];
-    P := Pos('|', vCampoStr);
-    if P > 0 then begin
-      vAtributo := Copy(vCampoStr, 1, P - 1);
-      Delete(vCampoStr, 1, P);
-      vCampo := vCampoStr;
+    vCampoStr := TmString.Split(ACampos[I], '|');
+    if Length(vCampoStr) > 1 then begin
+      vAtributo := vCampoStr[0];
+      vCampo := vCampoStr[1];
     end else begin
-      vAtributo := vCampoStr;
-      vCampo := vCampoStr;
+      vAtributo := vCampoStr[0];
+      vCampo := vCampoStr[0];
     end;
-
-    if vCampo = '' then
-      vCampo := vAtributo;
 
     AResult[I].Atributo := vAtributo;
     AResult[I].Campo := vCampo;
