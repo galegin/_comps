@@ -96,7 +96,7 @@ var
   I : Integer;
 begin
   for I := 0 to AList.Count - 1 do begin
-    vSql := TmComando.GetConsulta(AList[I]);
+    vSql := TmComando.GetSelect(AList[I]);
     vDataSet := FDatabase.Conexao.GetConsulta(vSql);
     if not vDataSet.IsEmpty then
       vCmd := TmComando.GetUpdate(AList[I])
