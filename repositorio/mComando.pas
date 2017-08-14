@@ -13,8 +13,8 @@ type
   private
   protected
   public
-    class function GetSelect(AClass : TClass; AWhere : String = '') : String;
-    class function GetConsulta(AObject : TObject) : String;
+    class function GetSelect(AClass : TClass; AWhere : String = '') : String; overload;
+    class function GetSelect(AObject : TObject) : String; overload;
     class function GetInsert(AObject : TObject) : String;
     class function GetUpdate(AObject : TObject) : String;
     class function GetDelete(AObject : TObject) : String;
@@ -118,7 +118,7 @@ begin
     ')' + IfThen(AWhere <> '', ' where ' + AWhere);
 end;
 
-class function TmComando.GetConsulta(AObject: TObject): String;
+class function TmComando.GetSelect(AObject: TObject): String;
 var
   vMapping : RMapping;
   vWhere : String;
