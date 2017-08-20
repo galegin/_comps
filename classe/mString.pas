@@ -67,28 +67,36 @@ type
     function GetString(ASeparador : String) : String;
   end;
 
-  (* TmStringListL = class(TList)
-  private
-    function GetItem(Index: Integer): TmStringObj;
-    procedure SetItem(Index: Integer; const Value: TmStringObj);
-  public
-    procedure Clear();
-    procedure Add(AString : String);
-    function Count: Integer;
-    property Items[Index : Integer] : TmStringObj read GetItem write SetItem;
-    function GetString(ASeparador : String) : String;
-  end; *)
+  // Assigned({str})
+  // {str} != null
 
-  TmStringListT = class(TStrings)
+  TrStringPart = record
+    Ini : String;
+    Str : String;
+    Fin : String;
+  end;
+
+  TrStringPartArray = Array Of TrStringPart;
+
+  TmStringPart = class
   private
-    fList: Array Of String;
-  protected
-    function Get(Index: Integer): string; override;
-    function GetCount: Integer; override;
+    fEntrada : String;
+    fSaida : String;
+    fList : TrStringPartArray;
+    procedure SetList();
+    function GetIni: String;
+    function GetFin: String;
+    function GetStr(AResult, AString: String): String;
   public
-    procedure Clear; override;
-    procedure Delete(Index: Integer); override;
-    procedure Insert(Index: Integer; const S: string); override;
+    constructor Create(AEntrada, ASaida : String);
+    function GetEnt(AString : String): String;
+    function GetSai(AString : String): String;
+  published
+    property _Entrada : String read fEntrada;
+    property _Saida : String read fSaida;
+    property _List : TrStringPartArray read fList;
+    property _Ini : String read GetIni;
+    property _Fin : String read GetFin;
   end;
 
 implementation
@@ -410,66 +418,119 @@ begin
     Result := Result + IfThen(Result <> '', ASeparador) + fStringArray[I];
 end;
 
-{ TmStringListT }
+{ TmStringPart }
 
-procedure TmStringListT.Clear;
+constructor TmStringPart.Create(AEntrada, ASaida: String);
+begin
+  fEntrada := AEntrada;
+  fSaida := ASaida;
+  SetList;
+end;
+
+procedure TmStringPart.SetList;
+var
+  vExpressao, vIni, vStr, vFin : String;
+  P : Integer;
+
+  procedure AddItem(AIni, AStr, AFin : String);
+  begin
+    SetLength(fList, Length(fList) + 1);
+    fList[High(fList)].Ini := AIni;
+    fList[High(fList)].Str := AStr;
+    fList[High(fList)].Fin := AFin;
+  end;
+
 begin
   SetLength(fList, 0);
+
+  vExpressao := trim(fEntrada);
+
+  vIni := '';
+  vStr := '';
+  vFin := '';
+
+  // Assigned({str})
+  // {str} != null
+
+  P := Pos('{', vExpressao);
+  while P > 0 do begin
+    vIni := Copy(vExpressao, 1, P - 1);
+    Delete(vExpressao, 1, P - 1);
+
+    P := Pos('}', vExpressao);
+    vStr := Copy(vExpressao, 1, P);
+    Delete(vExpressao, 1, P);
+
+    P := Pos('{', vExpressao);
+    if P > 0 then
+      vFin := Copy(vExpressao, 1, P - 1)
+    else
+      vFin := vExpressao;
+
+    AddItem(vIni, vStr, vFin);
+  end;
 end;
 
-procedure TmStringListT.Delete(Index: Integer);
+function TmStringPart.GetIni: String;
+begin
+  if Length(fList) > 0 then
+    Result := fList[0].Ini
+  else
+    Result := '';
+end;
+
+function TmStringPart.GetFin: String;
+begin
+  if Length(fList) > 0 then
+    Result := fList[High(fList)].Fin
+  else
+    Result := '';
+end;
+
+function TmStringPart.GetStr(AResult, AString: String): String;
 var
-  I : Integer;
+  vPart : TrStringPart;
+  I, P : Integer;
+  vVal : String;
 begin
-  if (Index < 0) or (Index >= Length(fList)) then
-    Exit;
+  Result := AResult;
 
-  for I := High(fList) downto Index do
-    fList[I-1] := fList[I];
+  AString := Trim(AString);
 
-  SetLength(fList, Length(fList) - 1);
+  for I := 0 to High(fList) do begin
+    vPart := fList[I];
+
+    P := Pos(vPart.Ini, AString);
+    if P = 0 then begin
+      Result := '';
+      Exit;
+    end;
+    Delete(AString, 1, P - 1);
+    Delete(AString, 1, Length(vPart.Ini));
+
+    P := Pos(vPart.Fin, AString);
+    if P = 0 then begin
+      Result := '';
+      Exit;
+    end;
+
+    vVal := Copy(AString, 1, P - 1);
+
+    Result := AnsiReplaceStr(Result, vPart.Str, vVal);
+  end;
 end;
 
-function TmStringListT.Get(Index: Integer): string;
+function TmStringPart.GetEnt(AString: String): String;
 begin
-  if (Index < 0) or (Index >= Length(fList)) then
-    Exit;
-
-  Result := fList[Index];
+  Result := GetStr(fEntrada, AString);
 end;
 
-function TmStringListT.GetCount: Integer;
+function TmStringPart.GetSai(AString: String): String;
 begin
-  Result := Length(fList);
-end;
-
-procedure TmStringListT.Insert(Index: Integer; const S: string);
-begin
-  SetLength(fList, Length(fList) + 1);
-  //fList[High(fList)] := S;
-  fList[Index] := S;
-end;
-
-procedure Testar;
-var
-  vStringList : TmStringList;
-  vStringListT : TmStringListT;
-  I : Integer;
-begin
-  vStringListT := TmStringListT.Create;
-  vStringListT.Add('teste 1');
-  vStringListT.Add('teste 2');
-  for I := 0 to vStringListT.Count - 1 do
-    ShowMessage(vStringListT[I]);
-
-  vStringList := TmStringList.Create;
-  vStringList.Add('teste 1');
-  vStringList.Add('teste 2');
-  for I := 0 to vStringList.Count - 1 do
-    ShowMessage(vStringList.Items[I]);
+  Result := GetStr(fSaida, AString);
 end;
 
 initialization
-  //Testar();
+  //TmStringPart.Create('function {cod}({par}) : {ret};', '');
 
 end.
