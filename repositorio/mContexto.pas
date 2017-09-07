@@ -21,15 +21,38 @@ type
     function GetLista(AClass : TClass; AWhere : String = '') : TList;
     procedure SetLista(AList : TList);
     procedure RemLista(AList : TList);
+
+    function GetObjeto(AClass : TClass; AWhere : String = '') : TObject;
+    procedure SetObjeto(AObjeto : TObject);
+    procedure RemObjeto(AObjeto : TObject);
   published
     property Parametro : TmParametro read FParametro write FParametro;
     property Database : TmDatabase read FDatabase write FDatabase;
   end;
 
+  function Instance() : TmContexto;
+  procedure Destroy();
+
 implementation
 
 uses
   mComando;
+
+var
+  _instance : TmContexto;
+
+  function Instance() : TmContexto;
+  begin
+    if not Assigned(_instance) then
+      _instance := TmContexto.Create(nil);
+    Result := _instance;
+  end;
+
+  procedure Destroy();
+  begin
+    if Assigned(_instance) then
+      _instance.Free;
+  end;
 
 (* mContexto *)
 
@@ -48,6 +71,8 @@ begin
 
   inherited;
 end;
+
+//-- lista
 
 function TmContexto.GetLista(AClass: TClass; AWhere: String): TList;
 var
@@ -96,7 +121,7 @@ var
   I : Integer;
 begin
   for I := 0 to AList.Count - 1 do begin
-    vSql := TmComando.GetSelect(AList[I]);
+    vSql := TmComando.GetSelect(TObject(AList[I]));
     vDataSet := FDatabase.Conexao.GetConsulta(vSql);
     if not vDataSet.IsEmpty then
       vCmd := TmComando.GetUpdate(AList[I])
@@ -116,5 +141,46 @@ begin
     FDatabase.Conexao.ExecComando(vCmd);
   end;
 end;
+
+//-- objeto
+
+function TmContexto.GetObjeto(AClass : TClass; AWhere : String = '') : TObject;
+var
+  vLista : TList;
+begin
+  vLista := GetLista(AClass, AWhere);
+  if Assigned(vLista) and (vLista.Count > 0) then
+    Result := vLista[0]
+  else
+    Result := nil;
+end;
+
+procedure TmContexto.SetObjeto(AObjeto : TObject);
+var
+  vLista : TList;
+begin
+  vLista := TList.Create;
+  vLista.Add(AObjeto);
+  SetLista(vLista);
+  vLista.Free;
+end;
+
+procedure TmContexto.RemObjeto(AObjeto : TObject);
+var
+  vLista : TList;
+begin
+  vLista := TList.Create;
+  vLista.Add(AObjeto);
+  RemLista(vLista);
+  vLista.Free;
+end;
+
+//--
+
+initialization
+  //Instance();
+
+finalization
+  Destroy();
 
 end.

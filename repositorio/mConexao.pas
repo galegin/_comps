@@ -4,19 +4,19 @@ interface
 
 uses
   Classes, SysUtils, StrUtils, TypInfo, DB,
-  mConexaoIntf, mParametro, mTipoDatabase; //, mDataSet;
+  mConexaoIntf, mParametro, mTipoDatabase; //, mDataSet; mValue
 
 type
-  TrDatabase_Sequence = record
+  TrDicionario_Sequence = record
     Create : String;
     Exists : String;
     Execute : String;
   end;
 
-  TrDatabase = record
+  TrDicionario = record
     Limits : String;
     Metadata : String;
-    Sequences : TrDatabase_Sequence;
+    Sequences : TrDicionario_Sequence;
     Tables : String;
     Views : String;
     Constraints : String;
@@ -25,8 +25,10 @@ type
   TmConexao = class(TComponent, IConexao)
   private
     fParametro : TmParametro;
+    fDicionario : TrDicionario;
   protected
     fConnection : TComponent;
+    function GetListDicionario(ASql, AField, AWhere : String) : TStringList;
   public
     constructor create(Aowner : TComponent); override;
 
@@ -39,15 +41,28 @@ type
 
     function GetParametro() : TmParametro;
     procedure SetParametro(const Value : TmParametro);
+
+    function GetLimits(ASql : String; AQtde : Integer) : String;
+    function GetMetadata(AEntidade : String) : TDataSet;
+    function GetConstraints(AConstraint : String) : TStringList;
+    function GetTables(ATable : String) : TStringList;
+    function GetViews(AView : String) : TStringList;
+
+    function GetSequence(ASequence : String) : Integer;
+
+    function ConstraintExiste(AConstraint : String) : Boolean;
+    function TableExiste(ATable : String) : Boolean;
+    function ViewExiste(AView : String) : Boolean;
   published
     property Parametro : TmParametro read GetParametro write SetParametro;
+    property Dicionario : TrDicionario read fDicionario;
   end;
 
 implementation
 
 { TmConexao }
 
-  function GetDatabase(ATipoDatabase : TTipoDatabase) : TrDatabase;
+  function GetDicionario(ATipoDatabase : TTipoDatabase) : TrDicionario;
   begin
     with Result do begin
       case ATipoDatabase of
@@ -84,8 +99,34 @@ implementation
           Tables := 'select TABLE_NAME from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = database()';
           Views := 'select VIEW_NAME from INFORMATION_SCHEMA.VIEWS where TABLE_SCHEMA = database()';
         end;
-        
+
       end;
+    end;
+  end;
+
+  //--
+
+  procedure AddWhere(var ASql : String; AWhere : String);
+  begin
+    ASql := ASql + IfThen(AWhere <> '', ' where ' + AWhere);
+  end;
+
+  function TmConexao.GetListDicionario(ASql, AField, AWhere : String) : TStringList;
+  var
+    vDataSet : TDataSet;
+  begin
+    Result := TStringList.Create;
+
+    if AWhere <> '' then
+      AddWhere(ASql, AField + ' = ''' + AWhere + '''');
+
+    vDataSet := GetConsulta(ASql);
+    with vDataSet do begin
+      while not EOF do begin
+        Result.Add(Trim(FieldByName(AField).AsString));
+        Next;
+      end;
+      Free;
     end;
   end;
 
@@ -104,6 +145,59 @@ end;
 procedure TmConexao.SetParametro(const Value: TmParametro);
 begin
   fParametro := Value;
+  fDicionario := GetDicionario(fParametro.Tp_Database);
+end;
+
+//--
+
+function TmConexao.GetLimits(ASql : String; AQtde : Integer) : String;
+begin
+  Result := Dicionario.Limits;
+  Result := AnsiReplaceStr(Result, '{sql}', ASql);
+  Result := AnsiReplaceStr(Result, '{qtde}', IntToStr(AQtde));
+end;
+
+function TmConexao.GetMetadata(AEntidade : String) : TDataSet;
+begin
+  Result := GetConsulta(AnsiReplaceStr(Dicionario.Metadata, '{entidade}', AEntidade));
+end;
+
+function TmConexao.GetConstraints(AConstraint : String) : TStringList;
+begin
+  Result := GetListDicionario(Dicionario.Constraints, 'CONSTRAINT_NAME', AConstraint);
+end;
+
+function TmConexao.GetTables(ATable : String) : TStringList;
+begin
+  Result := GetListDicionario(Dicionario.Tables, 'TABLE_NAME', ATable);
+end;
+
+function TmConexao.GetViews(AView : String) : TStringList;
+begin
+  Result := GetListDicionario(Dicionario.Views, 'VIEW_NAME', AView);
+end;
+
+//--
+
+function TmConexao.GetSequence(ASequence : String) : Integer;
+begin
+end;
+
+//--
+
+function TmConexao.ConstraintExiste(AConstraint : String) : Boolean;
+begin
+  Result := GetConstraints(AConstraint).IndexOf(AConstraint) > -1;
+end;
+
+function TmConexao.TableExiste(ATable : String) : Boolean;
+begin
+  Result := GetTables(ATable).IndexOf(ATable) > -1;
+end;
+
+function TmConexao.ViewExiste(AView : String) : Boolean;
+begin
+  Result := GetViews(AView).IndexOf(AView) > -1;
 end;
 
 //--

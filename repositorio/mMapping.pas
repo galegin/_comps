@@ -3,7 +3,7 @@ unit mMapping;
 interface
 
 uses
-  Classes;
+  Classes, SysUtils, StrUtils;
 
 type
   TmMapping = class;
@@ -43,6 +43,9 @@ type
   procedure AddCamposResult(var AResult : TmCampos; ACampos : Array Of String);
 
 implementation
+
+uses
+  mString;
 
 procedure AddKeysResult(var AResult : TmKeys; ACampos : Array Of String);
 var
