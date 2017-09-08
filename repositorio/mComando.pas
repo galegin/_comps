@@ -28,12 +28,12 @@ implementation
     AString := AString + IfThen(AString <> '', ASep, AIni) + AStr;
   end;
 
-  function GetMappingObj(AObject: TObject) : RMapping;
+  function GetMappingObj(AObject: TObject) : PmMapping;
   begin
-    Result := TmMapping(AObject).GetMapping()^;
+    Result := TmMapping(AObject).GetMapping();
   end;
 
-  function GetMappingClass(AClass: TClass) : RMapping;
+  function GetMappingClass(AClass: TClass) : PmMapping;
   var
     vMapping : TObject;
   begin
@@ -93,8 +93,7 @@ implementation
 
 class function TmComando.GetSelect(AClass: TClass; AWhere: String): String;
 var
-  vMapping : RMapping;
-  vCampo : PmCampo;
+  vMapping : PmMapping;
   vFieldsAtr, vFields : String;
   I : Integer;
 begin
@@ -103,118 +102,114 @@ begin
   vFieldsAtr := '';
   vFields := '';
 
-  for I := 0 to vMapping.Campos.Count - 1 do begin
-    vCampo := vMapping.Campos.Items[I];
-    with vCampo^ do begin
-      AddString(vFieldsAtr, Atributo + ' as "' + Atributo + '"', ', ');
-      AddString(vFields, Campo + ' as ' + Atributo, ', ');
-    end;
-  end;
+  with vMapping.Campos do
+    for I := 0 to Count - 1 do
+      with PmCampo(Items[I])^ do begin
+        AddString(vFieldsAtr, Atributo + ' as "' + Atributo + '"', ', ');
+        AddString(vFields, Campo + ' as ' + Atributo, ', ');
+      end;
 
   Result :=
     'select ' + vFieldsAtr + ' from (' +
       'select ' + vFields + ' from '+ vMapping.Tabela.Nome +
     ')' + IfThen(AWhere <> '', ' where ' + AWhere);
+
+  FreeMapping(vMapping);
 end;
 
 class function TmComando.GetSelect(AObject: TObject): String;
 var
-  vMapping : RMapping;
-  vChave : PmChave;
+  vMapping : PmMapping;
   vWhere : String;
   I : Integer;
 begin
   vMapping := GetMappingObj(AObject);
 
   vWhere := '';
-  for I := 0 to vMapping.Chaves.Count - 1 do begin
-    vChave := vMapping.Chaves.Items[I];
-    with vChave^ do
-      AddString(vWhere, Atributo + ' = ' + GetValueStr(AObject, Atributo), ' and ');
-  end;
+  with vMapping.Chaves do
+    for I := 0 to Count - 1 do
+      with PmChave(Items[I])^ do
+        AddString(vWhere, Atributo + ' = ' + GetValueStr(AObject, Atributo), ' and ');
 
   Result := GetSelect(AObject.ClassType, vWhere);
+
+  FreeMapping(vMapping);
 end;
 
 class function TmComando.GetInsert(AObject: TObject): String;
 var
-  vMapping : RMapping;
+  vMapping : PmMapping;
   vFields, vValues : String;
-  vCampo : PmCampo;
   I : Integer;
 begin
   vMapping := GetMappingObj(AObject);
 
   vFields := '';
   vValues := '';
-  for I := 0 to vMapping.Campos.Count - 1 do begin
-    vCampo := vMapping.Campos.Items[I];
-    with vCampo^ do begin
-      AddString(vFields, Campo, ', ');
-      AddString(vValues, GetValueStr(AObject, Atributo), ', ');
-    end;
-  end;
+  with vMapping.Campos do
+    for I := 0 to Count - 1 do
+      with PmCampo(Items[I])^ do begin
+        AddString(vFields, Campo, ', ');
+        AddString(vValues, GetValueStr(AObject, Atributo), ', ');
+      end;
 
   Result :=
     'insert into ' + vMapping.Tabela.Nome +
     ' (' + vFields +
     ') values (' + vValues +
     ')';
+
+  FreeMapping(vMapping);
 end;
 
 class function TmComando.GetUpdate(AObject: TObject): String;
 var
-  vMapping : RMapping;
-  vSets, vWhere, vKeys : String;
-  vCampo : PmCampo;
-  vChave : PmChave;
+  vMapping : PmMapping;
+  vSets, vWhere : String;
   I : Integer;
 begin
   vMapping := GetMappingObj(AObject);
 
-  vKeys := '';
   vWhere := '';
-  for I := 0 to vMapping.Chaves.Count - 1 do begin
-    vChave := vMapping.Chaves.Items[I];
-    with vChave^ do begin
-      AddString(vKeys, Atributo, '|');
-      AddString(vWhere, Campo + ' = ' + GetValueStr(AObject, Atributo), ' and ');
-    end;
-  end;
+  with vMapping.Chaves do
+    for I := 0 to Count - 1 do
+      with PmChave(Items[I])^ do
+        AddString(vWhere, Campo + ' = ' + GetValueStr(AObject, Atributo), ' and ');
 
   vSets := '';
-  for I := 0 to vMapping.Campos.Count - 1 do begin
-    vCampo := vMapping.Campos.Items[I];
-    with vCampo^ do
-      if Pos(Atributo, vKeys) = 0 then
-        AddString(vSets, GetValueStr(AObject, Atributo), ', ');
-  end;
+  with vMapping.Campos do
+    for I := 0 to Count - 1 do
+      with PmCampo(Items[I])^ do
+        if vMapping.Chaves.Buscar(Atributo) = nil then
+          AddString(vSets, Campo + ' = ' + GetValueStr(AObject, Atributo), ', ');
 
   Result :=
     'update ' + vMapping.Tabela.Nome +
     ' set ' + vSets +
     ' where ' + vWhere;
+
+  FreeMapping(vMapping);
 end;
 
 class function TmComando.GetDelete(AObject: TObject): String;
 var
-  vMapping : RMapping;
-  vChave : PmChave;
+  vMapping : PmMapping;
   vWhere : String;
   I : Integer;
 begin
   vMapping := GetMappingObj(AObject);
 
   vWhere := '';
-  for I := 0 to vMapping.Chaves.Count - 1 do begin
-    vChave := vMapping.Chaves.Items[I];
-    with vChave^ do
-      AddString(vWhere, Campo + ' = ' + GetValueStr(AObject, Atributo), ' and ');
-  end;
+  with vMapping.Chaves do
+    for I := 0 to Count - 1 do
+      with PmChave(Items[I])^ do
+        AddString(vWhere, Campo + ' = ' + GetValueStr(AObject, Atributo), ' and ');
 
   Result :=
     'delete from ' + vMapping.Tabela.Nome +
     ' where ' + vWhere;
+
+  FreeMapping(vMapping);
 end;
 
 end.
