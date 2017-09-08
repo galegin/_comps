@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping;
+  mMapping, uPessoa, uTransitem;
 
 type
   TTransacao = class(TmMapping)
@@ -20,6 +20,8 @@ type
     fCd_Operacao: String;
     fCd_Dnapagto: String;
     fDt_Canc: TDateTime;
+    fPessoa: TPessoa;
+    fItens: TTransitems;
     procedure SetCd_Dnatrans(const Value : String);
     procedure SetU_Version(const Value : String);
     procedure SetCd_Operador(const Value : Integer);
@@ -47,6 +49,8 @@ type
     property Cd_Operacao : String read fCd_Operacao write SetCd_Operacao;
     property Cd_Dnapagto : String read fCd_Dnapagto write SetCd_Dnapagto;
     property Dt_Canc : TDateTime read fDt_Canc write SetDt_Canc;
+    property Pessoa: TPessoa read fPessoa write fPessoa;
+    property Itens: TTransitems read fItens write fItens;
   end;
 
   TTransacaos = class(TList)
@@ -62,10 +66,14 @@ constructor TTransacao.Create(AOwner: TComponent);
 begin
   inherited;
 
+  fPessoa:= TPessoa.Create(nil);
+  fItens:= TTransitems.Create;
 end;
 
 destructor TTransacao.Destroy;
 begin
+  FreeAndNil(fPessoa);
+  FreeAndNil(fItens);
 
   inherited;
 end;
@@ -103,6 +111,19 @@ begin
 
   Result.Relacoes := TmRelacoes.Create;
   with Result.Relacoes do begin
+
+    with Add('Pessoa', TPessoa)^ do begin
+      with Campos do begin
+        Add('Nr_Cpfcnpj');
+      end;
+    end;
+
+    with Add('Itens', TTransitem, TTransitems)^ do begin
+      with Campos do begin
+        Add('Cd_Dnatrans');
+      end;
+    end;
+
   end;
 end;
 

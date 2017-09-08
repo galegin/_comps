@@ -46,21 +46,23 @@ type
   TmRelacaoCampos = class(TList)
   public
     function Add() : PmRelacaoCampo; overload;
-    procedure Add(AAtributo, AAtributoRel : String); overload;
-    function Buscar(AAtributo: String) : PmRelacaoCampo;
+    procedure Add(AAtributo : String; AAtributoRel : String = ''); overload;
+    function Buscar(AAtributo : String) : PmRelacaoCampo;
   end;
 
   PmRelacao = ^TmRelacao;
   TmRelacao = record
-    Tabela : PmTabela;
+    Atributo : String;
+    Classe : TClass;
+    ClasseLista : TClass;
     Campos : TmRelacaoCampos;
   end;
 
   TmRelacoes = class(TList)
   public
     function Add() : PmRelacao; overload;
-    procedure Add(ANome, ATabela : String); overload;
-    function Buscar(ANome: String) : PmRelacao;
+    function Add(AAtributo : String; AClasse : TClass; AClasseLista : TClass = nil) : PmRelacao; overload;
+    function Buscar(AAtributo : String) : PmRelacao;
   end;
 
   //-- mapping
@@ -120,7 +122,7 @@ uses
     I: Integer;
   begin
     for I := ARelacoes.Count - 1 downto 0 do begin
-      FreeRelacaoCampo(PmRelacao(ARelacoes).Campos);
+      FreeRelacaoCampo(PmRelacao(ARelacoes.Items[I])^.Campos);
       Dispose(PmRelacao(ARelacoes.Items[I]));
       ARelacoes.Delete(I);
     end;
@@ -205,25 +207,28 @@ end;
 function TmRelacoes.Add: PmRelacao;
 begin
   Result := New(PmRelacao);
+  Result.Campos := TmRelacaoCampos.Create;
   Self.Add(Result);
 end;
 
-procedure TmRelacoes.Add(ANome, ATabela: String);
+function TmRelacoes.Add(AAtributo : String; AClasse, AClasseLista : TClass) : PmRelacao;
 begin
-  with Self.Add^ do begin
-    ANome := ANome;
-    ATabela := IfThen(ATabela <> '', ATabela, ANome);
+  Result := Self.Add;
+  with Result^ do begin
+    Atributo := AAtributo;
+    Classe := AClasse;
+    ClasseLista := AClasseLista;
   end;
 end;
 
-function TmRelacoes.Buscar(ANome: String): PmRelacao;
+function TmRelacoes.Buscar(AAtributo : String): PmRelacao;
 var
   I: Integer;
 begin
   Result := nil;
   for I := 0 to Count - 1 do
     with PmRelacao(Items[I])^ do
-      if ANome = ANome then begin
+      if Atributo = AAtributo then begin
         Result := PmRelacao(Items[I]);
         Exit;
       end;

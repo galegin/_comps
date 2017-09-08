@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping;
+  mMapping, uProduto;
 
 type
   TTransitem = class(TmMapping)
@@ -30,6 +30,7 @@ type
     fVl_Seguro: Real;
     fVl_Outro: Real;
     fVl_Despesa: Real;
+    fProduto: TProduto;
     procedure SetCd_Dnatrans(const Value : String);
     procedure SetNr_Item(const Value : Integer);
     procedure SetU_Version(const Value : String);
@@ -77,6 +78,7 @@ type
     property Vl_Seguro : Real read fVl_Seguro write SetVl_Seguro;
     property Vl_Outro : Real read fVl_Outro write SetVl_Outro;
     property Vl_Despesa : Real read fVl_Despesa write SetVl_Despesa;
+    property Produto : TProduto read fProduto write fProduto;
   end;
 
   TTransitems = class(TList)
@@ -92,10 +94,12 @@ constructor TTransitem.Create(AOwner: TComponent);
 begin
   inherited;
 
+  fProduto := TProduto.Create(nil);
 end;
 
 destructor TTransitem.Destroy;
 begin
+  FreeAndNil(fProduto);
 
   inherited;
 end;
@@ -144,6 +148,13 @@ begin
 
   Result.Relacoes := TmRelacoes.Create;
   with Result.Relacoes do begin
+
+    with Add('Produto', TProduto)^ do begin
+      with Campos do begin
+        Add('Cd_Barraprd');
+      end;
+    end;
+
   end;
 end;
 

@@ -21,6 +21,9 @@ type
   published
   end;
 
+  procedure AddString(var AString : String; AStr : String; ASep : String; AIni : String = '');
+  function GetValueStr(AObject: TObject; ANome : String) : String;
+
 implementation
 
   procedure AddString(var AString : String; AStr : String; ASep : String; AIni : String = '');

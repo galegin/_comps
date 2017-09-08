@@ -22,6 +22,8 @@ type
     procedure SetLista(AList : TList);
     procedure RemLista(AList : TList);
 
+    procedure GetListaRelacao(AObjeto : TmMapping);
+
     function GetObjeto(AClass : TClass; AWhere : String = '') : TObject;
     procedure SetObjeto(AObjeto : TObject);
     procedure RemObjeto(AObjeto : TObject);
@@ -112,6 +114,9 @@ begin
             SetStrProp(vObject, FieldName, AsString);
         end;
 
+      if vObject is TmMapping then
+        GetListaRelacao(vObject as TmMapping);
+
       Next;
     end;
   end;
@@ -143,6 +148,47 @@ begin
     vCmd := TmComando.GetDelete(AList[I]);
     FDatabase.Conexao.ExecComando(vCmd);
   end;
+end;
+
+//-- relacao
+
+procedure TmContexto.GetListaRelacao(AObjeto: TmMapping);
+var
+  vMapping : PmMapping;
+  vLista : TList;
+  vObjeto : TObject;
+  vWhere : String;
+  I, J : Integer;
+begin
+  vMapping := AObjeto.GetMapping();
+
+  for I := 0 to vMapping.Relacoes.Count - 1 do begin
+    with PmRelacao(vMapping.Relacoes.Items[I])^ do begin
+
+      vWhere := '';
+      for J := 0 to Campos.Count - 1 do
+        with PmRelacaoCampo(Campos.Items[J])^ do
+          AddString(vWhere, Atributo + ' = ' + GetValueStr(AObjeto, AtributoRel), ' and ', '');
+
+      if (ClasseLista <> nil) then begin
+        vLista := GetLista(Classe, vWhere, ClasseLista);
+        SetObjectProp(AObjeto, Atributo, vLista);
+        for J := 0 to vLista.Count - 1 do
+          if TObject(vLista[J]) is TmMapping then
+            GetListaRelacao(TObject(vLista[J]) as TmMapping);
+
+      end else begin
+        vObjeto := GetObjeto(Classe, vWhere);
+        SetObjectProp(AObjeto, Atributo, vObjeto);
+        if vObjeto is TmMapping then
+          GetListaRelacao(vObjeto as TmMapping);
+
+      end;
+    end;
+
+  end;
+
+  FreeMapping(vMapping);
 end;
 
 //-- objeto
