@@ -18,7 +18,7 @@ type
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
 
-    function GetLista(AClass : TClass; AWhere : String = '') : TList;
+    function GetLista(AClass : TClass; AWhere : String = ''; AClassList : TClass = nil) : TList;
     procedure SetLista(AList : TList);
     procedure RemLista(AList : TList);
 
@@ -74,7 +74,7 @@ end;
 
 //-- lista
 
-function TmContexto.GetLista(AClass: TClass; AWhere: String): TList;
+function TmContexto.GetLista(AClass: TClass; AWhere: String; AClassList : TClass): TList;
 var
   vPropInfo : PPropInfo;
   vTipoBase : String;
@@ -83,7 +83,10 @@ var
   vSql : String;
   I : Integer;
 begin
-  Result := TList.Create;
+  if AClassList <> nil then
+    Result := AClassList.NewInstance as TList
+  else
+    Result := TList.Create;
 
   vSql := TmComando.GetSelect(AClass, AWhere);
 

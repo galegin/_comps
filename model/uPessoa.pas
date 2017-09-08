@@ -36,9 +36,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override; 
-    function GetTabela() : TmTabela; override;
-    function GetKeys() : TmKeys; override;
-    function GetCampos() : TmCampos; override;
+    function GetMapping() : PmMapping; override;
   published
     property Nr_Cpfcnpj: String read fNr_Cpfcnpj write fNr_Cpfcnpj;
     property U_Version: String read fU_Version write fU_Version;
@@ -87,44 +85,44 @@ begin
   inherited;
 end;
 
-function TPessoa.GetTabela: TmTabela;
+function TPessoa.GetMapping() : PmMapping;
 begin
-  Result.Nome := 'PESSOA';
-end;
+  with Result.Tabela do begin
+    Nome := 'PESSOA';
+  end;  
 
-function TPessoa.GetKeys: TmKeys;
-begin
-  AddKeysResult(Result, [
-    'Nr_CpfCnpj|NR_CPFCNPJ']);
-end;
+  Result.Chaves := TmChaves.Create;
+  with Result.Chaves do begin
+    Add('Nr_Cpfcnpj', 'NR_CPFCNPJ');
+  end;
 
-function TPessoa.GetCampos: TmCampos;
-begin
-  AddCamposResult(Result, [
-    'Nr_Cpfcnpj|NR_CPFCNPJ',
-    'U_Version|U_VERSION',
-    'Cd_Operador|CD_OPERADOR',
-    'Dt_Cadastro|DT_CADASTRO',
-    'Nr_Rgie|NR_RGIE',
-    'Cd_Pessoa|CD_PESSOA',
-    'Nm_Pessoa|NM_PESSOA',
-    'Nm_Fantasia|NM_FANTASIA',
-    'Cd_Cep|CD_CEP',
-    'Nm_Logradouro|NM_LOGRADOURO',
-    'Nr_Logradouro|NR_LOGRADOURO',
-    'Ds_Bairro|DS_BAIRRO',
-    'Ds_Complemento|DS_COMPLEMENTO',
-    'Cd_Municipio|CD_MUNICIPIO',
-    'Ds_Municipio|DS_MUNICIPIO',
-    'Cd_Estado|CD_ESTADO',
-    'Ds_Estado|DS_ESTADO',
-    'Ds_SiglaEstado|DS_SIGLAESTADO',
-    'Cd_Pais|CD_PAIS',
-    'Ds_Pais|DS_PAIS',
-    'Ds_Fone|DS_FONE',
-    'Ds_Celular|DS_CELULAR',
-    'Ds_Email|DS_EMAIL',
-    'In_Consumidorfinal|IN_CONSUMIDORFINAL']);
+  Result.Campos := TmCampos.Create;
+  with Result.Campos do begin
+    Add('Nr_Cpfcnpj', 'NR_CPFCNPJ');
+    Add('U_Version', 'U_VERSION');
+    Add('Cd_Operador', 'CD_OPERADOR');
+    Add('Dt_Cadastro', 'DT_CADASTRO');
+    Add('Nr_Rgie', 'NR_RGIE');
+    Add('Cd_Pessoa', 'CD_PESSOA');
+    Add('Nm_Pessoa', 'NM_PESSOA');
+    Add('Nm_Fantasia', 'NM_FANTASIA');
+    Add('Cd_Cep', 'CD_CEP');
+    Add('Nm_Logradouro', 'NM_LOGRADOURO');
+    Add('Nr_Logradouro', 'NR_LOGRADOURO');
+    Add('Ds_Bairro', 'DS_BAIRRO');
+    Add('Ds_Complemento', 'DS_COMPLEMENTO');
+    Add('Cd_Municipio', 'CD_MUNICIPIO');
+    Add('Ds_Municipio', 'DS_MUNICIPIO');
+    Add('Cd_Estado', 'CD_ESTADO');
+    Add('Ds_Estado', 'DS_ESTADO');
+    Add('Ds_SiglaEstado', 'DS_SIGLAESTADO');
+    Add('Cd_Pais', 'CD_PAIS');
+    Add('Ds_Pais', 'DS_PAIS');
+    Add('Ds_Fone', 'DS_FONE');
+    Add('Ds_Celular', 'DS_CELULAR');
+    Add('Ds_Email', 'DS_EMAIL');
+    Add('In_Consumidorfinal', 'IN_CONSUMIDORFINAL');
+  end;  
 end;
 
 { TPessoas }

@@ -6,74 +6,67 @@ uses
   Classes, SysUtils, StrUtils;
 
 type
-  TmMapping = class;
-  TmMappingClass = class of TmMapping;
-
+  PmTabela = ^TmTabela;
   TmTabela = record
     Nome : String;
   end;
 
+  PmCampo = ^TmCampo;
   TmCampo = record
     Atributo : String;
     Campo : String;
   end;
 
-  TmKeys = Array Of TmCampo;
-  TmCampos = Array Of TmCampo;
+  PmChave = ^TmChave;
+  TmChave = record
+    Atributo : String;
+    Campo : String;
+  end;
 
+  TmCampos = class(TList)
+  public
+    function Add() : PmCampo; overload;
+    procedure Add(AAtributo, ACampo : String); overload;
+  end;
+
+  TmChaves = class(TmCampos);
+
+  PmMapping = ^RMapping;
   RMapping = record
     Tabela : TmTabela;
-    Keys : TmKeys;
+    Chaves : TmChaves;
     Campos : TmCampos;
   end;
 
+  TmMapping = class;
+  TmMappingClass = class of TmMapping;
+
   IMapping = interface
-    function GetTabela() : TmTabela;
-    function GetKeys() : TmKeys;
-    function GetCampos() : TmCampos;
+    function GetMapping() : PmMapping;
   end;
 
   TmMapping = class(TComponent, IMapping)
-    function GetTabela() : TmTabela; virtual; abstract;
-    function GetKeys() : TmKeys; virtual; abstract;
-    function GetCampos() : TmCampos; virtual; abstract;
+    function GetMapping() : PmMapping; virtual; abstract;
   end;
-
-  procedure AddKeysResult(var AResult : TmKeys; ACampos : Array Of String);
-  procedure AddCamposResult(var AResult : TmCampos; ACampos : Array Of String);
 
 implementation
 
 uses
   mString;
 
-procedure AddKeysResult(var AResult : TmKeys; ACampos : Array Of String);
-var
-  vAtributo, vCampo : String;
-  vCampoStr : TmStringArray;
-  I : Integer;
-begin
-  SetLength(AResult, Length(ACampos));
+{ TmCampos }
 
-  for I := 0 to High(ACampos) do begin
-    vCampoStr := TmString.Split(ACampos[I], '|');
-    AResult[I].Atributo := vCampoStr[0];
-    AResult[I].Campo := IfThen(Length(vCampoStr) > 1, vCampoStr[1], vCampoStr[0]);
-  end;
+function TmCampos.Add: PmCampo;
+begin
+  Result := New(PmCampo);
+  Self.Add(Result);
 end;
 
-procedure AddCamposResult(var AResult : TmCampos; ACampos : Array Of String);
-var
-  vAtributo, vCampo : String;
-  vCampoStr : TmStringArray;
-  I : Integer;
+procedure TmCampos.Add(AAtributo, ACampo: String);
 begin
-  SetLength(AResult, Length(ACampos));
-
-  for I := 0 to High(ACampos) do begin
-    vCampoStr := TmString.Split(ACampos[I], '|');
-    AResult[I].Atributo := vCampoStr[0];
-    AResult[I].Campo := IfThen(Length(vCampoStr) > 1, vCampoStr[1], vCampoStr[0]);
+  with Self.Add^ do begin
+    Atributo := AAtributo;
+    Campo := IfThen(ACampo <> '', ACampo, AAtributo);
   end;
 end;
 
