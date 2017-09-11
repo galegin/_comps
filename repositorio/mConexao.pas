@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils, TypInfo, DB,
-  mConexaoIntf, mParametro, mTipoDatabase; //, mDataSet; mValue
+  mConexaoIntf, mParametro, mTipoDatabase, mDataSet; // mValue
 
 type
   TrDicionario_Sequence = record
@@ -180,7 +180,23 @@ end;
 //--
 
 function TmConexao.GetSequence(ASequence : String) : Integer;
+var
+  vSql : String;
+  vDataSet : TDataSet;
 begin
+  vSql := Dicionario.Sequences.Exists;
+  vSql := AnsiReplaceStr(vSql, '{sequence}', ASequence);
+  vDataSet := GetConsulta(vSql);
+  if TmDataSet.PegarS(vDataSet, 'SEQUENCE_NAME') = '' then begin
+    vSql := Dicionario.Sequences.Create;
+    vSql := AnsiReplaceStr(vSql, '{sequence}', ASequence);
+    ExecComando(vSql);
+  end;
+
+  vSql := Dicionario.Sequences.Execute;
+  vSql := AnsiReplaceStr(vSql, '{sequence}', ASequence);
+  vDataSet := GetConsulta(vSql);
+  Result := TmDataSet.PegarI(vDataSet, 'PROXIMO');
 end;
 
 //--

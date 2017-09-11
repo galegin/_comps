@@ -93,20 +93,15 @@ begin
     Nome := 'PRODUTO';
   end;
 
-  Result.Chaves := TmChaves.Create;
-  with Result.Chaves do begin
-    Add('Cd_Barraprd', 'CD_BARRAPRD');
-  end;
-
   Result.Campos := TmCampos.Create;
   with Result.Campos do begin
-    Add('Cd_Barraprd', 'CD_BARRAPRD');
+    Add('Cd_Barraprd', 'CD_BARRAPRD', tfKey);
     Add('U_Version', 'U_VERSION');
-    Add('Cd_Operador', 'CD_OPERADOR');
-    Add('Dt_Cadastro', 'DT_CADASTRO');
-    Add('Cd_Produto', 'CD_PRODUTO');
-    Add('Ds_Produto', 'DS_PRODUTO');
-    Add('Cd_Especie', 'CD_ESPECIE');
+    Add('Cd_Operador', 'CD_OPERADOR', tfReq);
+    Add('Dt_Cadastro', 'DT_CADASTRO', tfReq);
+    Add('Cd_Produto', 'CD_PRODUTO', tfReq);
+    Add('Ds_Produto', 'DS_PRODUTO', tfReq);
+    Add('Cd_Especie', 'CD_ESPECIE', tfReq);
     Add('Cd_Cst', 'CD_CST');
     Add('Cd_Ncm', 'CD_NCM');
     Add('Pr_Aliquota', 'PR_ALIQUOTA');

@@ -89,21 +89,16 @@ begin
     Nome := 'TRANSACAO';
   end;
 
-  Result.Chaves := TmChaves.Create;
-  with Result.Chaves do begin
-    Add('Cd_Dnatrans', 'CD_DNATRANS');
-  end;
-
   Result.Campos := TmCampos.Create;
   with Result.Campos do begin
-    Add('Cd_Dnatrans', 'CD_DNATRANS');
+    Add('Cd_Dnatrans', 'CD_DNATRANS', tfKey);
     Add('U_Version', 'U_VERSION');
-    Add('Cd_Operador', 'CD_OPERADOR');
-    Add('Dt_Cadastro', 'DT_CADASTRO');
-    Add('Cd_Equip', 'CD_EQUIP');
-    Add('Dt_Transacao', 'DT_TRANSACAO');
-    Add('Nr_Transacao', 'NR_TRANSACAO');
-    Add('Nr_Cpfcnpj', 'NR_CPFCNPJ');
+    Add('Cd_Operador', 'CD_OPERADOR', tfReq);
+    Add('Dt_Cadastro', 'DT_CADASTRO', tfReq);
+    Add('Cd_Equip', 'CD_EQUIP', tfReq);
+    Add('Dt_Transacao', 'DT_TRANSACAO', tfReq);
+    Add('Nr_Transacao', 'NR_TRANSACAO', tfReq);
+    Add('Nr_Cpfcnpj', 'NR_CPFCNPJ', tfReq);
     Add('Cd_Operacao', 'CD_OPERACAO');
     Add('Cd_Dnapagto', 'CD_DNAPAGTO');
     Add('Dt_Canc', 'DT_CANC');

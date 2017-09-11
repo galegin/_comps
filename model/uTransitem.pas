@@ -115,27 +115,21 @@ begin
     Nome := 'TRANSITEM';
   end;
 
-  Result.Chaves := TmChaves.Create;
-  with Result.Chaves do begin
-    Add('Cd_Dnatrans', 'CD_DNATRANS');
-    Add('Nr_Item', 'NR_ITEM');
-  end;
-
   Result.Campos := TmCampos.Create;
   with Result.Campos do begin
-    Add('Cd_Dnatrans', 'CD_DNATRANS');
-    Add('Nr_Item', 'NR_ITEM');
+    Add('Cd_Dnatrans', 'CD_DNATRANS', tfKey);
+    Add('Nr_Item', 'NR_ITEM', tfKey);
     Add('U_Version', 'U_VERSION');
-    Add('Cd_Operador', 'CD_OPERADOR');
-    Add('Dt_Cadastro', 'DT_CADASTRO');
-    Add('Cd_Barraprd', 'CD_BARRAPRD');
-    Add('Cd_Produto', 'CD_PRODUTO');
-    Add('Ds_Produto', 'DS_PRODUTO');
-    Add('Cd_Cfop', 'CD_CFOP');
-    Add('Qt_Item', 'QT_ITEM');
-    Add('Vl_Custo', 'VL_CUSTO');
-    Add('Vl_Unitario', 'VL_UNITARIO');
-    Add('Vl_Item', 'VL_ITEM');
+    Add('Cd_Operador', 'CD_OPERADOR', tfReq);
+    Add('Dt_Cadastro', 'DT_CADASTRO', tfReq);
+    Add('Cd_Barraprd', 'CD_BARRAPRD', tfReq);
+    Add('Cd_Produto', 'CD_PRODUTO', tfReq);
+    Add('Ds_Produto', 'DS_PRODUTO', tfReq);
+    Add('Cd_Cfop', 'CD_CFOP', tfReq);
+    Add('Qt_Item', 'QT_ITEM', tfReq);
+    Add('Vl_Custo', 'VL_CUSTO', tfReq);
+    Add('Vl_Unitario', 'VL_UNITARIO', tfReq);
+    Add('Vl_Item', 'VL_ITEM', tfReq);
     Add('Vl_Variacao', 'VL_VARIACAO');
     Add('Vl_Variacaocapa', 'VL_VARIACAOCAPA');
     Add('Cd_Especie', 'CD_ESPECIE');

@@ -16,24 +16,21 @@ type
 
   //-- campo
 
+  TTipoCampo = (tfKey, tfReq, tfNul);
+
   PmCampo = ^TmCampo;
   TmCampo = record
     Atributo : String;
     Campo : String;
+    TipoCampo : TTipoCampo;
   end;
 
   TmCampos = class(TList)
   public
     function Add() : PmCampo; overload;
-    procedure Add(AAtributo, ACampo : String); overload;
+    procedure Add(AAtributo, ACampo : String; ATipoCampo : TTipoCampo = tfNul); overload;
     function Buscar(AAtributo: String) : PmCampo;
   end;
-
-  //-- chave
-
-  PmChave = ^TmCampo;
-
-  TmChaves = class(TmCampos);
 
   //-- relacao
 
@@ -70,7 +67,6 @@ type
   PmMapping = ^RMapping;
   RMapping = record
     Tabela : PmTabela;
-    Chaves : TmChaves;
     Campos : TmCampos;
     Relacoes : TmRelacoes;
   end;
@@ -136,8 +132,6 @@ uses
       Dispose(PmTabela(AMapping.Tabela));
     if AMapping.Campos <> nil then
       FreeCampos(AMapping.Campos);
-    if AMapping.Chaves <> nil then
-      FreeCampos(TmCampos(AMapping.Chaves));
     if AMapping.Relacoes <> nil then
       FreeRelacoes(AMapping.Relacoes);
     if AMapping <> nil then
@@ -152,11 +146,12 @@ begin
   Self.Add(Result);
 end;
 
-procedure TmCampos.Add(AAtributo, ACampo: String);
+procedure TmCampos.Add(AAtributo, ACampo: String; ATipoCampo: TTipoCampo);
 begin
   with Self.Add^ do begin
     Atributo := AAtributo;
     Campo := IfThen(ACampo <> '', ACampo, AAtributo);
+    TipoCampo := ATipoCampo;
   end;
 end;
 

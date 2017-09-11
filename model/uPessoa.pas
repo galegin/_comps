@@ -120,33 +120,28 @@ begin
     Nome := 'PESSOA';
   end;
 
-  Result.Chaves := TmChaves.Create;
-  with Result.Chaves do begin
-    Add('Nr_Cpfcnpj', 'NR_CPFCNPJ');
-  end;
-
   Result.Campos := TmCampos.Create;
   with Result.Campos do begin
-    Add('Nr_Cpfcnpj', 'NR_CPFCNPJ');
+    Add('Nr_Cpfcnpj', 'NR_CPFCNPJ', tfKey);
     Add('U_Version', 'U_VERSION');
-    Add('Cd_Operador', 'CD_OPERADOR');
-    Add('Dt_Cadastro', 'DT_CADASTRO');
+    Add('Cd_Operador', 'CD_OPERADOR', tfReq);
+    Add('Dt_Cadastro', 'DT_CADASTRO', tfReq);
     Add('Nr_Rgie', 'NR_RGIE');
-    Add('Cd_Pessoa', 'CD_PESSOA');
-    Add('Nm_Pessoa', 'NM_PESSOA');
+    Add('Cd_Pessoa', 'CD_PESSOA', tfReq);
+    Add('Nm_Pessoa', 'NM_PESSOA', tfReq);
     Add('Nm_Fantasia', 'NM_FANTASIA');
-    Add('Cd_Cep', 'CD_CEP');
-    Add('Nm_Logradouro', 'NM_LOGRADOURO');
-    Add('Nr_Logradouro', 'NR_LOGRADOURO');
-    Add('Ds_Bairro', 'DS_BAIRRO');
+    Add('Cd_Cep', 'CD_CEP', tfReq);
+    Add('Nm_Logradouro', 'NM_LOGRADOURO', tfReq);
+    Add('Nr_Logradouro', 'NR_LOGRADOURO', tfReq);
+    Add('Ds_Bairro', 'DS_BAIRRO', tfReq);
     Add('Ds_Complemento', 'DS_COMPLEMENTO');
-    Add('Cd_Municipio', 'CD_MUNICIPIO');
-    Add('Ds_Municipio', 'DS_MUNICIPIO');
-    Add('Cd_Estado', 'CD_ESTADO');
-    Add('Ds_Estado', 'DS_ESTADO');
-    Add('Ds_Siglaestado', 'DS_SIGLAESTADO');
-    Add('Cd_Pais', 'CD_PAIS');
-    Add('Ds_Pais', 'DS_PAIS');
+    Add('Cd_Municipio', 'CD_MUNICIPIO', tfReq);
+    Add('Ds_Municipio', 'DS_MUNICIPIO', tfReq);
+    Add('Cd_Estado', 'CD_ESTADO', tfReq);
+    Add('Ds_Estado', 'DS_ESTADO', tfReq);
+    Add('Ds_Siglaestado', 'DS_SIGLAESTADO', tfReq);
+    Add('Cd_Pais', 'CD_PAIS', tfReq);
+    Add('Ds_Pais', 'DS_PAIS', tfReq);
     Add('Ds_Fone', 'DS_FONE');
     Add('Ds_Celular', 'DS_CELULAR');
     Add('Ds_Email', 'DS_EMAIL');

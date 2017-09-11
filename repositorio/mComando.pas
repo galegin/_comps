@@ -129,10 +129,11 @@ begin
   vMapping := GetMappingObj(AObject);
 
   vWhere := '';
-  with vMapping.Chaves do
+  with vMapping.Campos do
     for I := 0 to Count - 1 do
-      with PmChave(Items[I])^ do
-        AddString(vWhere, Atributo + ' = ' + GetValueStr(AObject, Atributo), ' and ');
+      with PmCampo(Items[I])^ do
+        if TipoCampo in [tfKey] then
+          AddString(vWhere, Atributo + ' = ' + GetValueStr(AObject, Atributo), ' and ');
 
   Result := GetSelect(AObject.ClassType, vWhere);
 
@@ -174,16 +175,13 @@ begin
   vMapping := GetMappingObj(AObject);
 
   vWhere := '';
-  with vMapping.Chaves do
-    for I := 0 to Count - 1 do
-      with PmChave(Items[I])^ do
-        AddString(vWhere, Campo + ' = ' + GetValueStr(AObject, Atributo), ' and ');
-
   vSets := '';
   with vMapping.Campos do
     for I := 0 to Count - 1 do
       with PmCampo(Items[I])^ do
-        if vMapping.Chaves.Buscar(Atributo) = nil then
+        if TipoCampo in [tfKey] then
+          AddString(vWhere, Campo + ' = ' + GetValueStr(AObject, Atributo), ' and ')
+        else
           AddString(vSets, Campo + ' = ' + GetValueStr(AObject, Atributo), ', ');
 
   Result :=
@@ -203,10 +201,11 @@ begin
   vMapping := GetMappingObj(AObject);
 
   vWhere := '';
-  with vMapping.Chaves do
+  with vMapping.Campos do
     for I := 0 to Count - 1 do
-      with PmChave(Items[I])^ do
-        AddString(vWhere, Campo + ' = ' + GetValueStr(AObject, Atributo), ' and ');
+      with PmCampo(Items[I])^ do
+        if TipoCampo in [tfKey] then
+          AddString(vWhere, Campo + ' = ' + GetValueStr(AObject, Atributo), ' and ');
 
   Result :=
     'delete from ' + vMapping.Tabela.Nome +
