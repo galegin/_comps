@@ -211,6 +211,8 @@ begin
   if pDir = '' then
     raise Exception.Create('Diretorio deve ser informado');
 
+  pExt := UpperCase(pExt);  
+
   R := FindFirst(pDir + '*.*', faAnyFile, SR);
 
   while R = 0 do begin
