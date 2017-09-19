@@ -187,7 +187,7 @@ begin
   vSql := Dicionario.Sequences.Exists;
   vSql := AnsiReplaceStr(vSql, '{sequence}', ASequence);
   vDataSet := GetConsulta(vSql);
-  if TmDataSet.PegarS(vDataSet, 'SEQUENCE_NAME') = '' then begin
+  if TmDataSet(vDataSet).PegarS('SEQUENCE_NAME') = '' then begin
     vSql := Dicionario.Sequences.Create;
     vSql := AnsiReplaceStr(vSql, '{sequence}', ASequence);
     ExecComando(vSql);
@@ -196,7 +196,7 @@ begin
   vSql := Dicionario.Sequences.Execute;
   vSql := AnsiReplaceStr(vSql, '{sequence}', ASequence);
   vDataSet := GetConsulta(vSql);
-  Result := TmDataSet.PegarI(vDataSet, 'PROXIMO');
+  Result := TmDataSet(vDataSet).PegarI('PROXIMO');
 end;
 
 //--

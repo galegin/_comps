@@ -14,46 +14,46 @@ type
 
   TTipoRetorno = (tprAvg, tprMax, tprMin, tprSum);
 
-  TmDataSet = class(TComponent)
+  TmDataSet = class(TDataSet)
   public
-    class function GetValues(ADataSet: TDataSet): TmValueList;
-    class procedure SetValues(ADataSet: TDataSet; AValues : TmValueList);
+    function GetValues(): TmValueList;
+    procedure SetValues(AValues : TmValueList);
 
-    class procedure ClearNotify(ADataSet: TDataSet);
-    class function GetNotify(ADataSet: TDataSet) : TmDataSet_Notify;
-    class procedure SetNotify(ADataSet: TDataSet; ANotify: TmDataSet_Notify);
+    procedure ClearNotify();
+    function GetNotify() : TmDataSet_Notify;
+    procedure SetNotify(ANotify: TmDataSet_Notify);
 
-    class function PegarB(ADataSet: TDataSet; ACampo: String) : Boolean;
-    class procedure SetarB(ADataSet: TDataSet; ACampo: String; AValue : Boolean);
+    function PegarB(ACampo: String) : Boolean;
+    procedure SetarB(ACampo: String; AValue : Boolean);
 
-    class function PegarD(ADataSet: TDataSet; ACampo: String) : TDateTime;
-    class procedure SetarD(ADataSet: TDataSet; ACampo: String; AValue : TDateTime);
+    function PegarD(ACampo: String) : TDateTime;
+    procedure SetarD(ACampo: String; AValue : TDateTime);
 
-    class function PegarF(ADataSet: TDataSet; ACampo: String) : Real;
-    class procedure SetarF(ADataSet: TDataSet; ACampo: String; AValue : Real);
+    function PegarF(ACampo: String) : Real;
+    procedure SetarF(ACampo: String; AValue : Real);
 
-    class function PegarI(ADataSet: TDataSet; ACampo: String) : Integer;
-    class procedure SetarI(ADataSet: TDataSet; ACampo: String; AValue : Integer);
+    function PegarI(ACampo: String) : Integer;
+    procedure SetarI(ACampo: String; AValue : Integer);
 
-    class function PegarS(ADataSet: TDataSet; ACampo: String) : String;
-    class procedure SetarS(ADataSet: TDataSet; ACampo: String; AValue : String);
+    function PegarS(ACampo: String) : String;
+    procedure SetarS(ACampo: String; AValue : String);
 
-    class procedure FromObject(AObject : TObject; ADataSet: TDataSet);
-    class procedure ToObject(ADataSet: TDataSet; AObject : TObject);
+    procedure FromObject(AObject : TObject);
+    procedure ToObject(AObject : TObject);
 
-    class function Calcular(ADataSet: TDataSet; ACampo : String; ATipoRetorno : TTipoRetorno) : Real;
+    function Calcular(ACampo : String; ATipoRetorno : TTipoRetorno) : Real;
 
-    class function Avg(ADataSet: TDataSet; ACampo : String) : Real;
-    class function Max(ADataSet: TDataSet; ACampo : String) : Real;
-    class function Min(ADataSet: TDataSet; ACampo : String) : Real;
-    class function Sum(ADataSet: TDataSet; ACampo : String) : Real;
+    function Avg(ACampo : String) : Real;
+    function Max(ACampo : String) : Real;
+    function Min(ACampo : String) : Real;
+    function Sum(ACampo : String) : Real;
   end;
 
 implementation
 
 { TmDataSet }
 
-class function TmDataSet.GetValues(ADataSet: TDataSet): TmValueList;
+function TmDataSet.GetValues(): TmValueList;
 var
   I : Integer;
   Key : Boolean;
@@ -64,77 +64,117 @@ begin
 
   Key := True;
 
-  with ADataSet do begin
-    for I := 0 to FieldCount - 1 do begin
-      with Fields[I] do begin
-        Nome := FieldName;
+  for I := 0 to FieldCount - 1 do begin
+    with Fields[I] do begin
+      Nome := FieldName;
 
-        if LowerCase(FieldName) = 'u_version' then
-          Key := False;
+      if LowerCase(FieldName) = 'u_version' then
+        Key := False;
 
-        TipoField := TTipoField(IfThen(Key, Ord(tfKey), IfThen(Required, Ord(tfReq), Ord(tfNul))));
+      TipoField := TTipoField(IfThen(Key, Ord(tfKey), IfThen(Required, Ord(tfReq), Ord(tfNul))));
 
-        case DataType of
-          ftBoolean : begin
-            Result.AddB(Nome, AsBoolean, TipoField);
-          end;
-          ftDate, ftDateTime, ftTime, ftTimeStamp : begin
-            Result.AddD(Nome, AsDateTime, TipoField);
-          end;
-          ftFloat, ftBCD, ftFMTBcd: begin
-            Result.AddF(Nome, AsFloat, TipoField);
-          end;
-          ftInteger, ftSmallint, ftWord: begin
-            Result.AddI(Nome, AsInteger, TipoField);
-          end;
-          ftString, ftWideString, ftMemo, ftFmtMemo, ftOraClob: begin
-            if TmString.StartsWiths(LowerCase(FieldName), 'in_') then
-              Result.AddB(Nome, (AsString = 'T'), TipoField)
-            else
-              Result.AddS(Nome, AsString, TipoField);
-          end;
+      case DataType of
+        ftBoolean : begin
+          Result.AddB(Nome, AsBoolean, TipoField);
         end;
-
+        ftDate, ftDateTime, ftTime, ftTimeStamp : begin
+          Result.AddD(Nome, AsDateTime, TipoField);
+        end;
+        ftFloat, ftBCD, ftFMTBcd: begin
+          Result.AddF(Nome, AsFloat, TipoField);
+        end;
+        ftInteger, ftSmallint, ftWord: begin
+          Result.AddI(Nome, AsInteger, TipoField);
+        end;
+        ftString, ftWideString, ftMemo, ftFmtMemo, ftOraClob: begin
+          if TmString.StartsWiths(LowerCase(FieldName), 'in_') then
+            Result.AddB(Nome, (AsString = 'T'), TipoField)
+          else
+            Result.AddS(Nome, AsString, TipoField);
+        end;
       end;
+
     end;
   end;
 end;
 
-class procedure TmDataSet.SetValues(ADataSet: TDataSet; AValues: TmValueList);
+procedure TmDataSet.SetValues(AValues: TmValueList);
 var
   vValue : TmValue;
   vEdit : Boolean;
   I : Integer;
 begin
-  with ADataSet do begin
+  vEdit := State in [dsInsert, dsEdit];
+  if not vEdit then
+    Edit;
+
+  for I := 0 to FieldCount - 1 do begin
+    with Fields[I] do begin
+      vValue := AValues.IndexOf(FieldName);
+
+      if vValue <> nil then begin
+        with vValue do begin
+          case Tipo of
+            tvBoolean:
+              AsBoolean := (vValue as TmValueBool).Value;
+            tvDateTime:
+              AsDateTime := (vValue as TmValueDate).Value;
+            tvInteger:
+              AsInteger := (vValue as TmValueInt).Value;
+            tvFloat:
+              AsFloat := (vValue as TmValueFloat).Value;
+            tvString:
+              AsString := (vValue as TmValueStr).Value;
+          end;
+        end;
+      end;
+
+    end;
+  end;
+
+  if not vEdit then
+    Post;
+end;
+
+//--
+
+procedure TmDataSet.ClearNotify();
+begin
+  AfterPost := nil;
+  BeforePost := nil;
+end;
+
+function TmDataSet.GetNotify() : TmDataSet_Notify;
+begin
+  Result.AfterPost := Self.AfterPost;
+  Result.BeforePost := Self.BeforePost;
+end;
+
+procedure TmDataSet.SetNotify(ANotify: TmDataSet_Notify);
+begin
+  AfterPost := ANotify.AfterPost;
+  BeforePost := ANotify.BeforePost;
+end;
+
+//--
+
+function TmDataSet.PegarB(ACampo: String): Boolean;
+begin
+  if FindField(ACampo) <> nil then
+    Result := FieldByName(ACampo).AsBoolean
+  else
+    Result := False;
+end;
+
+procedure TmDataSet.SetarB(ACampo : String; AValue: Boolean);
+var
+  vEdit : Boolean;
+begin
+  if FindField(ACampo) <> nil then begin
     vEdit := State in [dsInsert, dsEdit];
     if not vEdit then
       Edit;
-
-    for I := 0 to FieldCount - 1 do begin
-      with Fields[I] do begin
-        vValue := AValues.IndexOf(FieldName);
-
-        if vValue <> nil then begin
-          with vValue do begin
-            case Tipo of
-              tvBoolean:
-                AsBoolean := (vValue as TmValueBool).Value;
-              tvDateTime:
-                AsDateTime := (vValue as TmValueDate).Value;
-              tvInteger:
-                AsInteger := (vValue as TmValueInt).Value;
-              tvFloat:
-                AsFloat := (vValue as TmValueFloat).Value;
-              tvString:
-                AsString := (vValue as TmValueStr).Value;
-            end;
-          end;
-        end;
-
-      end;
-    end;
-
+    FieldByName(ACampo).AsBoolean := AValue;
     if not vEdit then
       Post;
   end;
@@ -142,238 +182,176 @@ end;
 
 //--
 
-class procedure TmDataSet.ClearNotify(ADataSet: TDataSet);
+function TmDataSet.PegarD(ACampo: String): TDateTime;
 begin
-  with ADataSet do begin
-    AfterPost := nil;
-    BeforePost := nil;
+  if FindField(ACampo) <> nil then
+    Result := FieldByName(ACampo).AsDateTime
+  else
+    Result := 0;
+end;
+
+procedure TmDataSet.SetarD(ACampo : String; AValue: TDateTime);
+var
+  vEdit : Boolean;
+begin
+  if FindField(ACampo) <> nil then begin
+    vEdit := State in [dsInsert, dsEdit];
+    if not vEdit then
+      Edit;
+    FieldByName(ACampo).AsDateTime := AValue;
+    if not vEdit then
+      Post;
   end;
 end;
 
-class function TmDataSet.GetNotify(ADataSet: TDataSet) : TmDataSet_Notify;
+//--
+
+function TmDataSet.PegarF(ACampo: String): Real;
 begin
-  with Result do begin
-    AfterPost := ADataSet.AfterPost;
-    BeforePost := ADataSet.BeforePost;
+  if FindField(ACampo) <> nil then
+    Result := FieldByName(ACampo).AsFloat
+  else
+    Result := 0;
+end;
+
+procedure TmDataSet.SetarF(ACampo : String; AValue: Real);
+var
+  vEdit : Boolean;
+begin
+  if FindField(ACampo) <> nil then begin
+    vEdit := State in [dsInsert, dsEdit];
+    if not vEdit then
+      Edit;
+    FieldByName(ACampo).AsFloat := AValue;
+    if not vEdit then
+      Post;
   end;
 end;
 
-class procedure TmDataSet.SetNotify(ADataSet: TDataSet; ANotify: TmDataSet_Notify);
+//--
+
+function TmDataSet.PegarI(ACampo: String): Integer;
 begin
-  with ADataSet do begin
-    AfterPost := ANotify.AfterPost;
-    BeforePost := ANotify.BeforePost;
+  if FindField(ACampo) <> nil then
+    Result := FieldByName(ACampo).AsInteger
+  else
+    Result := 0;
+end;
+
+procedure TmDataSet.SetarI(ACampo : String; AValue: Integer);
+var
+  vEdit : Boolean;
+begin
+  if FindField(ACampo) <> nil then begin
+    vEdit := State in [dsInsert, dsEdit];
+    if not vEdit then
+      Edit;
+    FieldByName(ACampo).AsInteger := AValue;
+    if not vEdit then
+      Post;
   end;
 end;
 
 //--
 
-class function TmDataSet.PegarB(ADataSet: TDataSet; ACampo: String): Boolean;
+function TmDataSet.PegarS(ACampo: String): String;
 begin
-  with ADataSet do
-    if FindField(ACampo) <> nil then
-      Result := FieldByName(ACampo).AsBoolean
-    else
-      Result := False;
+  if FindField(ACampo) <> nil then
+    Result := FieldByName(ACampo).AsString
+  else
+    Result := '';
 end;
 
-class procedure TmDataSet.SetarB(ADataSet: TDataSet; ACampo : String; AValue: Boolean);
+procedure TmDataSet.SetarS(ACampo : String; AValue: String);
 var
   vEdit : Boolean;
 begin
-  with ADataSet do
-    if FindField(ACampo) <> nil then begin
-      vEdit := State in [dsInsert, dsEdit];
-      if not vEdit then
-        Edit;
-      FieldByName(ACampo).AsBoolean := AValue;
-      if not vEdit then
-        Post;
-    end;
+  if FindField(ACampo) <> nil then begin
+    vEdit := State in [dsInsert, dsEdit];
+    if not vEdit then
+      Edit;
+    FieldByName(ACampo).AsString := AValue;
+    if not vEdit then
+      Post;
+  end;
 end;
 
 //--
 
-class function TmDataSet.PegarD(ADataSet: TDataSet; ACampo: String): TDateTime;
+procedure TmDataSet.FromObject(AObject: TObject);
 begin
-  with ADataSet do
-    if FindField(ACampo) <> nil then
-      Result := FieldByName(ACampo).AsDateTime
-    else
-      Result := 0;
+  SetValues(TmObjeto(AObject).GetValues());
 end;
 
-class procedure TmDataSet.SetarD(ADataSet: TDataSet; ACampo : String; AValue: TDateTime);
-var
-  vEdit : Boolean;
+procedure TmDataSet.ToObject(AObject: TObject);
 begin
-  with ADataSet do
-    if FindField(ACampo) <> nil then begin
-      vEdit := State in [dsInsert, dsEdit];
-      if not vEdit then
-        Edit;
-      FieldByName(ACampo).AsDateTime := AValue;
-      if not vEdit then
-        Post;
-    end;
+  TmObjeto(AObject).SetValues(GetValues());
 end;
 
 //--
 
-class function TmDataSet.PegarF(ADataSet: TDataSet; ACampo: String): Real;
-begin
-  with ADataSet do
-    if FindField(ACampo) <> nil then
-      Result := FieldByName(ACampo).AsFloat
-    else
-      Result := 0;
-end;
-
-class procedure TmDataSet.SetarF(ADataSet: TDataSet; ACampo : String; AValue: Real);
-var
-  vEdit : Boolean;
-begin
-  with ADataSet do
-    if FindField(ACampo) <> nil then begin
-      vEdit := State in [dsInsert, dsEdit];
-      if not vEdit then
-        Edit;
-      FieldByName(ACampo).AsFloat := AValue;
-      if not vEdit then
-        Post;
-    end;
-end;
-
-//--
-
-class function TmDataSet.PegarI(ADataSet: TDataSet; ACampo: String): Integer;
-begin
-  with ADataSet do
-    if FindField(ACampo) <> nil then
-      Result := FieldByName(ACampo).AsInteger
-    else
-      Result := 0;
-end;
-
-class procedure TmDataSet.SetarI(ADataSet: TDataSet; ACampo : String; AValue: Integer);
-var
-  vEdit : Boolean;
-begin
-  with ADataSet do
-    if FindField(ACampo) <> nil then begin
-      vEdit := State in [dsInsert, dsEdit];
-      if not vEdit then
-        Edit;
-      FieldByName(ACampo).AsInteger := AValue;
-      if not vEdit then
-        Post;
-    end;
-end;
-
-//--
-
-class function TmDataSet.PegarS(ADataSet: TDataSet; ACampo: String): String;
-begin
-  with ADataSet do
-    if FindField(ACampo) <> nil then
-      Result := FieldByName(ACampo).AsString
-    else
-      Result := '';
-end;
-
-class procedure TmDataSet.SetarS(ADataSet: TDataSet; ACampo : String; AValue: String);
-var
-  vEdit : Boolean;
-begin
-  with ADataSet do
-    if FindField(ACampo) <> nil then begin
-      vEdit := State in [dsInsert, dsEdit];
-      if not vEdit then
-        Edit;
-      FieldByName(ACampo).AsString := AValue;
-      if not vEdit then
-        Post;
-    end;
-end;
-
-//--
-
-class procedure TmDataSet.FromObject(AObject: TObject; ADataSet: TDataSet);
-begin
-  SetValues(ADataSet, TmObjeto.GetValues(AObject));
-end;
-
-class procedure TmDataSet.ToObject(ADataSet: TDataSet; AObject: TObject);
-begin
-  TmObjeto.SetValues(AObject, GetValues(ADataSet));
-end;
-
-//--
-
-class function TmDataSet.Calcular(ADataSet: TDataSet; ACampo : String; ATipoRetorno : TTipoRetorno) : Real;
+function TmDataSet.Calcular(ACampo : String; ATipoRetorno : TTipoRetorno) : Real;
 var
   vRecNo : Integer;
 begin
   Result := 0;
 
-  with ADataSet do begin
-    if FindField(ACampo) = nil then
-      Exit;
+  if FindField(ACampo) = nil then
+    Exit;
 
-    vRecNo := RecNo;
-    DisableControls;
-    First;
+  vRecNo := RecNo;
+  DisableControls;
+  First;
 
-    while not EOF do begin
-
-      case ATipoRetorno of
-        tprAvg, tprSum : begin
-          Result := Result + FieldByName(ACampo).AsFloat;
-        end;
-        tprMax : begin
-          if BOF or (FieldByName(ACampo).AsFloat > Result) then
-            Result := FieldByName(ACampo).AsFloat;
-        end;
-        tprMin : begin
-          if BOF or (FieldByName(ACampo).AsFloat < Result) then
-            Result := FieldByName(ACampo).AsFloat;
-        end;
-      end;
-
-      Next;
-    end;
+  while not EOF do begin
 
     case ATipoRetorno of
-      tprAvg : begin
-        if RecordCount > 0 then
-          Result := Result / RecordCount;
+      tprAvg, tprSum : begin
+        Result := Result + FieldByName(ACampo).AsFloat;
+      end;
+      tprMax : begin
+        if BOF or (FieldByName(ACampo).AsFloat > Result) then
+          Result := FieldByName(ACampo).AsFloat;
+      end;
+      tprMin : begin
+        if BOF or (FieldByName(ACampo).AsFloat < Result) then
+          Result := FieldByName(ACampo).AsFloat;
       end;
     end;
 
-    if vRecNo > 0 then
-      RecNo := vRecNo;
-    EnableControls;
+    Next;
   end;
+
+  case ATipoRetorno of
+    tprAvg : begin
+      if RecordCount > 0 then
+        Result := Result / RecordCount;
+    end;
+  end;
+
+  if vRecNo > 0 then
+    RecNo := vRecNo;
+  EnableControls;
 end;
 
-class function TmDataSet.Avg(ADataSet: TDataSet; ACampo : String) : Real;
+function TmDataSet.Avg(ACampo : String) : Real;
 begin
-  Result := Calcular(ADataSet, ACampo, tprAvg);
+  Result := Calcular(ACampo, tprAvg);
 end;
 
-class function TmDataSet.Max(ADataSet: TDataSet; ACampo : String) : Real;
+function TmDataSet.Max(ACampo : String) : Real;
 begin
-  Result := Calcular(ADataSet, ACampo, tprMax);
+  Result := Calcular(ACampo, tprMax);
 end;
 
-class function TmDataSet.Min(ADataSet: TDataSet; ACampo : String) : Real;
+function TmDataSet.Min(ACampo : String) : Real;
 begin
-  Result := Calcular(ADataSet, ACampo, tprMin);
+  Result := Calcular(ACampo, tprMin);
 end;
 
-class function TmDataSet.Sum(ADataSet: TDataSet; ACampo : String) : Real;
+function TmDataSet.Sum(ACampo : String) : Real;
 begin
-  Result := Calcular(ADataSet, ACampo, tprSum);
+  Result := Calcular(ACampo, tprSum);
 end;
 
 //--

@@ -7,12 +7,12 @@ uses
   mLogger, mValue;
 
 type
-  TmObjeto = class(TComponent)
+  TmObjeto = class(TObject)
   public
-    class procedure ResetValues(AObject: TObject);
-    class function GetValues(AObject: TObject): TmValueList;
-    class procedure SetValues(AObject: TObject; AValues: TmValueList);
-    class procedure ToObjeto(AObjectFrom: TObject; AObjectTo: TObject);
+    procedure ResetValues();
+    function GetValues(): TmValueList;
+    procedure SetValues(AValues: TmValueList);
+    procedure ToObjeto(AObjectTo: TObject);
   end;
 
 implementation
@@ -25,166 +25,130 @@ implementation
     tkVariant, tkArray, tkRecord, tkInterface, tkInt64, tkDynArray);
 *)
 
-class procedure TmObjeto.ResetValues;
+procedure TmObjeto.ResetValues;
 const
   cDS_METHOD = 'TmObjeto.ResetValues';
 var
-  vNome, vTipoBase : String;
   Count, Size, I : Integer;
-  PropInfo : PPropInfo;
-  List : PPropList;
+  vNome, vTipoBase : String;
+  vPropInfo : PPropInfo;
+  vList : PPropList;
 begin
-  Count := GetPropList(AObject.ClassInfo, tkProperties, nil, False);
+  Count := GetPropList(Self.ClassInfo, tkProperties, nil, False);
   Size := Count * SizeOf(Pointer);
-  GetMem(List, Size);
+  GetMem(vList, Size);
 
   try
-    Count := GetPropList(AObject.ClassInfo, tkProperties, List, False);
+    Count := GetPropList(Self.ClassInfo, tkProperties, vList, False);
 
     for I := 0 to Count - 1 do begin
-      PropInfo := List^[I];
+      vPropInfo := vList^[I];
 
-      try
-        vNome := PropInfo^.Name;
-        vTipoBase := PropInfo^.PropType^.Name;
+      //-- read-only
+      if vPropInfo^.SetProc = nil then
+        Continue;
 
-        //-- read-only
-        if PropInfo^.SetProc = nil then
-          Continue;
-
-        if (PropInfo^.PropType^.Kind in tkProperties) then begin
-
-          case PropInfo^.PropType^.Kind of
-            tkEnumeration:
-              if GetTypeData(PropInfo^.PropType^)^.BaseType^ = TypeInfo(Boolean) then
-                SetOrdProp(AObject, PropInfo, 0);
-            tkInteger:
-              SetOrdProp(AObject, PropInfo, 0);
-            tkFloat:
-              SetFloatProp(AObject, PropInfo, 0);
-            tkString, tkLString, tkWString:
-              SetStrProp(AObject, PropInfo, '');
-          end;
-          
-        end;
-
-      except
-        on E : Exception do begin
-          mLogger.Instance.Erro(cDS_METHOD, 'Erro: ' + E.Message +
-            ' / vNome: ' + vNome + ' / vTipoBase: ' + vTipoBase);
-        end;
-
-      end;
-
+      vTipoBase := vPropInfo^.PropType^.Name;
+      if vTipoBase = 'Boolean' then
+        SetOrdProp(Self, vPropInfo, 0)
+      else if vTipoBase = 'TDateTime' then
+        SetFloatProp(Self, vPropInfo, 0)
+      else if vTipoBase = 'Float' then
+        SetFloatProp(Self, vPropInfo, 0)
+      else if vTipoBase = 'Integer' then
+        SetOrdProp(Self, vPropInfo, 0)
+      else if vTipoBase = 'String' then
+        SetStrProp(Self, vPropInfo, '');
     end;
   finally
-    FreeMem(List);
+    FreeMem(vList);
   end;
 end;
 
 //--
 
-class function TmObjeto.GetValues;
+function TmObjeto.GetValues;
 var
   Count, Size, I : Integer;
-  PropInfo : PPropInfo;
-  List : PPropList;
-  Key : Boolean;
-  Nome : String;
-  TipoBase : String;
-  TipoField : TTipoField;
+  vPropInfo : PPropInfo;
+  vList : PPropList;
+  vKey : Boolean;
+  vNome, vTipoBase : String;
+  vTipoField : TTipoField;
 begin
   Result := TmValueList.Create;
-  Count := GetPropList(AObject.ClassInfo, tkProperties, nil, False);
+  Count := GetPropList(Self.ClassInfo, tkProperties, nil, False);
   Size := Count * SizeOf(Pointer);
-  GetMem(List, Size);
-  Key := True;
+  GetMem(vList, Size);
+  vKey := True;
 
   try
+    Count := GetPropList(Self.ClassInfo, tkProperties, vList, False);
 
-    Count := GetPropList(AObject.ClassInfo, tkProperties, List, False);
     for I := 0 to Count - 1 do begin
-      PropInfo := List^[I];
+      vPropInfo := vList^[I];
 
       //-- read-only
-      if PropInfo^.SetProc = nil then
+      if vPropInfo^.SetProc = nil then
         Continue;
 
-      if (PropInfo^.PropType^.Kind in tkProperties) then begin
-        Nome := PropInfo^.Name;
-        TipoBase := PropInfo^.PropType^.Name;
+      vNome := vPropInfo^.Name;
+      if LowerCase(vNome) = 'u_version' then
+        vKey := False;
 
-        if LowerCase(Nome) = 'u_version' then
-          Key := False;
+      vTipoField := TTipoField(IfThen(vKey, Ord(tfKey), Ord(tfNul)));
 
-        TipoField := TTipoField(IfThen(Key, Ord(tfKey), Ord(tfNul)));
-
-        case PropInfo^.PropType^.Kind of
-          tkEnumeration: begin
-            if GetTypeData(PropInfo^.PropType^)^.BaseType^ = TypeInfo(Boolean) then
-              Result.AddB(Nome, (GetOrdProp(AObject, PropInfo) = 1), TipoField);
-          end;
-          tkFloat: begin
-            if TipoBase = 'TDateTime' then
-              Result.AddD(Nome, GetFloatProp(AObject, PropInfo), TipoField)
-            else if TipoBase = 'Real' then
-              Result.AddF(Nome, GetFloatProp(AObject, PropInfo), TipoField);
-          end;
-          tkInteger: begin
-            Result.AddI(Nome, GetOrdProp(AObject, PropInfo), TipoField);
-          end;
-          tkString, tkLString, {tkUString,} tkWString: begin
-            Result.AddS(Nome, GetStrProp(AObject, PropInfo), TipoField);
-          end;
-        end;
-
-      end;
+      vTipoBase := vPropInfo^.PropType^.Name;
+      if vTipoBase = 'Boolean' then
+        Result.AddB(vNome, (GetOrdProp(Self, vPropInfo) = 1), vTipoField)
+      else if vTipoBase = 'TDateTime' then
+        Result.AddD(vNome, GetFloatProp(Self, vPropInfo), vTipoField)
+      else if vTipoBase = 'Float' then
+        Result.AddF(vNome, GetFloatProp(Self, vPropInfo), vTipoField)
+      else if vTipoBase = 'Integer' then
+        Result.AddI(vNome, GetOrdProp(Self, vPropInfo), vTipoField)
+      else if vTipoBase = 'String' then
+        Result.AddS(vNome, GetStrProp(Self, vPropInfo), vTipoField);
     end;
   finally
-    FreeMem(List);
+    FreeMem(vList);
   end;
 end;
 
-class procedure TmObjeto.SetValues;
+procedure TmObjeto.SetValues;
 var
-  PropInfo : PPropInfo;
+  vPropInfo : PPropInfo;
+  vNome, vTipoBase : String;
   I : Integer;
 begin
   with AValues do
     for I := 0 to Count - 1 do begin
-      with Items[I] do begin
+      vNome := Items[I].Nome;
+      vPropInfo := GetPropInfo(Self, vNome);
 
-        //-- read-only
-        PropInfo := GetPropInfo(AObject, Nome);
-        if PropInfo^.SetProc = nil then
-          Continue;
+      //-- read-only
+      if vPropInfo^.SetProc = nil then
+        Continue;
 
-        case Tipo of
-          tvBoolean:
-            if (Items[I] as TmValueBool).Value then
-              SetOrdProp(AObject, Nome, 1)
-            else
-              SetOrdProp(AObject, Nome, 0);
-          tvDateTime:
-            SetFloatProp(AObject, Nome, ItemsD[I].Value);
-          tvFloat:
-            SetFloatProp(AObject, Nome, ItemsF[I].Value);
-          tvInteger:
-            SetOrdProp(AObject, Nome, ItemsI[I].Value);
-          tvString:
-            SetStrProp(AObject, Nome, ItemsS[I].Value);
-        else
-          SetStrProp(AObject, Nome, ItemsS[I].Value);
-        end;
-      end;
+      vTipoBase := vPropInfo^.PropType^.Name;
+      if vTipoBase = 'Boolean' then
+        SetOrdProp(Self, vNome, IfThen(ItemsB[I].Value, 1, 0))
+      else if vTipoBase = 'TDateTime' then
+        SetFloatProp(Self, vNome, ItemsD[I].Value)
+      else if vTipoBase = 'Float' then
+        SetFloatProp(Self, vNome, ItemsF[I].Value)
+      else if vTipoBase = 'Integer' then
+        SetOrdProp(Self, vNome, ItemsI[I].Value)
+      else if vTipoBase = 'String' then
+        SetStrProp(Self, vNome, ItemsS[I].Value);
     end;
 end;
 
 //--
 
-class procedure TmObjeto.ToObjeto;
+procedure TmObjeto.ToObjeto;
 begin
-  SetValues(AObjectTo, GetValues(AObjectFrom));
+  TmObjeto(AObjectTo).SetValues(GetValues());
 end;
 
 //--
