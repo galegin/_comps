@@ -179,7 +179,7 @@ begin
       vObjTransitem.Vl_Frete := vTransitemJson.getDouble('Vl_Frete');
       vObjTransitem.Vl_Seguro := vTransitemJson.getDouble('Vl_Seguro');
       vObjTransitem.Vl_Outro := vTransitemJson.getDouble('Vl_Outro');
-      vObjTransitem.Vl_Despesa := vTransitemJson.getDouble('Double('');');
+      vObjTransitem.Vl_Despesa := vTransitemJson.getDouble('Vl_Despesa');
 
       vTransimpostosJson := vTransitemJson.Field['Impostos'] as TlkJSONlist;
       for L := 0 to vTransimpostosJson.Count - 1 do begin
