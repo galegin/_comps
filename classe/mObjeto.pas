@@ -30,7 +30,7 @@ const
   cDS_METHOD = 'TmObjeto.ResetValues';
 var
   Count, Size, I : Integer;
-  vNome, vTipoBase : String;
+  vTipoBase : String;
   vPropInfo : PPropInfo;
   vList : PPropList;
 begin
