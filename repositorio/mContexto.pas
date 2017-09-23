@@ -193,7 +193,7 @@ end;
 
 //-- objeto
 
-function TmContexto.GetObjeto(AClass : TClass; AWhere : String = '') : TObject;
+function TmContexto.GetObjeto(AClass : TClass; AWhere : String) : TObject;
 var
   vLista : TList;
 begin
