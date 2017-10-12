@@ -4,11 +4,11 @@ interface
 
 uses
   Classes, SysUtils, Math,
-  mMapping,
+  mMapping, mCollection, mCollectionItem,
   uTipoImposto;
 
 type
-  TTransimposto = class(TmMapping)
+  TTransimposto = class(TmCollectionItem)
   private
     fId_Transacao: String;
     fNr_Item: Integer;
@@ -35,7 +35,7 @@ type
     function GetVl_Ipi: Real;
     function GetVl_Pis: Real;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -65,16 +65,21 @@ type
     property Vl_Cofins : Real read GetVl_Cofins;
   end;
 
-  TTransimpostos = class(TList)
+  TTransimpostos = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TTransimposto;
+    procedure SetItem(Index: Integer; Value: TTransimposto);
   public
-    function Add: TTransimposto; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TTransimposto;
+    property Items[Index: Integer]: TTransimposto read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TTransimposto }
 
-constructor TTransimposto.Create(AOwner: TComponent);
+constructor TTransimposto.Create(ACollection: TCollection);
 begin
   inherited;
 
@@ -85,8 +90,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TTransimposto.GetMapping: PmMapping;
 begin
@@ -114,10 +117,6 @@ begin
     Add('Vl_Isento', 'VL_ISENTO', tfReq);
     Add('Cd_Cst', 'CD_CST', tfReq);
     Add('Cd_Csosn', 'CD_CSOSN', tfNul);
-  end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
   end;
 end;
 
@@ -170,10 +169,24 @@ end;
 
 { TTransimpostos }
 
+constructor TTransimpostos.Create(AOwner: TCollection);
+begin
+  inherited Create(TTransimposto);
+end;
+
 function TTransimpostos.Add: TTransimposto;
 begin
-  Result := TTransimposto.Create(nil);
-  Self.Add(Result);
+  Result := TTransimposto(inherited Add);
+end;
+
+function TTransimpostos.GetItem(Index: Integer): TTransimposto;
+begin
+  Result := TTransimposto(inherited GetItem(Index));
+end;
+
+procedure TTransimpostos.SetItem(Index: Integer; Value: TTransimposto);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

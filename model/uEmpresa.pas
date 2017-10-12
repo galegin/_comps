@@ -4,11 +4,11 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping,
+  mMapping, mCollection, mCollectionItem,
   uPessoa;
 
 type
-  TEmpresa = class(TmMapping)
+  TEmpresa = class(TmCollectionItem)
   private
     fId_Empresa: Integer;
     fU_Version: String;
@@ -17,7 +17,7 @@ type
     fId_Pessoa: String;
     fPessoa: TPessoa;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -29,20 +29,26 @@ type
     property Pessoa: TPessoa read fPessoa write fPessoa;
   end;
 
-  TEmpresas = class(TList)
+  TEmpresas = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TEmpresa;
+    procedure SetItem(Index: Integer; Value: TEmpresa);
   public
-    function Add: TEmpresa; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TEmpresa;
+    property Items[Index: Integer]: TEmpresa read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TEmpresa }
 
-constructor TEmpresa.Create(AOwner: TComponent);
+constructor TEmpresa.Create(ACollection: TCollection);
 begin
   inherited;
 
-  fPessoa:= TPessoa.Create(nil);
+  fPessoa := TPessoa.Create(nil);
+  fPessoa.SetRelacao(Self, 'Id_Pessoa');
 end;
 
 destructor TEmpresa.Destroy;
@@ -51,8 +57,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TEmpresa.GetMapping: PmMapping;
 begin
@@ -71,25 +75,28 @@ begin
     Add('Dt_Cadastro', 'DT_CADASTRO', tfReq);
     Add('Id_Pessoa', 'ID_PESSOA', tfReq);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-
-    with Add('Pessoa', TPessoa)^.Campos do begin
-      Add('Id_Pessoa');
-    end;
-    
-  end;
 end;
-
-//--
 
 { TEmpresas }
 
+constructor TEmpresas.Create(AOwner: TCollection);
+begin
+  inherited Create(TEmpresa);
+end;
+
 function TEmpresas.Add: TEmpresa;
 begin
-  Result := TEmpresa.Create(nil);
-  Self.Add(Result);
+  Result := TEmpresa(inherited Add);
+end;
+
+function TEmpresas.GetItem(Index: Integer): TEmpresa;
+begin
+  Result := TEmpresa(inherited GetItem(Index));
+end;
+
+procedure TEmpresas.SetItem(Index: Integer; Value: TEmpresa);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

@@ -4,11 +4,11 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping,
+  mMapping, mCollection, mCollectionItem,
   uTransdfe, uTranscont, uTransinut;
 
 type
-  TTransfiscal = class(TmMapping)
+  TTransfiscal = class(TmCollectionItem)
   private
     fId_Transacao: String;
     fU_Version: String;
@@ -27,7 +27,7 @@ type
     fContingencia: TTranscont;
     fInutilizacao: TTransinut;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -49,22 +49,30 @@ type
     property Inutilizacao: TTransinut read fInutilizacao write fInutilizacao;
   end;
 
-  TTransfiscals = class(TList)
+  TTransfiscals = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TTransfiscal;
+    procedure SetItem(Index: Integer; Value: TTransfiscal);
   public
-    function Add: TTransfiscal; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TTransfiscal;
+    property Items[Index: Integer]: TTransfiscal read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TTransfiscal }
 
-constructor TTransfiscal.Create(AOwner: TComponent);
+constructor TTransfiscal.Create(ACollection: TCollection);
 begin
   inherited;
 
-  fEventos:= TTransdfes.Create;
+  fEventos:= TTransdfes.Create(nil);
+  fEventos.SetRelacao(Self, 'Id_Transacao');
   fContingencia:= TTranscont.Create(nil);
+  fContingencia.SetRelacao(Self, 'Id_Transacao');
   fInutilizacao:= TTransinut.Create(nil);
+  fInutilizacao.SetRelacao(Self, 'Id_Transacao');
 end;
 
 destructor TTransfiscal.Destroy;
@@ -103,33 +111,28 @@ begin
     Add('Dt_Recebimento', 'DT_RECEBIMENTO', tfNul);
     Add('Nr_Recibo', 'NR_RECIBO', tfNul);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-
-    with Add('Eventos', TTransdfe, TTransdfes)^.Campos do begin
-      Add('Id_Transacao');
-    end;
-
-    with Add('Contingencia', TTranscont)^.Campos do begin
-      Add('Id_Transacao');
-    end;
-
-    with Add('Inutilizacao', TTransinut)^.Campos do begin
-      Add('Id_Transacao');
-    end;
-
-  end;
 end;
-
-//--
 
 { TTransfiscals }
 
+constructor TTransfiscals.Create(AOwner: TCollection);
+begin
+  inherited Create(TTransfiscal);
+end;
+
 function TTransfiscals.Add: TTransfiscal;
 begin
-  Result := TTransfiscal.Create(nil);
-  Self.Add(Result);
+  Result := TTransfiscal(inherited Add);
+end;
+
+function TTransfiscals.GetItem(Index: Integer): TTransfiscal;
+begin
+  Result := TTransfiscal(inherited GetItem(Index));
+end;
+
+procedure TTransfiscals.SetItem(Index: Integer; Value: TTransfiscal);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

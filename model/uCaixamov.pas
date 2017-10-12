@@ -4,10 +4,10 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping;
+  mMapping, mCollection, mCollectionItem;
 
 type
-  TCaixamov = class(TmMapping)
+  TCaixamov = class(TmCollectionItem)
   private
     fId_Caixa: Integer;
     fNr_Seq: Integer;
@@ -19,7 +19,7 @@ type
     fNr_Doc: Integer;
     fDs_Aux: String;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -34,16 +34,21 @@ type
     property Ds_Aux : String read fDs_Aux write fDs_Aux;
   end;
 
-  TCaixamovs = class(TList)
+  TCaixamovs = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TCaixamov;
+    procedure SetItem(Index: Integer; Value: TCaixamov);
   public
-    function Add: TCaixamov; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TCaixamov;
+    property Items[Index: Integer]: TCaixamov read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TCaixamov }
 
-constructor TCaixamov.Create(AOwner: TComponent);
+constructor TCaixamov.Create(ACollection: TCollection);
 begin
   inherited;
 
@@ -54,8 +59,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TCaixamov.GetMapping: PmMapping;
 begin
@@ -78,20 +81,28 @@ begin
     Add('Nr_Doc', 'NR_DOC', tfReq);
     Add('Ds_Aux', 'DS_AUX', tfReq);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-  end;
 end;
-
-//--
 
 { TCaixamovs }
 
+constructor TCaixamovs.Create(AOwner: TCollection);
+begin
+  inherited Create(TCaixamov);
+end;
+
 function TCaixamovs.Add: TCaixamov;
 begin
-  Result := TCaixamov.Create(nil);
-  Self.Add(Result);
+  Result := TCaixamov(inherited Add);
+end;
+
+function TCaixamovs.GetItem(Index: Integer): TCaixamov;
+begin
+  Result := TCaixamov(inherited GetItem(Index));
+end;
+
+procedure TCaixamovs.SetItem(Index: Integer; Value: TCaixamov);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

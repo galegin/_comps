@@ -4,10 +4,10 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping;
+  mMapping, mCollection, mCollectionItem;
 
 type
-  TNcmsubst = class(TmMapping)
+  TNcmsubst = class(TmCollectionItem)
   private
     fUf_Origem: String;
     fUf_Destino: String;
@@ -17,7 +17,7 @@ type
     fDt_Cadastro: TDateTime;
     fCd_Cest: String;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -30,16 +30,21 @@ type
     property Cd_Cest : String read fCd_Cest write fCd_Cest;
   end;
 
-  TNcmsubsts = class(TList)
+  TNcmsubsts = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TNcmsubst;
+    procedure SetItem(Index: Integer; Value: TNcmsubst);
   public
-    function Add: TNcmsubst; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TNcmsubst;
+    property Items[Index: Integer]: TNcmsubst read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TNcmsubst }
 
-constructor TNcmsubst.Create(AOwner: TComponent);
+constructor TNcmsubst.Create(ACollection: TCollection);
 begin
   inherited;
 
@@ -50,8 +55,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TNcmsubst.GetMapping: PmMapping;
 begin
@@ -72,20 +75,28 @@ begin
     Add('Dt_Cadastro', 'DT_CADASTRO', tfNul);
     Add('Cd_Cest', 'CD_CEST', tfNul);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-  end;
 end;
-
-//--
 
 { TNcmsubsts }
 
+constructor TNcmsubsts.Create(AOwner: TCollection);
+begin
+  inherited Create(TNcmsubst);
+end;
+
 function TNcmsubsts.Add: TNcmsubst;
 begin
-  Result := TNcmsubst.Create(nil);
-  Self.Add(Result);
+  Result := TNcmsubst(inherited Add);
+end;
+
+function TNcmsubsts.GetItem(Index: Integer): TNcmsubst;
+begin
+  Result := TNcmsubst(inherited GetItem(Index));
+end;
+
+procedure TNcmsubsts.SetItem(Index: Integer; Value: TNcmsubst);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

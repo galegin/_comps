@@ -4,10 +4,10 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping;
+  mMapping, mCollection, mCollectionItem;
 
 type
-  TPais = class(TmMapping)
+  TPais = class(TmCollectionItem)
   private
     fId_Pais: Integer;
     fU_Version: String;
@@ -17,7 +17,7 @@ type
     fDs_Pais: String;
     fDs_Sigla: String;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -30,16 +30,21 @@ type
     property Ds_Sigla : String read fDs_Sigla write fDs_Sigla;
   end;
 
-  TPaiss = class(TList)
+  TPaiss = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TPais;
+    procedure SetItem(Index: Integer; Value: TPais);
   public
-    function Add: TPais; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TPais;
+    property Items[Index: Integer]: TPais read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TPais }
 
-constructor TPais.Create(AOwner: TComponent);
+constructor TPais.Create(ACollection: TCollection);
 begin
   inherited;
 
@@ -50,8 +55,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TPais.GetMapping: PmMapping;
 begin
@@ -72,20 +75,28 @@ begin
     Add('Ds_Pais', 'DS_PAIS', tfReq);
     Add('Ds_Sigla', 'DS_SIGLA', tfReq);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-  end;
 end;
-
-//--
 
 { TPaiss }
 
+constructor TPaiss.Create(AOwner: TCollection);
+begin
+  inherited Create(TPais);
+end;
+
 function TPaiss.Add: TPais;
 begin
-  Result := TPais.Create(nil);
-  Self.Add(Result);
+  Result := TPais(inherited Add);
+end;
+
+function TPaiss.GetItem(Index: Integer): TPais;
+begin
+  Result := TPais(inherited GetItem(Index));
+end;
+
+procedure TPaiss.SetItem(Index: Integer; Value: TPais);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

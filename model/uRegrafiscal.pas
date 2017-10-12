@@ -4,11 +4,11 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping,
+  mMapping, mCollection, mCollectionItem,
   uRegraimposto;
 
 type
-  TRegrafiscal = class(TmMapping)
+  TRegrafiscal = class(TmCollectionItem)
   private
     fId_Regrafiscal: Integer;
     fU_Version: String;
@@ -18,7 +18,7 @@ type
     fIn_Calcimposto: String;
     fImpostos: TRegraimpostos;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -31,20 +31,26 @@ type
     property Impostos : TRegraimpostos read fImpostos write fImpostos;
   end;
 
-  TRegrafiscals = class(TList)
+  TRegrafiscals = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TRegrafiscal;
+    procedure SetItem(Index: Integer; Value: TRegrafiscal);
   public
-    function Add: TRegrafiscal; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TRegrafiscal;
+    property Items[Index: Integer]: TRegrafiscal read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TRegrafiscal }
 
-constructor TRegrafiscal.Create(AOwner: TComponent);
+constructor TRegrafiscal.Create(ACollection: TCollection);
 begin
   inherited;
 
-  fImpostos:= TRegraimpostos.Create;
+  fImpostos:= TRegraimpostos.Create(nil);
+  fImpostos.SetRelacao(Self, 'Id_Regrafiscal');
 end;
 
 destructor TRegrafiscal.Destroy;
@@ -74,25 +80,30 @@ begin
     Add('Ds_Regrafiscal', 'DS_REGRAFISCAL', tfReq);
     Add('In_Calcimposto', 'IN_CALCIMPOSTO', tfReq);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-
-    with Add('Impostos', TRegraimpostos)^.Campos do begin
-      Add('Id_Regrafiscal');
-    end;
-
-  end;
 end;
 
 //--
 
 { TRegrafiscals }
 
+constructor TRegrafiscals.Create(AOwner: TCollection);
+begin
+  inherited Create(TRegrafiscal);
+end;
+
 function TRegrafiscals.Add: TRegrafiscal;
 begin
-  Result := TRegrafiscal.Create(nil);
-  Self.Add(Result);
+  Result := TRegrafiscal(inherited Add);
+end;
+
+function TRegrafiscals.GetItem(Index: Integer): TRegrafiscal;
+begin
+  Result := TRegrafiscal(inherited GetItem(Index));
+end;
+
+procedure TRegrafiscals.SetItem(Index: Integer; Value: TRegrafiscal);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

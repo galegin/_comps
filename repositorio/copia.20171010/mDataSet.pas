@@ -3,7 +3,7 @@ unit mDataSet;
 interface
 
 uses
-  Classes, SysUtils, StrUtils, Math, DB, DBClient, TypInfo,
+  Classes, SysUtils, StrUtils, Math, DB, DBClient,
   mObjeto, mClasse, mString, mValue;
 
 type
@@ -15,10 +15,6 @@ type
   TTipoRetorno = (tprAvg, tprMax, tprMin, tprSum);
 
   TmDataSet = class(TDataSet)
-  private
-    fEdit : Boolean;
-    function SetEdit(ACampo : String) : Boolean;
-    procedure SetPost();
   public
     function GetValues(): TmValueList;
     procedure SetValues(AValues : TmValueList);
@@ -60,19 +56,22 @@ implementation
 function TmDataSet.GetValues(): TmValueList;
 var
   I : Integer;
+  Key : Boolean;
   Nome : String;
   TipoField : TTipoField;
 begin
   Result := TmValueList.Create;
 
-  TipoField := tfKey;
+  Key := True;
 
   for I := 0 to FieldCount - 1 do begin
     with Fields[I] do begin
       Nome := FieldName;
 
       if LowerCase(FieldName) = 'u_version' then
-        TipoField := tfNul;
+        Key := False;
+
+      TipoField := TTipoField(IfThen(Key, Ord(tfKey), IfThen(Required, Ord(tfReq), Ord(tfNul))));
 
       case DataType of
         ftBoolean : begin
@@ -159,24 +158,6 @@ end;
 
 //--
 
-function TmDataSet.SetEdit(ACampo : String) : Boolean;
-begin
-  Result := (FindField(ACampo) <> nil);
-  if not Result then
-    Exit;
-  fEdit := State in [dsInsert, dsEdit];
-  if not fEdit then
-    Edit;
-end;
-
-procedure TmDataSet.SetPost();
-begin
-  if not fEdit then
-    Post;
-end;
-
-//--
-
 function TmDataSet.PegarB(ACampo: String): Boolean;
 begin
   if FindField(ACampo) <> nil then
@@ -186,10 +167,16 @@ begin
 end;
 
 procedure TmDataSet.SetarB(ACampo : String; AValue: Boolean);
+var
+  vEdit : Boolean;
 begin
-  if SetEdit(ACampo) then begin
+  if FindField(ACampo) <> nil then begin
+    vEdit := State in [dsInsert, dsEdit];
+    if not vEdit then
+      Edit;
     FieldByName(ACampo).AsBoolean := AValue;
-    SetPost();
+    if not vEdit then
+      Post;
   end;
 end;
 
@@ -204,10 +191,16 @@ begin
 end;
 
 procedure TmDataSet.SetarD(ACampo : String; AValue: TDateTime);
+var
+  vEdit : Boolean;
 begin
-  if SetEdit(ACampo) then begin
+  if FindField(ACampo) <> nil then begin
+    vEdit := State in [dsInsert, dsEdit];
+    if not vEdit then
+      Edit;
     FieldByName(ACampo).AsDateTime := AValue;
-    SetPost();
+    if not vEdit then
+      Post;
   end;
 end;
 
@@ -222,10 +215,16 @@ begin
 end;
 
 procedure TmDataSet.SetarF(ACampo : String; AValue: Real);
+var
+  vEdit : Boolean;
 begin
-  if SetEdit(ACampo) then begin
+  if FindField(ACampo) <> nil then begin
+    vEdit := State in [dsInsert, dsEdit];
+    if not vEdit then
+      Edit;
     FieldByName(ACampo).AsFloat := AValue;
-    SetPost();
+    if not vEdit then
+      Post;
   end;
 end;
 
@@ -240,10 +239,16 @@ begin
 end;
 
 procedure TmDataSet.SetarI(ACampo : String; AValue: Integer);
+var
+  vEdit : Boolean;
 begin
-  if SetEdit(ACampo) then begin
+  if FindField(ACampo) <> nil then begin
+    vEdit := State in [dsInsert, dsEdit];
+    if not vEdit then
+      Edit;
     FieldByName(ACampo).AsInteger := AValue;
-    SetPost();
+    if not vEdit then
+      Post;
   end;
 end;
 
@@ -258,10 +263,16 @@ begin
 end;
 
 procedure TmDataSet.SetarS(ACampo : String; AValue: String);
+var
+  vEdit : Boolean;
 begin
-  if SetEdit(ACampo) then begin
+  if FindField(ACampo) <> nil then begin
+    vEdit := State in [dsInsert, dsEdit];
+    if not vEdit then
+      Edit;
     FieldByName(ACampo).AsString := AValue;
-    SetPost();
+    if not vEdit then
+      Post;
   end;
 end;
 
@@ -273,28 +284,8 @@ begin
 end;
 
 procedure TmDataSet.ToObject(AObject: TObject);
-var
-  vPropInfo : PPropInfo;
-  vTipoBase : String;
-  I : Integer;
 begin
-  for I := 0 to FieldCount - 1 do
-    with Fields[I] do begin
-      vPropInfo := GetPropInfo(AObject, FieldName);
-      vTipoBase := LowerCase(vPropInfo^.PropType^.Name);
-      case StrToTipoValue(vTipoBase) of
-        tvBoolean :
-          SetOrdProp(AObject, FieldName, IfThen(AsString = 'T', 1, 0));
-        tvDateTime :
-          SetFloatProp(AObject, FieldName, AsDateTime);
-        tvFloat :
-          SetFloatProp(AObject, FieldName, AsFloat);
-        tvInteger :
-          SetOrdProp(AObject, FieldName, AsInteger);
-        tvString :
-          SetStrProp(AObject, FieldName, AsString);
-      end;
-    end;
+  TmObjeto(AObject).SetValues(GetValues());
 end;
 
 //--

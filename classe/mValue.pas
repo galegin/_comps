@@ -27,6 +27,7 @@ type
     fTipoField : TTipoField;
     function GetTipo: TTipoValue;
   protected
+    function GetValueBase() : String; virtual; abstract;
     function GetValueInt() : String; virtual; abstract;
     function GetValueStr() : String; virtual; abstract;
     procedure SetValueStr(const Value : String); virtual; abstract;
@@ -41,12 +42,11 @@ type
 
   //-- database
 
-  TmValueBase = class(TmValue);
-
-  TmValueBool = class(TmValueBase)
+  TmValueBool = class(TmValue)
   private
     fValue : Boolean;
   protected
+    function GetValueBase() : String; override;
     function GetValueInt() : String; override;
     function GetValueStr() : String; override;
     procedure SetValueStr(const Value : String); override;
@@ -56,10 +56,11 @@ type
     property Value : Boolean read fValue write fValue;
   end;
 
-  TmValueDate = class(TmValueBase)
+  TmValueDate = class(TmValue)
   private
     fValue : TDateTime;
   protected
+    function GetValueBase() : String; override;
     function GetValueInt() : String; override;
     function GetValueStr() : String; override;
     procedure SetValueStr(const Value : String); override;
@@ -69,10 +70,11 @@ type
     property Value : TDateTime read fValue write fValue;
   end;
 
-  TmValueFloat = class(TmValueBase)
+  TmValueFloat = class(TmValue)
   private
     fValue : Real;
   protected
+    function GetValueBase() : String; override;
     function GetValueInt() : String; override;
     function GetValueStr() : String; override;
     procedure SetValueStr(const Value : String); override;
@@ -82,10 +84,11 @@ type
     property Value : Real read fValue write fValue;
   end;
 
-  TmValueInt = class(TmValueBase)
+  TmValueInt = class(TmValue)
   private
     fValue : Integer;
   protected
+    function GetValueBase() : String; override;
     function GetValueInt() : String; override;
     function GetValueStr() : String; override;
     procedure SetValueStr(const Value : String); override;
@@ -95,10 +98,11 @@ type
     property Value : Integer read fValue write fValue;
   end;
 
-  TmValueStr = class(TmValueBase)
+  TmValueStr = class(TmValue)
   private
     fValue : String;
   protected
+    function GetValueBase() : String; override;
     function GetValueInt() : String; override;
     function GetValueStr() : String; override;
     procedure SetValueStr(const Value : String); override;
@@ -134,6 +138,9 @@ type
     property ItemsS[Index : Integer] : TmValueStr read GetItemS;
   end;
 
+  function StrToTipoValue(pStr : String) : TTipoValue;
+  function TipoValueToStr(pTip : TTipoValue) : String;
+
 implementation
 
 const
@@ -143,6 +150,30 @@ const
     TmValueFloat,
     TmValueInt,
     TmValueStr);
+
+  STipoValue : Array [TTipoValue] Of String = (
+    'boolean',
+    'tdatetime',
+    'float',
+    'integer',
+    'string');
+
+  function StrToTipoValue(pStr : String) : TTipoValue;
+  var
+    I: Integer;
+  begin
+    Result := TTipoValue(Ord(-1));
+    for I := 0 to Ord(High(TTipoValue)) do
+      if STipoValue[TTipoValue(I)] = pStr then begin
+        Result := TTipoValue(I);
+        Exit;
+      end;
+  end;
+
+  function TipoValueToStr(pTip : TTipoValue) : String;
+  begin
+    Result := STipoValue[pTip];
+  end;
 
 { TmValue }
 
@@ -163,6 +194,11 @@ begin
   fNome := ANome;
   fValue := AValue;
   fTipoField := ATipo;
+end;
+
+function TmValueBool.GetValueBase: String;
+begin
+  Result := '''' + IfThen(fValue, 'T', 'F') + '''';
 end;
 
 function TmValueBool.GetValueInt: String;
@@ -189,6 +225,11 @@ begin
   fTipoField := ATipo;
 end;
 
+function TmValueDate.GetValueBase: String;
+begin
+  Result := '''' + FormatDateTime('dd/mm/yyyy hh:nn:ss', fValue) + '''';
+end;
+
 function TmValueDate.GetValueInt: String;
 begin
   Result := FormatDateTime('yyyymmdd_hhnnss', fValue);
@@ -211,6 +252,11 @@ begin
   fNome := ANome;
   fValue := AValue;
   fTipoField := ATipo;
+end;
+
+function TmValueFloat.GetValueBase: String;
+begin
+  Result := AnsiReplaceStr(FloatToStr(fValue), ',', '.');
 end;
 
 function TmValueFloat.GetValueInt: String;
@@ -237,6 +283,11 @@ begin
   fTipoField := ATipo;
 end;
 
+function TmValueInt.GetValueBase: String;
+begin
+  Result := IntToStr(fValue);
+end;
+
 function TmValueInt.GetValueInt: String;
 begin
   Result := FormatFloat('000000', fValue);
@@ -259,6 +310,11 @@ begin
   fNome := ANome;
   fValue := AValue;
   fTipoField := ATipo;
+end;
+
+function TmValueStr.GetValueBase: String;
+begin
+  Result := '''' + AnsiReplaceStr(fValue, '''', '''''') + '''';
 end;
 
 function TmValueStr.GetValueInt: String;

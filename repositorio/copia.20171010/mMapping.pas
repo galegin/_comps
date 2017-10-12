@@ -22,23 +22,17 @@ type
   TmCampo = record
     Atributo : String;
     Campo : String;
-    Tipo : TTipoCampo;
+    TipoCampo : TTipoCampo;
   end;
 
   TmCampos = class(TList)
   public
     function Add() : PmCampo; overload;
-    procedure Add(AAtributo, ACampo : String; ATipo : TTipoCampo = tfNul); overload;
+    procedure Add(AAtributo, ACampo : String; ATipoCampo : TTipoCampo = tfNul); overload;
     function Buscar(AAtributo: String) : PmCampo;
   end;
 
   //-- relacao
-
-  PmRelacao = ^TmRelacao;
-  TmRelacao = record
-    Owner : TObject;
-    Campos : String;
-  end;
 
   PmRelacaoCampo = ^TmRelacaoCampo;
   TmRelacaoCampo = record
@@ -53,17 +47,42 @@ type
     function Buscar(AAtributo : String) : PmRelacaoCampo;
   end;
 
+  PmRelacao = ^TmRelacao;
+  TmRelacao = record
+    Atributo : String;
+    Classe : TClass;
+    ClasseLista : TClass;
+    Campos : TmRelacaoCampos;
+  end;
+
+  TmRelacoes = class(TList)
+  public
+    function Add() : PmRelacao; overload;
+    function Add(AAtributo : String; AClasse : TClass; AClasseLista : TClass = nil) : PmRelacao; overload;
+    function Buscar(AAtributo : String) : PmRelacao;
+  end;
+
   //-- mapping
 
   PmMapping = ^RMapping;
   RMapping = record
     Tabela : PmTabela;
     Campos : TmCampos;
+    Relacoes : TmRelacoes;
+  end;
+
+  TmMapping = class;
+  TmMappingClass = class of TmMapping;
+
+  IMapping = interface
+    function GetMapping() : PmMapping;
+  end;
+
+  TmMapping = class(TComponent, IMapping)
+    function GetMapping() : PmMapping; virtual; abstract;
   end;
 
   procedure FreeMapping(var AMapping : PmMapping);
-
-  function GetRelacaoCampos(ACampos : String) : TmRelacaoCampos;
 
 implementation
 
@@ -94,6 +113,17 @@ uses
     end;
   end;
 
+  procedure FreeRelacoes(var ARelacoes : TmRelacoes);
+  var
+    I: Integer;
+  begin
+    for I := ARelacoes.Count - 1 downto 0 do begin
+      FreeRelacaoCampo(PmRelacao(ARelacoes.Items[I])^.Campos);
+      Dispose(PmRelacao(ARelacoes.Items[I]));
+      ARelacoes.Delete(I);
+    end;
+  end;
+
   //-- mapping
 
   procedure FreeMapping(var AMapping : PmMapping);
@@ -102,6 +132,8 @@ uses
       Dispose(PmTabela(AMapping.Tabela));
     if AMapping.Campos <> nil then
       FreeCampos(AMapping.Campos);
+    if AMapping.Relacoes <> nil then
+      FreeRelacoes(AMapping.Relacoes);
     if AMapping <> nil then
       Dispose(PmMapping(AMapping));
   end;
@@ -114,12 +146,12 @@ begin
   Self.Add(Result);
 end;
 
-procedure TmCampos.Add(AAtributo, ACampo: String; ATipo: TTipoCampo);
+procedure TmCampos.Add(AAtributo, ACampo: String; ATipoCampo: TTipoCampo);
 begin
   with Self.Add^ do begin
     Atributo := AAtributo;
     Campo := IfThen(ACampo <> '', ACampo, AAtributo);
-    Tipo := ATipo;
+    TipoCampo := ATipoCampo;
   end;
 end;
 
@@ -165,27 +197,36 @@ begin
       end;
 end;
 
-//--
+{ TmRelacoes }
 
-function GetRelacaoCampos(ACampos : String) : TmRelacaoCampos;
-var
-  vStringArray : TmStringArray;
-  vCampo : PmRelacaoCampo;
-  I : Integer;
+function TmRelacoes.Add: PmRelacao;
 begin
-  Result := TmRelacaoCampos.Create;
+  Result := New(PmRelacao);
+  Result.Campos := TmRelacaoCampos.Create;
+  Self.Add(Result);
+end;
 
-  vStringArray := TmString.Split(ACampos, ';');
-  for I := 0 to High(vStringArray) do begin
-    vCampo := Result.Add;
-    if Pos('=', vStringArray[I]) > 0 then begin
-      vCampo.Atributo := TmString.LeftStr(vStringArray[I], '=');
-      vCampo.AtributoRel := TmString.RightStr(vStringArray[I], '=');
-    end else begin
-      vCampo.Atributo := vStringArray[I];
-      vCampo.AtributoRel := vStringArray[I];
-    end;
+function TmRelacoes.Add(AAtributo : String; AClasse, AClasseLista : TClass) : PmRelacao;
+begin
+  Result := Self.Add;
+  with Result^ do begin
+    Atributo := AAtributo;
+    Classe := AClasse;
+    ClasseLista := AClasseLista;
   end;
+end;
+
+function TmRelacoes.Buscar(AAtributo : String): PmRelacao;
+var
+  I: Integer;
+begin
+  Result := nil;
+  for I := 0 to Count - 1 do
+    with PmRelacao(Items[I])^ do
+      if Atributo = AAtributo then begin
+        Result := PmRelacao(Items[I]);
+        Exit;
+      end;
 end;
 
 end.

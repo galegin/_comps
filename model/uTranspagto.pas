@@ -4,10 +4,10 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping;
+  mMapping, mCollection, mCollectionItem;
 
 type
-  TTranspagto = class(TmMapping)
+  TTranspagto = class(TmCollectionItem)
   private
     fId_Transacao: String;
     fNr_Seq: Integer;
@@ -35,7 +35,7 @@ type
     fCd_Operbaixa: Integer;
     fDt_Baixa: TDateTime;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -66,16 +66,21 @@ type
     property Dt_Baixa : TDateTime read fDt_Baixa write fDt_Baixa;
   end;
 
-  TTranspagtos = class(TList)
+  TTranspagtos = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TTranspagto;
+    procedure SetItem(Index: Integer; Value: TTranspagto);
   public
-    function Add: TTranspagto; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TTranspagto;
+    property Items[Index: Integer]: TTranspagto read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TTranspagto }
 
-constructor TTranspagto.Create(AOwner: TComponent);
+constructor TTranspagto.Create(ACollection: TCollection);
 begin
   inherited;
 
@@ -86,8 +91,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TTranspagto.GetMapping: PmMapping;
 begin
@@ -126,20 +129,28 @@ begin
     Add('Cd_Operbaixa', 'CD_OPERBAIXA', tfNul);
     Add('Dt_Baixa', 'DT_BAIXA', tfNul);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-  end;
 end;
-
-//--
 
 { TTranspagtos }
 
+constructor TTranspagtos.Create(AOwner: TCollection);
+begin
+  inherited Create(TTranspagto);
+end;
+
 function TTranspagtos.Add: TTranspagto;
 begin
-  Result := TTranspagto.Create(nil);
-  Self.Add(Result);
+  Result := TTranspagto(inherited Add);
+end;
+
+function TTranspagtos.GetItem(Index: Integer): TTranspagto;
+begin
+  Result := TTranspagto(inherited GetItem(Index));
+end;
+
+procedure TTranspagtos.SetItem(Index: Integer; Value: TTranspagto);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

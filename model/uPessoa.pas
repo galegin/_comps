@@ -4,10 +4,10 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping;
+  mMapping, mCollection, mCollectionItem;
 
 type
-  TPessoa = class(TmMapping)
+  TPessoa = class(TmCollectionItem)
   private
     fId_Pessoa: String;
     fU_Version: String;
@@ -35,7 +35,7 @@ type
     fDs_Email: String;
     fIn_Consumidorfinal: String;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -66,16 +66,21 @@ type
     property In_Consumidorfinal : String read fIn_Consumidorfinal write fIn_Consumidorfinal;
   end;
 
-  TPessoas = class(TList)
+  TPessoas = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TPessoa;
+    procedure SetItem(Index: Integer; Value: TPessoa);
   public
-    function Add: TPessoa; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TPessoa;
+    property Items[Index: Integer]: TPessoa read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TPessoa }
 
-constructor TPessoa.Create(AOwner: TComponent);
+constructor TPessoa.Create(ACollection: TCollection);
 begin
   inherited;
 
@@ -86,8 +91,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TPessoa.GetMapping: PmMapping;
 begin
@@ -126,20 +129,28 @@ begin
     Add('Ds_Email', 'DS_EMAIL', tfNul);
     Add('In_Consumidorfinal', 'IN_CONSUMIDORFINAL', tfNul);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-  end;
 end;
-
-//--
 
 { TPessoas }
 
+constructor TPessoas.Create(AOwner: TCollection);
+begin
+  inherited Create(TPessoa);
+end;
+
 function TPessoas.Add: TPessoa;
 begin
-  Result := TPessoa.Create(nil);
-  Self.Add(Result);
+  Result := TPessoa(inherited Add);
+end;
+
+function TPessoas.GetItem(Index: Integer): TPessoa;
+begin
+  Result := TPessoa(inherited GetItem(Index));
+end;
+
+procedure TPessoas.SetItem(Index: Integer; Value: TPessoa);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

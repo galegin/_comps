@@ -4,12 +4,12 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping, mList,
+  mMapping, mCollection, mCollectionItem, mList,
   uEmpresa, uPessoa, uOperacao,
   uTransfiscal, uTransitem, uTranspagto;
 
 type
-  TTransacao = class(TmMapping)
+  TTransacao = class(TmCollectionItem)
   private
     fId_Transacao: String;
     fU_Version: String;
@@ -43,7 +43,7 @@ type
     function GetVl_Seguro: Real;
     function GetVl_Total: Real;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -80,25 +80,36 @@ type
     property Vl_Total : Real read GetVl_Total;
   end;
 
-  TTransacaos = class(TList)
+  TTransacaos = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TTransacao;
+    procedure SetItem(Index: Integer; Value: TTransacao);
   public
-    function Add: TTransacao; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TTransacao;
+    property Items[Index: Integer]: TTransacao read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TTransacao }
 
-constructor TTransacao.Create(AOwner: TComponent);
+constructor TTransacao.Create(ACollection: TCollection);
 begin
   inherited;
 
   fEmpresa:= TEmpresa.Create(nil);
+  fEmpresa.SetRelacao(Self, 'Id_Empresa');
   fPessoa:= TPessoa.Create(nil);
+  fPessoa.SetRelacao(Self, 'Id_Pessoa');
   fOperacao:= TOperacao.Create(nil);
+  fOperacao.SetRelacao(Self, 'Id_Operacao');
   fFiscal:= TTransfiscal.Create(nil);
-  fItens:= TTransitems.Create();
-  fPagtos:= TTranspagtos.Create();
+  fFiscal.SetRelacao(Self, 'Id_Transacao');
+  fItens:= TTransitems.Create(nil);
+  fItens.SetRelacao(Self, 'Id_Transacao');
+  fPagtos:= TTranspagtos.Create(nil);
+  fPagtos.SetRelacao(Self, 'Id_Transacao');
 end;
 
 destructor TTransacao.Destroy;
@@ -112,8 +123,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TTransacao.GetMapping: PmMapping;
 begin
@@ -137,35 +146,6 @@ begin
     Add('Nr_Transacao', 'NR_TRANSACAO', tfReq);
     Add('Tp_Situacao', 'TP_SITUACAO', tfReq);
     Add('Dt_Cancelamento', 'DT_CANCELAMENTO', tfNul);
-  end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-
-    with Add('Empresa', TEmpresa)^.Campos do begin
-      Add('Id_Empresa');
-    end;
-
-    with Add('Pessoa', TPessoa)^.Campos do begin
-      Add('Id_Pessoa');
-    end;
-
-    with Add('Operacao', TOperacao)^.Campos do begin
-      Add('Id_Operacao');
-    end;
-
-    with Add('Fiscal', TTransfiscal)^.Campos do begin
-      Add('Id_Transacao');
-    end;
-
-    with Add('Itens', TTransitem, TTransitems)^.Campos do begin
-      Add('Id_Transacao');
-    end;
-
-    with Add('Pagtos', TTranspagto, TTranspagtos)^.Campos do begin
-      Add('Id_Transacao');
-    end;
-
   end;
 end;
 
@@ -243,10 +223,24 @@ end;
 
 { TTransacaos }
 
+constructor TTransacaos.Create(AOwner: TCollection);
+begin
+  inherited Create(TTransacao);
+end;
+
 function TTransacaos.Add: TTransacao;
 begin
-  Result := TTransacao.Create(nil);
-  Self.Add(Result);
+  Result := TTransacao(inherited Add);
+end;
+
+function TTransacaos.GetItem(Index: Integer): TTransacao;
+begin
+  Result := TTransacao(inherited GetItem(Index));
+end;
+
+procedure TTransacaos.SetItem(Index: Integer; Value: TTransacao);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

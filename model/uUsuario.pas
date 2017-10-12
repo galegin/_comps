@@ -4,10 +4,10 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping;
+  mMapping, mCollection, mCollectionItem;
 
 type
-  TUsuario = class(TmMapping)
+  TUsuario = class(TmCollectionItem)
   private
     fId_Usuario: Integer;
     fU_Version: String;
@@ -20,7 +20,7 @@ type
     fTp_Bloqueio: Integer;
     fDt_Bloqueio: TDateTime;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -36,16 +36,21 @@ type
     property Dt_Bloqueio : TDateTime read fDt_Bloqueio write fDt_Bloqueio;
   end;
 
-  TUsuarios = class(TList)
+  TUsuarios = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TUsuario;
+    procedure SetItem(Index: Integer; Value: TUsuario);
   public
-    function Add: TUsuario; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TUsuario;
+    property Items[Index: Integer]: TUsuario read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TUsuario }
 
-constructor TUsuario.Create(AOwner: TComponent);
+constructor TUsuario.Create(ACollection: TCollection);
 begin
   inherited;
 
@@ -56,8 +61,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TUsuario.GetMapping: PmMapping;
 begin
@@ -81,20 +84,28 @@ begin
     Add('Tp_Bloqueio', 'TP_BLOQUEIO', tfReq);
     Add('Dt_Bloqueio', 'DT_BLOQUEIO', tfNul);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-  end;
 end;
-
-//--
 
 { TUsuarios }
 
+constructor TUsuarios.Create(AOwner: TCollection);
+begin
+  inherited Create(TUsuario);
+end;
+
 function TUsuarios.Add: TUsuario;
 begin
-  Result := TUsuario.Create(nil);
-  Self.Add(Result);
+  Result := TUsuario(inherited Add);
+end;
+
+function TUsuarios.GetItem(Index: Integer): TUsuario;
+begin
+  Result := TUsuario(inherited GetItem(Index));
+end;
+
+procedure TUsuarios.SetItem(Index: Integer; Value: TUsuario);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

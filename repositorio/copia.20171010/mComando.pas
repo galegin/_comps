@@ -6,18 +6,18 @@ interface
 
 uses
   Classes, SysUtils, StrUtils, TypInfo,
-  mCollection, mCollectionItem, mMapping, mValue;
+  mMapping;
 
 type
-  TmComando = class(TObject)
+  TmComando = class
   private
   protected
   public
     class function GetSelect(AClass : TClass; AWhere : String = '') : String; overload;
-    function GetSelect() : String; overload;
-    function GetInsert() : String;
-    function GetUpdate() : String;
-    function GetDelete() : String;
+    class function GetSelect(AObject : TObject) : String; overload;
+    class function GetInsert(AObject : TObject) : String;
+    class function GetUpdate(AObject : TObject) : String;
+    class function GetDelete(AObject : TObject) : String;
   published
   end;
 
@@ -33,14 +33,14 @@ implementation
 
   function GetMappingObj(AObject: TObject) : PmMapping;
   begin
-    Result := TmCollectionItem(AObject).GetMapping();
+    Result := TmMapping(AObject).GetMapping();
   end;
 
   function GetMappingClass(AClass: TClass) : PmMapping;
   var
     vMapping : TObject;
   begin
-    vMapping := TmCollectionItemClass(AClass).Create(nil);
+    vMapping := TmMappingClass(AClass).Create(nil);
     Result := GetMappingObj(vMapping);
     FreeAndNil(vMapping);
   end;
@@ -55,18 +55,16 @@ implementation
     vPropInfo := GetPropInfo(AObject, ANome);
     vTipoBase := LowerCase(vPropInfo^.PropType^.Name);
 
-    case StrToTipoValue(vTipoBase) of
-      tvBoolean :
-        Result := GetOrdProp(AObject, ANome) = 0;
-      tvDateTime :
-        Result := GetFloatProp(AObject, ANome) = 0;
-      tvFloat :
-        Result := GetFloatProp(AObject, ANome) = 0;
-      tvInteger :
-        Result := GetOrdProp(AObject, ANome) = 0;
-      tvString :
-        Result := GetStrProp(AObject, ANome) = '';
-    end;
+    if vTipoBase = 'boolean' then // mObjeto
+      Result := GetOrdProp(AObject, ANome) = 0
+    else if vTipoBase = 'tdatetime' then
+      Result := GetFloatProp(AObject, ANome) = 0
+    else if vTipoBase = 'float' then
+      Result := GetFloatProp(AObject, ANome) = 0
+    else if vTipoBase = 'integer' then
+      Result := GetOrdProp(AObject, ANome) = 0
+    else if vTipoBase = 'string' then
+      Result := GetStrProp(AObject, ANome) = ''
   end;
 
   function GetValueStr(AObject: TObject; ANome : String) : String;
@@ -82,18 +80,16 @@ implementation
     vPropInfo := GetPropInfo(AObject, ANome);
     vTipoBase := LowerCase(vPropInfo^.PropType^.Name);
 
-    case StrToTipoValue(vTipoBase) of
-      tvBoolean :
-        Result := '''' + IfThen(GetOrdProp(AObject, ANome) = 1, 'T', 'F') + '''';
-      tvDateTime :
-        Result := '''' + FormatDateTime('dd.mm.yyyy hh:nn:ss', GetFloatProp(AObject, ANome)) + '''';
-      tvFloat :
-        Result := AnsiReplaceStr(FloatToStr(GetFloatProp(AObject, ANome)), ',', '.');
-      tvInteger :
-        Result := IntToStr(GetOrdProp(AObject, ANome));
-      tvString :
-        Result := '''' + AnsiReplaceStr(GetStrProp(AObject, ANome), '''', '''''') + '''';
-    end;
+    if vTipoBase = 'boolean' then // mObjeto
+      Result := '''' + IfThen(GetOrdProp(AObject, ANome) = 1, 'T', 'F') + ''''
+    else if vTipoBase = 'tdatetime' then
+      Result := '''' + FormatDateTime('dd.mm.yyyy hh:nn:ss', GetFloatProp(AObject, ANome)) + ''''
+    else if vTipoBase = 'float' then
+      Result := AnsiReplaceStr(FloatToStr(GetFloatProp(AObject, ANome)), ',', '.')
+    else if vTipoBase = 'integer' then
+      Result := IntToStr(GetOrdProp(AObject, ANome))
+    else if vTipoBase = 'string' then
+      Result := '''' + AnsiReplaceStr(GetStrProp(AObject, ANome), '''', '''''') + '''';
   end;
 
 { TmComando }
@@ -124,33 +120,33 @@ begin
   FreeMapping(vMapping);
 end;
 
-function TmComando.GetSelect(): String;
+class function TmComando.GetSelect(AObject: TObject): String;
 var
   vMapping : PmMapping;
   vWhere : String;
   I : Integer;
 begin
-  vMapping := GetMappingObj(Self);
+  vMapping := GetMappingObj(AObject);
 
   vWhere := '';
   with vMapping.Campos do
     for I := 0 to Count - 1 do
       with PmCampo(Items[I])^ do
-        if Tipo in [mMapping.tfKey] then
-          AddString(vWhere, Atributo + ' = ' + GetValueStr(Self, Atributo), ' and ');
+        if TipoCampo in [tfKey] then
+          AddString(vWhere, Atributo + ' = ' + GetValueStr(AObject, Atributo), ' and ');
 
-  Result := GetSelect(Self.ClassType, vWhere);
+  Result := GetSelect(AObject.ClassType, vWhere);
 
   FreeMapping(vMapping);
 end;
 
-function TmComando.GetInsert(): String;
+class function TmComando.GetInsert(AObject: TObject): String;
 var
   vMapping : PmMapping;
   vFields, vValues : String;
   I : Integer;
 begin
-  vMapping := GetMappingObj(Self);
+  vMapping := GetMappingObj(AObject);
 
   vFields := '';
   vValues := '';
@@ -158,7 +154,7 @@ begin
     for I := 0 to Count - 1 do
       with PmCampo(Items[I])^ do begin
         AddString(vFields, Campo, ', ');
-        AddString(vValues, GetValueStr(Self, Atributo), ', ');
+        AddString(vValues, GetValueStr(AObject, Atributo), ', ');
       end;
 
   Result :=
@@ -170,23 +166,23 @@ begin
   FreeMapping(vMapping);
 end;
 
-function TmComando.GetUpdate(): String;
+class function TmComando.GetUpdate(AObject: TObject): String;
 var
   vMapping : PmMapping;
   vSets, vWhere : String;
   I : Integer;
 begin
-  vMapping := GetMappingObj(Self);
+  vMapping := GetMappingObj(AObject);
 
   vWhere := '';
   vSets := '';
   with vMapping.Campos do
     for I := 0 to Count - 1 do
       with PmCampo(Items[I])^ do
-        if Tipo in [mMapping.tfKey] then
-          AddString(vWhere, Campo + ' = ' + GetValueStr(Self, Atributo), ' and ')
+        if TipoCampo in [tfKey] then
+          AddString(vWhere, Campo + ' = ' + GetValueStr(AObject, Atributo), ' and ')
         else
-          AddString(vSets, Campo + ' = ' + GetValueStr(Self, Atributo), ', ');
+          AddString(vSets, Campo + ' = ' + GetValueStr(AObject, Atributo), ', ');
 
   Result :=
     'update ' + vMapping.Tabela.Nome +
@@ -196,20 +192,20 @@ begin
   FreeMapping(vMapping);
 end;
 
-function TmComando.GetDelete(): String;
+class function TmComando.GetDelete(AObject: TObject): String;
 var
   vMapping : PmMapping;
   vWhere : String;
   I : Integer;
 begin
-  vMapping := GetMappingObj(Self);
+  vMapping := GetMappingObj(AObject);
 
   vWhere := '';
   with vMapping.Campos do
     for I := 0 to Count - 1 do
       with PmCampo(Items[I])^ do
-        if Tipo in [mMapping.tfKey] then
-          AddString(vWhere, Campo + ' = ' + GetValueStr(Self, Atributo), ' and ');
+        if TipoCampo in [tfKey] then
+          AddString(vWhere, Campo + ' = ' + GetValueStr(AObject, Atributo), ' and ');
 
   Result :=
     'delete from ' + vMapping.Tabela.Nome +

@@ -4,10 +4,10 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping;
+  mMapping, mCollection, mCollectionItem;
 
 type
-  TRegraimposto = class(TmMapping)
+  TRegraimposto = class(TmCollectionItem)
   private
     fId_Regrafiscal: Integer;
     fCd_Imposto: Integer;
@@ -21,7 +21,7 @@ type
     fIn_Isento: String;
     fIn_Outro: String;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -38,16 +38,21 @@ type
     property In_Outro : String read fIn_Outro write fIn_Outro;
   end;
 
-  TRegraimpostos = class(TList)
+  TRegraimpostos = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TRegraimposto;
+    procedure SetItem(Index: Integer; Value: TRegraimposto);
   public
-    function Add: TRegraimposto; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TRegraimposto;
+    property Items[Index: Integer]: TRegraimposto read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TRegraimposto }
 
-constructor TRegraimposto.Create(AOwner: TComponent);
+constructor TRegraimposto.Create(ACollection: TCollection);
 begin
   inherited;
 
@@ -58,8 +63,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TRegraimposto.GetMapping: PmMapping;
 begin
@@ -84,20 +87,28 @@ begin
     Add('In_Isento', 'IN_ISENTO', tfReq);
     Add('In_Outro', 'IN_OUTRO', tfReq);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-  end;
 end;
-
-//--
 
 { TRegraimpostos }
 
+constructor TRegraimpostos.Create(AOwner: TCollection);
+begin
+  inherited Create(TRegraimposto);
+end;
+
 function TRegraimpostos.Add: TRegraimposto;
 begin
-  Result := TRegraimposto.Create(nil);
-  Self.Add(Result);
+  Result := TRegraimposto(inherited Add);
+end;
+
+function TRegraimpostos.GetItem(Index: Integer): TRegraimposto;
+begin
+  Result := TRegraimposto(inherited GetItem(Index));
+end;
+
+procedure TRegraimpostos.SetItem(Index: Integer; Value: TRegraimposto);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

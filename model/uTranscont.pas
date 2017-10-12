@@ -4,10 +4,10 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping;
+  mMapping, mCollection, mCollectionItem;
 
 type
-  TTranscont = class(TmMapping)
+  TTranscont = class(TmCollectionItem)
   private
     fId_Transacao: String;
     fU_Version: String;
@@ -16,7 +16,7 @@ type
     fTp_Situacao: Integer;
     fCd_Terminal: Integer;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -28,16 +28,21 @@ type
     property Cd_Terminal : Integer read fCd_Terminal write fCd_Terminal;
   end;
 
-  TTransconts = class(TList)
+  TTransconts = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TTranscont;
+    procedure SetItem(Index: Integer; Value: TTranscont);
   public
-    function Add: TTranscont; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TTranscont;
+    property Items[Index: Integer]: TTranscont read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TTranscont }
 
-constructor TTranscont.Create(AOwner: TComponent);
+constructor TTranscont.Create(ACollection: TCollection);
 begin
   inherited;
 
@@ -48,8 +53,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TTranscont.GetMapping: PmMapping;
 begin
@@ -69,20 +72,28 @@ begin
     Add('Tp_Situacao', 'TP_SITUACAO', tfReq);
     Add('Cd_Terminal', 'CD_TERMINAL', tfReq);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-  end;
 end;
-
-//--
 
 { TTransconts }
 
+constructor TTransconts.Create(AOwner: TCollection);
+begin
+  inherited Create(TTranscont);
+end;
+
 function TTransconts.Add: TTranscont;
 begin
-  Result := TTranscont.Create(nil);
-  Self.Add(Result);
+  Result := TTranscont(inherited Add);
+end;
+
+function TTransconts.GetItem(Index: Integer): TTranscont;
+begin
+  Result := TTranscont(inherited GetItem(Index));
+end;
+
+procedure TTransconts.SetItem(Index: Integer; Value: TTranscont);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

@@ -4,10 +4,10 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping;
+  mMapping, mCollection, mCollectionItem;
 
 type
-  TCaixacont = class(TmMapping)
+  TCaixacont = class(TmCollectionItem)
   private
     fId_Caixa: Integer;
     fId_Histrel: Integer;
@@ -20,7 +20,7 @@ type
     fVl_Suprimento: Real;
     fVl_Diferenca: Real;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -36,16 +36,21 @@ type
     property Vl_Diferenca : Real read fVl_Diferenca write fVl_Diferenca;
   end;
 
-  TCaixaconts = class(TList)
+  TCaixaconts = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TCaixacont;
+    procedure SetItem(Index: Integer; Value: TCaixacont);
   public
-    function Add: TCaixacont; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TCaixacont;
+    property Items[Index: Integer]: TCaixacont read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TCaixacont }
 
-constructor TCaixacont.Create(AOwner: TComponent);
+constructor TCaixacont.Create(ACollection: TCollection);
 begin
   inherited;
 
@@ -56,8 +61,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TCaixacont.GetMapping: PmMapping;
 begin
@@ -81,20 +84,28 @@ begin
     Add('Vl_Suprimento', 'VL_SUPRIMENTO', tfReq);
     Add('Vl_Diferenca', 'VL_DIFERENCA', tfReq);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-  end;
 end;
-
-//--
 
 { TCaixaconts }
 
+constructor TCaixaconts.Create(AOwner: TCollection);
+begin
+  inherited Create(TCaixacont);
+end;
+
 function TCaixaconts.Add: TCaixacont;
 begin
-  Result := TCaixacont.Create(nil);
-  Self.Add(Result);
+  Result := TCaixacont(inherited Add);
+end;
+
+function TCaixaconts.GetItem(Index: Integer): TCaixacont;
+begin
+  Result := TCaixacont(inherited GetItem(Index));
+end;
+
+procedure TCaixaconts.SetItem(Index: Integer; Value: TCaixacont);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

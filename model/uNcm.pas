@@ -4,10 +4,10 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping;
+  mMapping, mCollection, mCollectionItem;
 
 type
-  TNcm = class(TmMapping)
+  TNcm = class(TmCollectionItem)
   private
     fCd_Ncm: String;
     fU_Version: String;
@@ -15,7 +15,7 @@ type
     fDt_Cadastro: TDateTime;
     fDs_Ncm: String;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -26,16 +26,21 @@ type
     property Ds_Ncm : String read fDs_Ncm write fDs_Ncm;
   end;
 
-  TNcms = class(TList)
+  TNcms = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TNcm;
+    procedure SetItem(Index: Integer; Value: TNcm);
   public
-    function Add: TNcm; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TNcm;
+    property Items[Index: Integer]: TNcm read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TNcm }
 
-constructor TNcm.Create(AOwner: TComponent);
+constructor TNcm.Create(ACollection: TCollection);
 begin
   inherited;
 
@@ -46,8 +51,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TNcm.GetMapping: PmMapping;
 begin
@@ -66,20 +69,28 @@ begin
     Add('Dt_Cadastro', 'DT_CADASTRO', tfReq);
     Add('Ds_Ncm', 'DS_NCM', tfReq);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-  end;
 end;
-
-//--
 
 { TNcms }
 
+constructor TNcms.Create(AOwner: TCollection);
+begin
+  inherited Create(TNcm);
+end;
+
 function TNcms.Add: TNcm;
 begin
-  Result := TNcm.Create(nil);
-  Self.Add(Result);
+  Result := TNcm(inherited Add);
+end;
+
+function TNcms.GetItem(Index: Integer): TNcm;
+begin
+  Result := TNcm(inherited GetItem(Index));
+end;
+
+procedure TNcms.SetItem(Index: Integer; Value: TNcm);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

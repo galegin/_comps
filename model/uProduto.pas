@@ -4,10 +4,10 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping;
+  mMapping, mCollection, mCollectionItem;
 
 type
-  TProduto = class(TmMapping)
+  TProduto = class(TmCollectionItem)
   private
     fId_Produto: String;
     fU_Version: String;
@@ -25,7 +25,7 @@ type
     fVl_Venda: Real;
     fVl_Promocao: Real;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -46,16 +46,21 @@ type
     property Vl_Promocao : Real read fVl_Promocao write fVl_Promocao;
   end;
 
-  TProdutos = class(TList)
+  TProdutos = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TProduto;
+    procedure SetItem(Index: Integer; Value: TProduto);
   public
-    function Add: TProduto; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TProduto;
+    property Items[Index: Integer]: TProduto read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TProduto }
 
-constructor TProduto.Create(AOwner: TComponent);
+constructor TProduto.Create(ACollection: TCollection);
 begin
   inherited;
 
@@ -66,8 +71,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TProduto.GetMapping: PmMapping;
 begin
@@ -96,20 +99,28 @@ begin
     Add('Vl_Venda', 'VL_VENDA', tfReq);
     Add('Vl_Promocao', 'VL_PROMOCAO', tfReq);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-  end;
 end;
-
-//--
 
 { TProdutos }
 
+constructor TProdutos.Create(AOwner: TCollection);
+begin
+  inherited Create(TProduto);
+end;
+
 function TProdutos.Add: TProduto;
 begin
-  Result := TProduto.Create(nil);
-  Self.Add(Result);
+  Result := TProduto(inherited Add);
+end;
+
+function TProdutos.GetItem(Index: Integer): TProduto;
+begin
+  Result := TProduto(inherited GetItem(Index));
+end;
+
+procedure TProdutos.SetItem(Index: Integer; Value: TProduto);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

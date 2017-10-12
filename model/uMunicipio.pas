@@ -4,11 +4,11 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping,
+  mMapping, mCollection, mCollectionItem,
   uEstado;
 
 type
-  TMunicipio = class(TmMapping)
+  TMunicipio = class(TmCollectionItem)
   private
     fId_Municipio: Integer;
     fU_Version: String;
@@ -20,7 +20,7 @@ type
     fId_Estado: Integer;
     fEstado: TEstado;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -35,20 +35,26 @@ type
     property Estado : TEstado read fEstado write fEstado;
   end;
 
-  TMunicipios = class(TList)
+  TMunicipios = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TMunicipio;
+    procedure SetItem(Index: Integer; Value: TMunicipio);
   public
-    function Add: TMunicipio; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TMunicipio;
+    property Items[Index: Integer]: TMunicipio read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TMunicipio }
 
-constructor TMunicipio.Create(AOwner: TComponent);
+constructor TMunicipio.Create(ACollection: TCollection);
 begin
   inherited;
 
   fEstado:= TEstado.Create(nil);
+  fEstado.SetRelacao(Self, 'Id_Estado');
 end;
 
 destructor TMunicipio.Destroy;
@@ -57,8 +63,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TMunicipio.GetMapping: PmMapping;
 begin
@@ -80,25 +84,28 @@ begin
     Add('Ds_Sigla', 'DS_SIGLA', tfReq);
     Add('Id_Estado', 'ID_ESTADO', tfReq);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-
-    with Add('Estado', TEstado)^.Campos do begin
-      Add('Id_Estado');
-    end;
-    
-  end;
 end;
-
-//--
 
 { TMunicipios }
 
+constructor TMunicipios.Create(AOwner: TCollection);
+begin
+  inherited Create(TMunicipio);
+end;
+
 function TMunicipios.Add: TMunicipio;
 begin
-  Result := TMunicipio.Create(nil);
-  Self.Add(Result);
+  Result := TMunicipio(inherited Add);
+end;
+
+function TMunicipios.GetItem(Index: Integer): TMunicipio;
+begin
+  Result := TMunicipio(inherited GetItem(Index));
+end;
+
+procedure TMunicipios.SetItem(Index: Integer; Value: TMunicipio);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

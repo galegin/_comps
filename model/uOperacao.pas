@@ -4,11 +4,11 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping,
+  mMapping, mCollection, mCollectionItem,
   uRegrafiscal;
 
 type
-  TOperacao = class(TmMapping)
+  TOperacao = class(TmCollectionItem)
   private
     fId_Operacao: String;
     fU_Version: String;
@@ -23,7 +23,7 @@ type
     fId_Regrafiscal: Integer;
     fRegrafiscal: TRegrafiscal;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -41,20 +41,26 @@ type
     property Regrafiscal : TRegrafiscal read fRegrafiscal write fRegrafiscal;
   end;
 
-  TOperacaos = class(TList)
+  TOperacaos = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TOperacao;
+    procedure SetItem(Index: Integer; Value: TOperacao);
   public
-    function Add: TOperacao; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TOperacao;
+    property Items[Index: Integer]: TOperacao read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TOperacao }
 
-constructor TOperacao.Create(AOwner: TComponent);
+constructor TOperacao.Create(ACollection: TCollection);
 begin
   inherited;
 
   fRegrafiscal:= TRegrafiscal.Create(nil);
+  fRegrafiscal.SetRelacao(Self, 'Id_Regrafiscal');
 end;
 
 destructor TOperacao.Destroy;
@@ -63,8 +69,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TOperacao.GetMapping: PmMapping;
 begin
@@ -89,25 +93,28 @@ begin
     Add('Cd_Cfop', 'CD_CFOP', tfReq);
     Add('Id_Regrafiscal', 'ID_REGRAFISCAL', tfReq);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-
-    with Add('Regrafiscal', TRegrafiscal)^.Campos do begin
-      Add('Id_Operacao');
-    end;
-
-  end;
 end;
-
-//--
 
 { TOperacaos }
 
+constructor TOperacaos.Create(AOwner: TCollection);
+begin
+  inherited Create(TOperacao);
+end;
+
 function TOperacaos.Add: TOperacao;
 begin
-  Result := TOperacao.Create(nil);
-  Self.Add(Result);
+  Result := TOperacao(inherited Add);
+end;
+
+function TOperacaos.GetItem(Index: Integer): TOperacao;
+begin
+  Result := TOperacao(inherited GetItem(Index));
+end;
+
+procedure TOperacaos.SetItem(Index: Integer; Value: TOperacao);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

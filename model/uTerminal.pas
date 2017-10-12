@@ -4,10 +4,10 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping;
+  mMapping, mCollection, mCollectionItem;
 
 type
-  TTerminal = class(TmMapping)
+  TTerminal = class(TmCollectionItem)
   private
     fId_Terminal: Integer;
     fU_Version: String;
@@ -16,7 +16,7 @@ type
     fCd_Terminal: Integer;
     fDs_Terminal: String;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -28,16 +28,21 @@ type
     property Ds_Terminal : String read fDs_Terminal write fDs_Terminal;
   end;
 
-  TTerminals = class(TList)
+  TTerminals = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TTerminal;
+    procedure SetItem(Index: Integer; Value: TTerminal);
   public
-    function Add: TTerminal; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TTerminal;
+    property Items[Index: Integer]: TTerminal read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TTerminal }
 
-constructor TTerminal.Create(AOwner: TComponent);
+constructor TTerminal.Create(ACollection: TCollection);
 begin
   inherited;
 
@@ -48,8 +53,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TTerminal.GetMapping: PmMapping;
 begin
@@ -69,20 +72,28 @@ begin
     Add('Cd_Terminal', 'CD_TERMINAL', tfReq);
     Add('Ds_Terminal', 'DS_TERMINAL', tfReq);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-  end;
 end;
-
-//--
 
 { TTerminals }
 
+constructor TTerminals.Create(AOwner: TCollection);
+begin
+  inherited Create(TTerminal);
+end;
+
 function TTerminals.Add: TTerminal;
 begin
-  Result := TTerminal.Create(nil);
-  Self.Add(Result);
+  Result := TTerminal(inherited Add);
+end;
+
+function TTerminals.GetItem(Index: Integer): TTerminal;
+begin
+  Result := TTerminal(inherited GetItem(Index));
+end;
+
+procedure TTerminals.SetItem(Index: Integer; Value: TTerminal);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

@@ -4,11 +4,11 @@ interface
 
 uses
   Classes, SysUtils, Math,
-  mMapping, mList,
+  mMapping, mCollection, mCollectionItem, mList,
   uProduto, uTransimposto;
 
 type
-  TTransitem = class(TmMapping)
+  TTransitem = class(TmCollectionItem)
   private
     fId_Transacao: String;
     fNr_Item: Integer;
@@ -45,7 +45,7 @@ type
     function GetVl_Pis: Real;
     function GetVl_Totitem: Real;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -85,21 +85,28 @@ type
     property Vl_Totitem : Real read GetVl_Totitem;
   end;
 
-  TTransitems = class(TList)
+  TTransitems = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TTransitem;
+    procedure SetItem(Index: Integer; Value: TTransitem);
   public
-    function Add: TTransitem; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TTransitem;
+    property Items[Index: Integer]: TTransitem read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TTransitem }
 
-constructor TTransitem.Create(AOwner: TComponent);
+constructor TTransitem.Create(ACollection: TCollection);
 begin
   inherited;
 
   fProduto:= TProduto.Create(nil);
-  fImpostos:= TTransimpostos.Create;
+  fProduto.SetRelacao(Self, 'Id_Produto');
+  fImpostos:= TTransimpostos.Create(nil);
+  fImpostos.SetRelacao(Self, 'Id_Transacao');
 end;
 
 destructor TTransitem.Destroy;
@@ -109,8 +116,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TTransitem.GetMapping: PmMapping;
 begin
@@ -144,19 +149,6 @@ begin
     Add('Vl_Seguro', 'VL_SEGURO', tfReq);
     Add('Vl_Outro', 'VL_OUTRO', tfReq);
     Add('Vl_Despesa', 'VL_DESPESA', tfReq);
-  end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-
-    with Add('Produto', TProduto)^.Campos do begin
-      Add('Id_Produto');
-    end;
-
-    with Add('Impostos', TTransimpostos)^.Campos do begin
-      Add('Id_Transacao');
-    end;
-
   end;
 end;
 
@@ -223,10 +215,24 @@ end;
 
 { TTransitems }
 
+constructor TTransitems.Create(AOwner: TCollection);
+begin
+  inherited Create(TTransitem);
+end;
+
 function TTransitems.Add: TTransitem;
 begin
-  Result := TTransitem.Create(nil);
-  Self.Add(Result);
+  Result := TTransitem(inherited Add);
+end;
+
+function TTransitems.GetItem(Index: Integer): TTransitem;
+begin
+  Result := TTransitem(inherited GetItem(Index));
+end;
+
+procedure TTransitems.SetItem(Index: Integer; Value: TTransitem);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

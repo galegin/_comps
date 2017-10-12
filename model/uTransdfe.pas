@@ -4,10 +4,10 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping;
+  mMapping, mCollection, mCollectionItem;
 
 type
-  TTransdfe = class(TmMapping)
+  TTransdfe = class(TmCollectionItem)
   private
     fId_Transacao: String;
     fNr_Sequencia: Integer;
@@ -20,7 +20,7 @@ type
     fDs_Envioxml: String;
     fDs_Retornoxml: String;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -36,16 +36,21 @@ type
     property Ds_Retornoxml : String read fDs_Retornoxml write fDs_Retornoxml;
   end;
 
-  TTransdfes = class(TList)
+  TTransdfes = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TTransdfe;
+    procedure SetItem(Index: Integer; Value: TTransdfe);
   public
-    function Add: TTransdfe; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TTransdfe;
+    property Items[Index: Integer]: TTransdfe read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TTransdfe }
 
-constructor TTransdfe.Create(AOwner: TComponent);
+constructor TTransdfe.Create(ACollection: TCollection);
 begin
   inherited;
 
@@ -56,8 +61,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TTransdfe.GetMapping: PmMapping;
 begin
@@ -81,20 +84,28 @@ begin
     Add('Ds_Envioxml', 'DS_ENVIOXML', tfReq);
     Add('Ds_Retornoxml', 'DS_RETORNOXML', tfNul);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-  end;
 end;
-
-//--
 
 { TTransdfes }
 
+constructor TTransdfes.Create(AOwner: TCollection);
+begin
+  inherited Create(TTransdfe);
+end;
+
 function TTransdfes.Add: TTransdfe;
 begin
-  Result := TTransdfe.Create(nil);
-  Self.Add(Result);
+  Result := TTransdfe(inherited Add);
+end;
+
+function TTransdfes.GetItem(Index: Integer): TTransdfe;
+begin
+  Result := TTransdfe(inherited GetItem(Index));
+end;
+
+procedure TTransdfes.SetItem(Index: Integer; Value: TTransdfe);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

@@ -4,11 +4,11 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping,
+  mMapping, mCollection, mCollectionItem,
   uPais;
 
 type
-  TEstado = class(TmMapping)
+  TEstado = class(TmCollectionItem)
   private
     fId_Estado: Integer;
     fU_Version: String;
@@ -20,7 +20,7 @@ type
     fId_Pais: Integer;
     fPais: TPais;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -35,20 +35,26 @@ type
     property Pais : TPais read fPais write fPais;
   end;
 
-  TEstados = class(TList)
+  TEstados = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TEstado;
+    procedure SetItem(Index: Integer; Value: TEstado);
   public
-    function Add: TEstado; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TEstado;
+    property Items[Index: Integer]: TEstado read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TEstado }
 
-constructor TEstado.Create(AOwner: TComponent);
+constructor TEstado.Create(ACollection: TCollection);
 begin
   inherited;
 
   fPais:= TPais.Create(nil);
+  fPais.SetRelacao(Self, 'Id_Pais');
 end;
 
 destructor TEstado.Destroy;
@@ -57,8 +63,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TEstado.GetMapping: PmMapping;
 begin
@@ -80,25 +84,28 @@ begin
     Add('Ds_Sigla', 'DS_SIGLA', tfReq);
     Add('Id_Pais', 'ID_PAIS', tfReq);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-
-    with Add('Pais', TPais)^.Campos do begin
-      Add('Id_Pais');
-    end;
-
-  end;
 end;
-
-//--
 
 { TEstados }
 
+constructor TEstados.Create(AOwner: TCollection);
+begin
+  inherited Create(TEstado);
+end;
+
 function TEstados.Add: TEstado;
 begin
-  Result := TEstado.Create(nil);
-  Self.Add(Result);
+  Result := TEstado(inherited Add);
+end;
+
+function TEstados.GetItem(Index: Integer): TEstado;
+begin
+  Result := TEstado(inherited GetItem(Index));
+end;
+
+procedure TEstados.SetItem(Index: Integer; Value: TEstado);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

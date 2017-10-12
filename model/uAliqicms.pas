@@ -4,10 +4,10 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping;
+  mMapping, mCollection, mCollectionItem;
 
 type
-  TAliqicms = class(TmMapping)
+  TAliqicms = class(TmCollectionItem)
   private
     fUf_Origem: String;
     fUf_Destino: String;
@@ -16,7 +16,7 @@ type
     fDt_Cadastro: TDateTime;
     fPr_Aliquota: Real;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -28,16 +28,21 @@ type
     property Pr_Aliquota : Real read fPr_Aliquota write fPr_Aliquota;
   end;
 
-  TAliqicmss = class(TList)
+  TAliqicmss = class(TmCollection)
+  private
+    function GetItem(Index: Integer): TAliqicms;
+    procedure SetItem(Index: Integer; Value: TAliqicms);
   public
-    function Add: TAliqicms; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: TAliqicms;
+    property Items[Index: Integer]: TAliqicms read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TAliqicms }
 
-constructor TAliqicms.Create(AOwner: TComponent);
+constructor TAliqicms.Create(ACollection: TCollection);
 begin
   inherited;
 
@@ -48,8 +53,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function TAliqicms.GetMapping: PmMapping;
 begin
@@ -69,20 +72,28 @@ begin
     Add('Dt_Cadastro', 'DT_CADASTRO', tfReq);
     Add('Pr_Aliquota', 'PR_ALIQUOTA', tfReq);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-  end;
 end;
-
-//--
 
 { TAliqicmss }
 
+constructor TAliqicmss.Create(AOwner: TCollection);
+begin
+  inherited Create(TAliqicms);
+end;
+
 function TAliqicmss.Add: TAliqicms;
 begin
-  Result := TAliqicms.Create(nil);
-  Self.Add(Result);
+  Result := TAliqicms(inherited Add);
+end;
+
+function TAliqicmss.GetItem(Index: Integer): TAliqicms;
+begin
+  Result := TAliqicms(inherited GetItem(Index));
+end;
+
+procedure TAliqicmss.SetItem(Index: Integer; Value: TAliqicms);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.

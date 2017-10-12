@@ -4,10 +4,10 @@ interface
 
 uses
   Classes, SysUtils,
-  mMapping;
+  mMapping, mCollection, mCollectionItem;
 
 type
-  THistrel = class(TmMapping)
+  THistrel = class(TmCollectionItem)
   private
     fId_Histrel: Integer;
     fU_Version: String;
@@ -18,7 +18,7 @@ type
     fDs_Histrel: String;
     fNr_Parcelas: Integer;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
     function GetMapping() : PmMapping; override;
   published
@@ -32,16 +32,21 @@ type
     property Nr_Parcelas : Integer read fNr_Parcelas write fNr_Parcelas;
   end;
 
-  THistrels = class(TList)
+  THistrels = class(TmCollection)
+  private
+    function GetItem(Index: Integer): THistrel;
+    procedure SetItem(Index: Integer; Value: THistrel);
   public
-    function Add: THistrel; overload;
+    constructor Create(AOwner: TCollection);
+    function Add: THistrel;
+    property Items[Index: Integer]: THistrel read GetItem write SetItem; default;
   end;
 
 implementation
 
 { THistrel }
 
-constructor THistrel.Create(AOwner: TComponent);
+constructor THistrel.Create(ACollection: TCollection);
 begin
   inherited;
 
@@ -52,8 +57,6 @@ begin
 
   inherited;
 end;
-
-//--
 
 function THistrel.GetMapping: PmMapping;
 begin
@@ -75,20 +78,28 @@ begin
     Add('Ds_Histrel', 'DS_HISTREL', tfReq);
     Add('Nr_Parcelas', 'NR_PARCELAS', tfReq);
   end;
-
-  Result.Relacoes := TmRelacoes.Create;
-  with Result.Relacoes do begin
-  end;
 end;
-
-//--
 
 { THistrels }
 
+constructor THistrels.Create(AOwner: TCollection);
+begin
+  inherited Create(THistrel);
+end;
+
 function THistrels.Add: THistrel;
 begin
-  Result := THistrel.Create(nil);
-  Self.Add(Result);
+  Result := THistrel(inherited Add);
+end;
+
+function THistrels.GetItem(Index: Integer): THistrel;
+begin
+  Result := THistrel(inherited GetItem(Index));
+end;
+
+procedure THistrels.SetItem(Index: Integer; Value: THistrel);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.
